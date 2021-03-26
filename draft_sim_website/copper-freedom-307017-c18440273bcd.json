@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "copper-freedom-307017",
+  "private_key_id": "c18440273bcd7767f41d609d7e1ad294f0dbf23a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDRPOtA/XX/9c+3\n0OTTi5BUZh4n+t/geSPx4nBDUPOvd7qS4BXE6WVyyUunc0030pTwe0rQOW6/oubM\nWGRpuokUXXRpn+qmc7aaZYgUvAB4E3tWlv0M982iHNqUpzIRdhkIMDiz9LY/K3Qp\nDCYvXYEtVGyWaKw2AhdVjQjEh37ST5Su4d0cbM+0Uo6i8qOf4pxa39ZvFvVMtC58\n4Hn3096URkDIQTOsSGgblOCVjqe4FCl/o2zG8W8hmWOTimFk9ooXWrULQZtH/4ef\nEaLJA+oxqwaSKE5Js2iEs2wi4bHBTnwbI7+yTNB5M3K2tENE+fCZZ+LxBJKKTBcg\nP3Dvz+QVAgMBAAECggEAULMStweqxbRMT4SBZPfMjEiwc9IGG8ENNIMVsljcC759\nVp2Xt9Ee4AU0KRrG2vNcn12mDqZACShupLyoycB4k0KyHfTgHx+8+1KSiBC0i5tT\n9CMa6S///vjq8u+DV4m5gNd8XyfQTI/ZZuV5KsaBBncrxF0NomzvC/9vtMDfkIQO\n7FjGVmETkCYXinYvxaL7VZzJYKaJ1861QY+wcBzG2mQR3tGRRvL/7IG6pK6UN8Bf\njzSaiK6yz9COT82utxN/i6M/YxwKGUUFHQ+A3bhFHw4pRjN2obVM2w82qStV8RPd\n+j3a1vN5s6drKS5tV/lSy1+KU5fiuvT77Y72Cq+HZwKBgQD6TBms5hFn9jGWEIF+\nfjoLbSrapk4BLGFRGknwL2w4wr+AJ3wHdz6TXVpK9gcLLYk3BKQz2YOwo+3Kli8N\nPTwJV1YKEVBByINEgaQ0zYPQrRz7IhzCmlKyvL+7m6KufsXRrre6kaPBebEJYKTL\nvbuV95w55k7VMtvkrSk1b7bCawKBgQDWAVVlWOT0OHp0cmZYo55BkdwwZltk6woz\nb08xDwKLpBfQHBlr3dA6ugysPBsqx8KsW8p+YJD6u2WKg12AQT+3D1zq9hmWAnL8\ncjUnerD5UASlJXxMEHxO5bjwoSdP54AaGUCtLuWq/4SxMCppgx1emaY1x2mRnuJL\nh/TpDAaTfwKBgQCJYiPlpxJ+wb9N4xlw2M/7XZxcD1RZiIaSAZ/72cvJC/wY15NY\ndbc/I8pfwtLy67eZH08Rtp514kSvIegJmEbPycRMGly2/twuSgpbgUKM07hIj9zB\nY/toZ/nFfBO7O5JRGVl3amE73ROzVfyeaDICirqRfTxgAV55EiLAVeU2qQKBgGoo\nkzIJHNpBQg2NylNiJtkj//RKcj/nkFHff4s4hOy8Y8uqhLnLeMYJEMxHrLpWCa3y\ngsqaIJEgcMh7TeCXfYHTryYnGp4dbOjpxpBk/nFOTl+V7sjUzLVeo5VKe/PZROSt\nbjX6s5dV1X8IA6H/lowc8CRxXV8NT/hj4wvQGVsFAoGBAKi1Lshem51IjZwjLASW\ngN5q0Y9E5GYPfyVqpq8kD0jKLp6Db+5UQUsIuDAb/Hnp0KvmZ/sxzwFJMZb8c/t3\nIUK4ifb6syRHZRP5f6R2ox2uvcX6YeZY1dSvTbpTiQ1YD8P/py6u5nuynejt/wE8\nc2Mpahf64Y2wa5eRLv/iVpR4\n-----END PRIVATE KEY-----\n",
+  "client_email": "mtg-bot-first-service-account@copper-freedom-307017.iam.gserviceaccount.com",
+  "client_id": "100151698936333327232",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/mtg-bot-first-service-account%40copper-freedom-307017.iam.gserviceaccount.com"
+}

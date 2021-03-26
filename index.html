@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MTGTO Kaldheim</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="./draft_sim_website/styles.css">
+  </head>
+  <body>
+  <!-- Modal -->
+    <div id="loading">
+        <h1 id="loadingText"> Loading </h1>
+        <div id="loadingSpinner" class="loadingSpinner">
+        </div>
+    </div>
+    <div id="restart">
+        <img src="./draft_sim_website/resources/images/arrow-clockwise.svg" id="restartIcon">
+        <h1 id="restartText"> Restart </h1>
+        </div>
+    </div>
+
+
+    <div class="container col-12" id="main">
+        <div class="row">
+            <div id="particles-js">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-12" id="navbar_div">
+                        <nav id="navbar" class="navbar navbar-dark bg-dark sticky-top">
+                            <span class="navbar-brand mb-0 h1" id="GTO-bot">
+                                MTGTO Kaldheim
+                            </span>
+                            <button id="pool-toggler" class="btn btn-primary mx-auto" type="button" data-toggle="collapse" data-target="#pool_window" aria-expanded="false" aria-controls="pool_window">
+                                Pool
+                            </button>
+                            <span id="feedback" class="mx-auto h3 white"> </span>
+                            <span id="score" class="mx-auto h3"> 
+                                Score 
+                            </span>
+                            <div class="dropdown ml-auto dropleft">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Menu
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="https://mtgto-bot.web.app/" id="home">Home</a>
+                                <a class="dropdown-item" id="resetSideboard">Reset Sideboard</a>
+                                <a class="dropdown-item" id="toggleFeedback">Toggle Feedback</a>
+                                <a class="dropdown-item" id="resetDraft">Reset Draft</a>
+                            </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            <div class="row">
+                <div class="col-12">
+                    <div id="main_window" class="d-flex justify-content-center flex-wrap noSelect">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                        <img src="" class="pack-card-image rounded noSelect zoom">
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="pool_window" class="col-12 collapse fixed-top bg-light h-100">
+                        <div class="row" id="main-pool-row">
+                            <div id="one_cmc" class="col-2 pool-col">
+                                <div class="col">
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-01">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-02">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-03">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-04">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-05">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-06">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-07">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-08">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-09">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-10">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-11">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-12">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-13">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-14">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect one-cmc-image zoom" src="" id="1-15">
+                                    </div>
+                                    <div class="w-100"></div>
+                                </div>   
+                            </div>
+                            <div id="two_cmc" class="col-2">
+                                <div class="col">
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-01">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-02">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-03">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-04">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-05">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-06">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-07">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-08">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-09">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-10">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-11">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-12">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-13">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-14">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect two-cmc-image zoom" src="" id="2-15">
+                                    </div>
+                                    <div class="w-100"></div>
+                                </div>         
+                            </div>
+                            <div id="three_cmc" class="col-2 pool-col">
+                                <div class="col">
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-01">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-02">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-03">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-04">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-05">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-06">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-07">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-08">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-09">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-10">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-11">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-12">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-13">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-14">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect three-cmc-image zoom" src="" id="3-15">
+                                    </div>
+                                    <div class="w-100"></div>
+                                </div>      
+                            </div>
+                            <div id="four_cmc" class="col-2 pool-col">
+                                <div class="col">
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-01">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-02">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-03">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-04">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-05">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-06">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-07">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-08">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-09">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-10">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-11">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-12">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-13">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-14">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect four-cmc-image zoom" src="" id="4-15">
+                                    </div>
+                                    <div class="w-100"></div>
+                                </div>     
+                            </div>
+                            <div id="five_cmc" class="col-2 pool-col">
+                                <div class="col">
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-01">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-02">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-03">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-04">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-05">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-06">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-07">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-08">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-09">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-10">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-11">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-12">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-13">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-14">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect five-cmc-image zoom" src="" id="5-15">
+                                    </div>
+                                    <div class="w-100"></div>
+                                </div>         
+                            </div>
+                            <div id="six_cmc" class="col-2 pool-col">
+                                <div class="col">
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom" src="" id="6-01">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom" src="" id="6-02">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom" src="" id="6-03">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom" src="" id="6-04">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom" src="" id="6-05">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom" src="" id="6-06">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom" src="" id="6-07">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom" src="" id="6-08">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom" src="" id="6-09">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom " src="" id="6-10">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom " src="" id="6-11">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom " src="" id="6-12">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom " src="" id="6-13">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom " src="" id="6-14">
+                                    </div>
+                                    <div class="w-100"></div>
+                                    <div class="col pool-col">
+                                        <img class="pool-card-image noSelect six-cmc-image zoom " src="" id="6-15">
+                                    </div>
+                                    <div class="w-100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="particles.js"></script>
+    <script>
+        particlesJS.load("particles-js", "particles.json", function() {
+            console.log("particles.json loaded")
+        })
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="./draft_sim_website/main.js"></script>
+  </body>
+</html>
