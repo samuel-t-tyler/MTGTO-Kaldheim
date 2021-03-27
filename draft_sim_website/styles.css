@@ -154,3 +154,49 @@ img {
 .zoom:hover {
   transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
 }
+
+@media only screen and (max-device-width: 800px) {
+  img {
+    display: block;
+    max-height: 200px;
+    max-width: 143px;
+    margin: 0;
+  }
+
+  #GTO-bot {
+    font-size: 2vh !important;
+    font-family: 'Orbitron', sans-serif;
+}
+  .zoom:hover {
+  transform: scale(1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+  }
+  #pool-toggler {
+    display: none;
+  }
+  #menu {
+    min-height: 2vh;
+    min-width: 2vh;
+  }
+
+  #feedback {
+      width: 15vh;
+      font-size: 2vh !important;
+      text-align: center;
+      margin-left: 100%;
+  }
+  #score {
+    display: none;
+  }
+  #GTO-bot {
+    font-size: 3vh;
+    font-family: 'Orbitron', sans-serif;
+    display: inline-block;
+    position:relative;
+  }
+  #navbar {
+    justify-content: right;
+  }
+  #loadingText {
+    display: none;
+  }
+}

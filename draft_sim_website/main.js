@@ -251,7 +251,7 @@ function displayPack(playerOnehot) {
   arrayOfURLs = [];
   for (z = 0; z < 15; z++) {
     displayedPack[z].src = "";  
-    displayedPack[z].style.border = "";
+    displayedPack[z].style.border = 0;
   }
   for (i = 0; i < humanPlayerActivePack.length; i++) {
     if (humanPlayerActivePack[i] > 0) {
@@ -495,7 +495,6 @@ function updateDraftIfOver() {
     console.log("triggered");
     for (i = 0; i < displayPack.length; i++) {
       displayedPack[i].src = ""
-      displayedPack[i].style.border = 0
     }
     restartText.style.display = "block"
     restartIcon.style.display = "block"
