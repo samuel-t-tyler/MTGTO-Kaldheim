@@ -347,7 +347,6 @@ function displayPoolAfterReset() {
 }
 
 function displayFeedbackToggle() {
-  console.log("toggled visability")
   if (feedbackActive === true) {
     feedbackHTML.style.visibility = "hidden";
     scoreHTML.style.visibility = "hidden";
@@ -355,7 +354,6 @@ function displayFeedbackToggle() {
     return
   }
   if (feedbackActive === false) {
-    console.log("turning back on")
     feedbackHTML.style.visibility = "visible";
     scoreHTML.style.visibility = "visible";
     feedbackActive = true;
@@ -418,7 +416,6 @@ function updateFeatureVectors(picks, featureVectors = activeFeatureVectors) {
     predName = masterHash["index_to_name"][picks[i]];
     predColor = masterHash["name_to_color"][predName];
     predCMC = masterHash["name_to_cmc"][predName];
-    // console.log("feature vector update:", predName, predColor, predCMC, "player:", i);
     if (predColor.length === 0) {
       featureVectors[i][feature_vector_index["Colorless"]] += 1;
     } else {
@@ -448,7 +445,6 @@ function updatePacks(
   picks = activePicks
 ) {
   pack = Math.floor(currentPick / 15)
-  console.log("pack before pick", pack)
   arrayOfActivePacks = [];
   if (count !== 15 && count !== 30) {
     for (i = 0; i < 8; i++) {
@@ -456,14 +452,12 @@ function updatePacks(
       arrayOfActivePacks.push(draftPack[i][pack]);
     }
     if (currentPack !== 1) {
-      console.log("poping last, unshifting")
       last = arrayOfActivePacks.pop();
       arrayOfActivePacks.unshift(last);
       for (j = 0; j < 8; j++) {
         activePacks[j][pack] = arrayOfActivePacks[j];
       }
     } else {
-      console.log("shifting first, pushing")
       first = arrayOfActivePacks.shift();
       arrayOfActivePacks.push(first);
       for (j = 0; j < 8; j++) {
@@ -492,9 +486,9 @@ function updatePick() {
 
 function updateDraftIfOver() {
   if (currentPick === 45) {
-    console.log("triggered");
     for (i = 0; i < displayPack.length; i++) {
       displayedPack[i].src = ""
+      displayedPack[i].style.borderRadius = "0px";
     }
     restartText.style.display = "block"
     restartIcon.style.display = "block"
@@ -505,7 +499,6 @@ function updateDraftIfOver() {
 }
 
 function updatePoolToggled() {
-  
   if (poolToggled === false) {
     poolToggled = true
     restartIcon.style.display = "none"
@@ -562,14 +555,12 @@ function humanSeesResults() {
     }
     updatePick();
     if (currentPick < 45) {
-      console.log(currentPick)
       updatePools(activePicks, activePools);
       activeFeatureVectors = updateFeatureVectors(activePicks, activeFeatureVectors);
       activePacks = updatePacks(currentPick, activePacks, activePicks);
       packnumb = Math.floor(currentPick/15)
       for (f = 0; f < 8; f++) {
         sum = findSum(activePacks[f][packnumb]);
-        console.log(sum);
       }
       activeOnehots = updateOnehots(activePacks, activeFeatureVectors, activePools, currentPack);
       activePreds = makeBatchPreds(activeOnehots);
@@ -630,7 +621,6 @@ function resetDraft() {
   activePacks = generateActivePacks();
   activeOnehots = updateOnehots(activePacks, activeFeatureVectors, activePools, currentPack);
   displayPack(activeOnehots[0]);
-  console.log(activeOnehots);
   activePreds = makeBatchPreds(activeOnehots);
   picksActive = true;
 
@@ -683,7 +673,6 @@ Promise.all([
     for (h = 0; h < 8; h++) {
       for (w = 0;w < 3; w++) {
         sum = findSum(activePacks[h][w])
-        console.log(sum)
       }
     }
   })
