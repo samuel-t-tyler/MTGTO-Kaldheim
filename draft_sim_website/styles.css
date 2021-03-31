@@ -1,19 +1,20 @@
 body {
     background-color: transparent;
+    font-family: 'Orbitron', sans-serif;
 }
 
 .loadingSpinner {
   border: 16px solid #ffffff; /* Light grey */
   border-top: 16px solid #353535; /* Blue */
   border-radius: 50%;
-  width: 20vh;
-  height: 20vh;
-  position: absolute;
+  width: 120px;
+  height: 120px ;
+  position: fixed;
   z-index: 100;
   top: 50%;
   left: 50% ;
   margin-top: -10vh;
-  margin-left: -10vh;
+  margin-left: -44px;
   animation: spin 2s linear infinite;
   background-color: transparent;
 }
@@ -24,15 +25,16 @@ body {
 }
 
 #loadingText {
-  width: 20vh;
+  width: 150px;
   color: white;
-  height: 20vh;
-  position: absolute;
+  height: auto;
+  position: fixed;
   z-index: 100;
   top: 50%;
   left: 50% ;
   margin-top: -20vh;
-  margin-left: -10vh;
+  margin-left: -75px;
+  font-family: 'Orbitron', sans-serif;
 }
 
 #restartText {
@@ -72,7 +74,7 @@ body {
     z-index: 6;
     min-height: 8vh;
     width: 100%;
-    background-color: rgba(117, 117, 117, 0.89) !important;
+    background-color: rgba(219, 219, 219, 0.89) !important;
 }
 
 #navbar_div {
@@ -83,21 +85,30 @@ body {
 #GTO-bot {
     font-size: 3vh;
     font-family: 'Orbitron', sans-serif;
+    color: black;
 }
 
 #score {
-    color: white;
+    color: rgb(0, 0, 0);
     margin-bottom: 0;
-    font-size: 3vh;
+    font-size: 3.2vh;
+    font-family: 'Orbitron', sans-serif;
 }
 
 #feedback {
-    color: white !important;
+    color: rgb(0, 0, 0) !important;
     margin-bottom: 0;
     font-size: 3vh;
     box-sizing: border-box;
     width: 40vh;
     text-align: center;
+    font-family: 'Orbitron', sans-serif;
+}
+
+#pool-toggler, #menu {
+  background-color: black;
+  color: white;
+  border-color: rgba(219, 219, 219, 0.89) ;
 }
 
 #main_window {
@@ -106,10 +117,22 @@ body {
     background-color: transparent;
 }
 
+.dropdown-item {
+  color: white ;
+  background-color: black ; 
+}
+
+.dropdown-item:hover {
+  color: black !important;
+  background-color: white !important; 
+  cursor: pointer;
+}
+
 #pool_window {
     margin-top: 8vh;
     min-height: 92vh;
     z-index: 5;
+    justify-content: center;
     background-color: black !important;
 }
 
@@ -117,9 +140,9 @@ body {
 img {
     width: auto;
     height: auto;
-    max-width: 37%;
-    max-height: 37%;
-    margin: 0.7vh;
+    max-width: 100%;
+    max-height: 95%;
+    
 }
 
 .pool-card-image {
@@ -128,6 +151,14 @@ img {
     width: auto;
     min-width: 100%;
     margin: 0%;
+}
+
+.pack-card-image-div {
+    justify-content: center;
+    max-height: 35vh ;
+    max-width: 25vh ;
+    margin: 0vh
+
 }
 
 .pool-col {
@@ -152,7 +183,7 @@ img {
 }
 
 .zoom:hover {
-  transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+  transform: scale(1.07); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
 }
 
 @media only screen and (max-device-width: 800px) {

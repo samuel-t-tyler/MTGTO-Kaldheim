@@ -1,6 +1,9 @@
 ///////////////////////////////// TO TEST, RUN ON LOCAL SERVER //////////////////////////////////
 // python -m http.server (in console)
-// http://localhost:8000/OneDrive/Desktop/coding/draft_sim_website/
+// http://localhost:8000/path
+
+///////////////////////////////// FETCH CLASS WITH METHODS  //////////////////////////////////
+let DraftMethods = new DraftSimPackage("Kaldheim");
 
 ///////////////////////////////// DEFINING GLOBAL VARIABLES //////////////////////////////////
 // Fetching relevant cards by class, defining global variables
@@ -30,6 +33,7 @@ let poolArray = [poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc,
 const setSize = 280;
 const inputSize = 574;
 const oddsOfRare = 0.875;
+
 
 // Counters used to maintain the gamestate
 let score = 0;
@@ -250,6 +254,7 @@ function displayPack(playerOnehot) {
   humanPlayerActivePack = playerOnehot.slice(setSize, setSize * 2);
   arrayOfURLs = [];
   for (z = 0; z < 15; z++) {
+    displayedPack[z].style.display = "block"
     displayedPack[z].src = "";  
     displayedPack[z].style.border = 0;
   }
@@ -318,15 +323,11 @@ function displayPoolAfterSideboard() {
   clicked = this.id
   pile = clicked[0]
   index = parseInt(clicked.slice(2, 4)) //note that index is one above the index used in array
-  console.log("index", index)
-  console.log(activePoolUrls[pile - 1].length, "length precut");
   cutURL = activePoolUrls[pile - 1].splice((index - 1), 1);
-  console.log(cutURL);
   poolSideboard[pile - 1].push(cutURL[0])
   for (k = 0; k < 15; k++) {
     poolArray[pile - 1][k].src = ""
   }
-  console.log(activePoolUrls[pile - 1].length);
   for (z = 0; z < activePoolUrls[pile - 1].length; z++) {
     poolArray[pile - 1][z].src = activePoolUrls[pile - 1][z]
   }
@@ -435,7 +436,7 @@ function updateFeatureVectors(picks, featureVectors = activeFeatureVectors) {
 // Function that adds the prediction to the pool of all 7 non human players
 function updatePools(picks, arrayOfPools) {
   for (i = 0; i < 8; i++) {
-    arrayOfPools[i][picks[i]] += 1;
+    arrayOfPools[i][picks[i]] += 1.5;
   }
 }
 
@@ -487,8 +488,9 @@ function updatePick() {
 function updateDraftIfOver() {
   if (currentPick === 45) {
     for (i = 0; i < displayPack.length; i++) {
-      displayedPack[i].src = ""
+      displayedPack[i].style.display = "none"
       displayedPack[i].style.borderRadius = "0px";
+      displayedPack[i].style.border = "none";
     }
     restartText.style.display = "block"
     restartIcon.style.display = "block"
@@ -669,7 +671,10 @@ Promise.all([
     displayPack(activeOnehots[0]);
     activePreds = makeBatchPreds(activeOnehots);
     picksActive = true;
-
+    for (i = 0; i < 15; i++) {
+      displayedPack[i].style.webkitAnimation = "none"
+      displayedPack[i].style.webkitAnimation = 'fade-in';
+    }
     for (h = 0; h < 8; h++) {
       for (w = 0;w < 3; w++) {
         sum = findSum(activePacks[h][w])
