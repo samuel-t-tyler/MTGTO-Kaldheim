@@ -1,7 +1,8 @@
+"use strict";
+
 class DraftSimPackage {
   constructor(set) {
-      this.set = set;
-      this.humanMakesPick = this.humanMakesPick.bind(this)
+    this.set = set;
   }
 
   feature_vector_index = {
@@ -39,6 +40,34 @@ class DraftSimPackage {
     return count;
   }
   ////////////////////////////// GENERATING ACTIVE VARIABLES ///////////////////////////////
+    
+  // Populating the arrays of cards
+  generateRarityArrays() {
+    let cardsAvailable = [];
+    for (let key in masterHash["name_to_collector"]) {
+      if (masterHash["name_to_collector"][key] < 286) {
+        cardsAvailable.push(key);
+      }
+    }
+    for (let m = 0; m < cardsAvailable.length; m++) {
+      if (
+        masterHash["name_to_rarity"][cardsAvailable[m]] === "common" &&
+        !snowLands.includes(cardsAvailable[m])
+      ) {
+        commons.push(cardsAvailable[m]);
+      }
+      if (masterHash["name_to_rarity"][cardsAvailable[m]] === "uncommon") {
+        uncommons.push(cardsAvailable[m]);
+      }
+      if (masterHash["name_to_rarity"][cardsAvailable[m]] === "rare") {
+        rares.push(cardsAvailable[m]);
+      }
+      if (masterHash["name_to_rarity"][cardsAvailable[m]] === "mythic") {
+        mythics.push(cardsAvailable[m]);
+      }
+    }
+    return [commons, uncommons, rares, mythics, snowLands];
+  }
   // Creating function to create arrays to represent players pools
   generateActivePools() {
     let activePoolsTemp = [];
@@ -75,7 +104,7 @@ class DraftSimPackage {
       let shuffled = cards[i].sort(() => 0.5 - Math.random());
       // Get sub-array of first n elements after shuffled
       let selected = shuffled.slice(0, quantity[i]);
-      for (j = 0; j < quantity[i]; j++) {
+      for (let j = 0; j < quantity[i]; j++) {
         pack.push(selected[j]);
       }
     }
@@ -143,7 +172,7 @@ class DraftSimPackage {
         packLimitedPred.push(arrayOfPred[z] * arrayOfPacks[k][z]);
       }
       max_value = 0;
-      for (i = 0; i < packLimitedPred.length; i++) {
+      for (let i = 0; i < packLimitedPred.length; i++) {
         if (packLimitedPred[i] > max_value) {
           max_value = packLimitedPred[i];
           max_value_index = i;
@@ -221,11 +250,13 @@ class DraftSimPackage {
     }
     return pickValue;
   }
+
+  ///////////////////////////////// DISPLAY //////////////////////////////////
   // Highlight the pick the bot likes
   displayBotPred(pred) {
     if (feedbackActive === true) {
       let predURL = masterHash["index_to_url"][pred];
-      for (i = 0; i < displayedPack.length; i++) {
+      for (let i = 0; i < displayedPack.length; i++) {
         if (displayedPack[i].src === predURL) {
           displayedPack[i].style.border = "thick solid #33cc33";
         }
@@ -249,7 +280,7 @@ class DraftSimPackage {
       activePoolUrls[5].push(humanPickURL);
     }
     for (let j = 0; j < 6; j++) {
-      for (i = 0; i < activePoolUrls[j].length; i++) {
+      for (let i = 0; i < activePoolUrls[j].length; i++) {
         poolArray[j][i].src = activePoolUrls[j][i];
       }
     }
@@ -342,20 +373,20 @@ class DraftSimPackage {
     let pack = Math.floor(currentPick / 15);
     let arrayOfActivePacks = [];
     if (count !== 15 && count !== 30) {
-      for (i = 0; i < 8; i++) {
+      for (let i = 0; i < 8; i++) {
         draftPack[i][pack][picks[i]] = 0;
         arrayOfActivePacks.push(draftPack[i][pack]);
       }
       if (currentPack !== 1) {
         let last = arrayOfActivePacks.pop();
         arrayOfActivePacks.unshift(last);
-        for (j = 0; j < 8; j++) {
+        for (let j = 0; j < 8; j++) {
           activePacks[j][pack] = arrayOfActivePacks[j];
         }
       } else {
-        first = arrayOfActivePacks.shift();
+        let first = arrayOfActivePacks.shift();
         arrayOfActivePacks.push(first);
-        for (j = 0; j < 8; j++) {
+        for (let j = 0; j < 8; j++) {
           activePacks[j][pack] = arrayOfActivePacks[j];
         }
       }
@@ -416,7 +447,7 @@ class DraftSimPackage {
   ////////////////////////////////// END DRAFT ////////////////////////////////////
 
   // Function that resets the gamestate from the beginning
-  resetDraft() {
+  resetDraft = () => {
     // resetting all varaiables that store gamestate
     score = 0;
     currentPick = 0;
@@ -458,7 +489,7 @@ class DraftSimPackage {
       rares,
       mythics,
       snowLands,
-    ] = generateRarityArrays();
+    ] = this.generateRarityArrays();
     activePacks = DraftMethods.generateActivePacks();
     activeOnehots = DraftMethods.updateOnehots(
       activePacks,
@@ -473,13 +504,13 @@ class DraftSimPackage {
     picksActive = true;
 
     // Resetting event listeners
-    for (i = 0; i < 15; i++) {
-      displayedPack[i].addEventListener("click", humanMakesPick);
+    for (let i = 0; i < 15; i++) {
+      displayedPack[i].addEventListener("click", this.humanMakesPick);
     }
 
     // Resetting pool SRCs
-    for (j = 0; j < 6; j++) {
-      for (i = 0; i < 15; i++) {
+    for (let j = 0; j < 6; j++) {
+      for (let i = 0; i < 15; i++) {
         poolArray[j][i].src = "";
       }
     }
@@ -487,39 +518,78 @@ class DraftSimPackage {
     // Resetting inner HTML
     scoreHTML.innerHTML = "Score";
     feedbackHTML.innerHTML = "";
-    }
+  }
 
-///////////////////////////////// UPDATEFUNCS //////////////////////////////////
-    humanMakesPick( ) {
-        // Changing border color of the card the player picked
-        if (picksActive === true) {
-            for (let i = 0; i < 15; i++) {
-            displayedPack[i].removeEventListener("click", this.humanMakesPick);
-            }
-            picksActive = false;
-            let pickSRC = this.src;
-            for (i = 0; i < displayedPack.length; i++) {
-            if (displayedPack[i].src === pickSRC) {
-                displayedPack[i].style.border = "thick solid #ff9966";
-            }
-            }
-            // Highlighting bot pick and calculating accuracy of human pick
-            let pickName = masterHash["url_to_name"][pickSRC];
-            let pickIndex = masterHash["name_to_index"][pickName];
-
-            let activePicks = JSON.parse(JSON.stringify(activePreds)); //this creates a deepcopy, because JS using shallowcopy for arrays
-            activePicks[0] = pickIndex;
-
-            
-            this.displayBotPred(activePreds[0]);
-            this.generatePickAccuracy(activePickSoftmax, activePicks, activePreds);
-
-            // Updating event listeners
-            setTimeout(() => {
-            for (let i = 0; i < 15; i++) {
-                displayedPack[i].addEventListener("click", humanSeesResults);
-            }
-            }, 100);
+  ///////////////////////////////// UPDATEFUNCS //////////////////////////////////
+  humanMakesPick = (event) => {
+    // Changing border color of the card the player picked
+    if (picksActive === true) {
+      for (let i = 0; i < 15; i++) {
+        displayedPack[i].removeEventListener("click", this.humanMakesPick);
+      }
+      picksActive = false;
+      let pickSRC = event.srcElement.src;
+      for (let i = 0; i < displayedPack.length; i++) {
+        if (displayedPack[i].src === pickSRC) {
+          displayedPack[i].style.border = "thick solid #ff9966";
         }
+      }
+      // Highlighting bot pick and calculating accuracy of human pick
+      let pickName = masterHash["url_to_name"][pickSRC];
+      let pickIndex = masterHash["name_to_index"][pickName];
+
+      activePicks = JSON.parse(JSON.stringify(activePreds)); //this creates a deepcopy, because JS using shallowcopy for arrays
+      activePicks[0] = pickIndex;
+
+      this.displayBotPred(activePreds[0]);
+      this.generatePickAccuracy(activePickSoftmax, activePicks, activePreds);
+
+      // Updating event listeners
+      setTimeout(() => {
+        for (let i = 0; i < 15; i++) {
+          displayedPack[i].addEventListener("click", this.humanSeesResults);
+        }
+      }, 100);
     }
+  };
+  humanSeesResults = () => {
+    if (picksActive === false) {
+      for (let i = 0; i < 15; i++) {
+        displayedPack[i].removeEventListener("click", this.humanSeesResults);
+      }
+      DraftMethods.updatePick();
+      if (currentPick < 45) {
+        DraftMethods.updatePools(activePicks, activePools);
+        activeFeatureVectors = DraftMethods.updateFeatureVectors(
+          activePicks,
+          activeFeatureVectors
+        );
+        activePacks = DraftMethods.updatePacks(
+          currentPick,
+          activePacks,
+          activePicks
+        );
+        activeOnehots = DraftMethods.updateOnehots(
+          activePacks,
+          activeFeatureVectors,
+          activePools,
+          currentPack
+        );
+        [activePreds, activePickSoftmax] = DraftMethods.makeBatchPreds(
+          activeOnehots
+        );
+        DraftMethods.displayPack(activeOnehots[0]);
+        picksActive = true;
+        DraftMethods.displayPoolImages(activePicks);
+        setTimeout(() => {
+          for (let i = 0; i < 15; i++) {
+            displayedPack[i].addEventListener("click", this.humanMakesPick);
+          }
+        }, 100);
+        feedbackHTML.innerHTML = "";
+      } else {
+        DraftMethods.updateDraftIfOver();
+      }
+    }
+  };
 }
