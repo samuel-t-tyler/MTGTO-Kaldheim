@@ -1,9 +1,43 @@
 "use strict";
 
 class DraftSimPackage {
-  constructor(set) {
-    this.set = set;
+  constructor(set, setSize, inputSize, oddsOfRare, landSlot) {
+    this.set = set; //String of the set name
+    this.setSize = setSize; //Number of cards in the set
+    this.inputSize = inputSize; //Size of the input array into the neural net
+    this.oddsOfRare = oddsOfRare; //Odds of opening a rare in any given pack, relateive to a mythic (0-1)
+    this.landSlot = landSlot
   }
+  // Critical variables 
+  masterHash; // Layered object that can take any card representation and turn into any other card representation
+  model; //Tensorflow JS model file
+  // Variables used to maintain the gamestate
+  score = 0;
+  currentPick = 0;
+  currentPack = 0;
+  picksActive = false;
+  feedbackActive = true;
+  poolToggled = false;
+  draftOver = false;
+
+  // Variables that store the active state of players (human and bots)
+  activePacks; // Onehot array of shape [8, 3, 280] representing all packs in the draft
+  activeOnehots; // Array of shape [8, 574] representing the vector being fed into the prediction matrix
+  activePreds; // Array of length 8 representing the bot pred of each pick being made
+  activePicks; // Array of length 8 representing each being made.  For human, it is their choice
+  activeFeatureVectors; // Array of shape [8, 14] representing all players feature vectors
+  activePools; //Array of shape [8, 280] representing all pools for all players
+  activePickSoftmax; // the softmax output of the human pick
+  prevActivePicks; // the previous active pick made by all bots and humans
+  prevPrevActivePicks; // 2 picks back active pick made by all bots and humans
+
+  activePoolUrls = [[], [], [], [], [], []];
+  poolSideboard = [[], [], [], [], [], []];
+
+  commons = [];
+  uncommons = [];
+  rares = [];
+  mythics = [];
 
   feature_vector_index = {
     Colorless: 0,
@@ -27,7 +61,7 @@ class DraftSimPackage {
     let outputArray = [];
     for (let i = 0; i < onehot.length; i++) {
       if (onehot[i] > 0) {
-        outputArray.push(masterHash["index_to_name"][i]);
+        outputArray.push(this.masterHash["index_to_name"][i]);
       }
     }
     return outputArray;
@@ -40,63 +74,69 @@ class DraftSimPackage {
     return count;
   }
   ////////////////////////////// GENERATING ACTIVE VARIABLES ///////////////////////////////
-    
+
   // Populating the arrays of cards
-  generateRarityArrays() {
+  generateRarityArrays = () => {
     let cardsAvailable = [];
-    for (let key in masterHash["name_to_collector"]) {
-      if (masterHash["name_to_collector"][key] < 286) {
+    for (let key in this.masterHash["name_to_collector"]) {
+      if (this.masterHash["name_to_collector"][key] < 286) {
         cardsAvailable.push(key);
       }
     }
     for (let m = 0; m < cardsAvailable.length; m++) {
       if (
-        masterHash["name_to_rarity"][cardsAvailable[m]] === "common" &&
-        !snowLands.includes(cardsAvailable[m])
+        this.masterHash["name_to_rarity"][cardsAvailable[m]] === "common" &&
+        !this.landSlot.includes(cardsAvailable[m])
       ) {
-        commons.push(cardsAvailable[m]);
+        this.commons.push(cardsAvailable[m]);
       }
-      if (masterHash["name_to_rarity"][cardsAvailable[m]] === "uncommon") {
-        uncommons.push(cardsAvailable[m]);
+      if (this.masterHash["name_to_rarity"][cardsAvailable[m]] === "uncommon") {
+        this.uncommons.push(cardsAvailable[m]);
       }
-      if (masterHash["name_to_rarity"][cardsAvailable[m]] === "rare") {
-        rares.push(cardsAvailable[m]);
+      if (this.masterHash["name_to_rarity"][cardsAvailable[m]] === "rare") {
+        this.rares.push(cardsAvailable[m]);
       }
-      if (masterHash["name_to_rarity"][cardsAvailable[m]] === "mythic") {
-        mythics.push(cardsAvailable[m]);
+      if (this.masterHash["name_to_rarity"][cardsAvailable[m]] === "mythic") {
+        this.mythics.push(cardsAvailable[m]);
       }
     }
-    return [commons, uncommons, rares, mythics, snowLands];
-  }
+    return [
+      this.commons,
+      this.uncommons,
+      this.rares,
+      this.mythics,
+      this.landSlot,
+    ];
+  };
   // Creating function to create arrays to represent players pools
-  generateActivePools() {
+  generateActivePools = () => {
     let activePoolsTemp = [];
     let pool;
     for (let i = 0; i < 8; i++) {
-      (pool = []).length = setSize;
+      (pool = []).length = this.setSize;
       pool.fill(0);
       activePoolsTemp.push(pool);
     }
     return activePoolsTemp;
-  }
+  };
   //Creating function to represent player feature vectors
   generateActiveFeatures() {
-    let activeFeatureVectors = [];
+    this.activeFeatureVectors = [];
     let features;
     for (let i = 0; i < 8; i++) {
       (features = []).length = 14;
       features.fill(0);
-      activeFeatureVectors.push(features);
+      this.activeFeatureVectors.push(features);
     }
-    return activeFeatureVectors;
+    return this.activeFeatureVectors;
   }
   // Function to generate a random pack of Kaldheim cards
-  generatePack() {
+  generatePack = () => {
     let activePackTemp;
     (activePackTemp = []).length = 280;
     activePackTemp.fill(0);
     let pack = [];
-    const cards = [commons, uncommons, snowLands];
+    const cards = [this.commons, this.uncommons, this.landSlot];
     const quantity = [10, 3, 1];
 
     // add commons, uncommons, snow lands
@@ -110,21 +150,21 @@ class DraftSimPackage {
     }
     // add rare/mythic
     let randomNum = Math.random();
-    if (randomNum > oddsOfRare) {
-      let shuffled = mythics.sort(() => 0.5 - Math.random());
+    if (randomNum > this.oddsOfRare) {
+      let shuffled = this.mythics.sort(() => 0.5 - Math.random());
       let selected = shuffled.slice(0, 1);
       pack.push(selected);
     } else {
-      let shuffled = rares.sort(() => 0.5 - Math.random());
+      let shuffled = this.rares.sort(() => 0.5 - Math.random());
       let selected = shuffled.slice(0, 1);
       pack.push(selected);
     }
 
     for (let card = 0; card < 15; card++) {
-      activePackTemp[masterHash["name_to_index"][pack[card]]] = 1;
+      activePackTemp[this.masterHash["name_to_index"][pack[card]]] = 1;
     }
     return activePackTemp;
-  }
+  };
 
   // Function to generate array of 8 arrays of 3 packs
   generateActivePacks() {
@@ -143,30 +183,34 @@ class DraftSimPackage {
   ///////////////////////////////// MAKING PREDICTIONS //////////////////////////////////
 
   //Function that makes a prediction for all players
-  makeBatchPreds(arrayOfOnehots) {
+  makeBatchPreds = (arrayOfOnehots) => {
     //save previous active picks
-    prevPrevActivePicks = prevActivePicks;
-    prevActivePicks = activePicks;
+    this.prevPrevActivePicks = this.prevActivePicks;
+    this.prevActivePicks = this.activePicks;
     // generating packs to multiply predictions by
     let arrayOfPacks = [];
     for (let k = 0; k < arrayOfOnehots.length; k++) {
-      arrayOfPacks.push(arrayOfOnehots[k].slice(setSize, setSize * 2));
+      arrayOfPacks.push(
+        arrayOfOnehots[k].slice(this.setSize, this.setSize * 2)
+      );
     }
     //generating preds
-    let predRaw = model.predict(tf.reshape(arrayOfOnehots, [8, inputSize]));
+    let predRaw = this.model.predict(
+      tf.reshape(arrayOfOnehots, [8, this.inputSize])
+    );
     const v = predRaw.dataSync();
 
     //Saving the softmax activations for the human pick
-    let activePickSoftmax = [];
-    for (let q = 0; q < setSize; q++) {
-      activePickSoftmax.push(v[q] * arrayOfPacks[0][q]);
+    this.activePickSoftmax = [];
+    for (let q = 0; q < this.setSize; q++) {
+      this.activePickSoftmax.push(v[q] * arrayOfPacks[0][q]);
     }
     //Saving the argmax preds for each player
     let arrayOfIndexes = [];
     for (let k = 0; k < 8; k++) {
       let max_value = 0;
       let max_value_index = 275;
-      let arrayOfPred = v.slice(k * setSize, (k + 1) * setSize);
+      let arrayOfPred = v.slice(k * this.setSize, (k + 1) * this.setSize);
       let packLimitedPred = [];
       for (let z = 0; z < arrayOfPred.length; z++) {
         packLimitedPred.push(arrayOfPred[z] * arrayOfPacks[k][z]);
@@ -180,14 +224,17 @@ class DraftSimPackage {
       }
       arrayOfIndexes.push(max_value_index);
     }
-    activePreds = arrayOfIndexes;
-    return [activePreds, activePickSoftmax];
-  }
+    this.activePreds = arrayOfIndexes;
+    return [this.activePreds, this.activePickSoftmax];
+  };
   ///////////////////////////////// DISPLAY //////////////////////////////////
 
   // Change the displayed pack SRCs to the image of the current pack
-  displayPack(playerOnehot) {
-    let humanPlayerActivePack = playerOnehot.slice(setSize, setSize * 2);
+  displayPack = (playerOnehot) => {
+    let humanPlayerActivePack = playerOnehot.slice(
+      this.setSize,
+      this.setSize * 2
+    );
     let arrayOfURLs = [];
     for (let z = 0; z < 15; z++) {
       displayedPack[z].style.display = "block";
@@ -196,7 +243,7 @@ class DraftSimPackage {
     }
     for (let i = 0; i < humanPlayerActivePack.length; i++) {
       if (humanPlayerActivePack[i] > 0) {
-        arrayOfURLs.push(masterHash["index_to_url"][i]);
+        arrayOfURLs.push(this.masterHash["index_to_url"][i]);
       }
     }
     //Sort URLS by rarity
@@ -205,8 +252,8 @@ class DraftSimPackage {
     let uncommons = [];
     let commons = [];
     for (let m = 0; m < arrayOfURLs.length; m++) {
-      let cardName = masterHash["url_to_name"][arrayOfURLs[m]];
-      let rarity = masterHash["name_to_rarity"][cardName];
+      let cardName = this.masterHash["url_to_name"][arrayOfURLs[m]];
+      let rarity = this.masterHash["name_to_rarity"][cardName];
       if (rarity === "common") {
         commons.push(arrayOfURLs[m]);
       } else if (rarity === "uncommon") {
@@ -219,20 +266,20 @@ class DraftSimPackage {
     for (let k = 0; k < arrayOfSortedURLS.length; k++) {
       displayedPack[k].src = arrayOfSortedURLS[k];
     }
-  }
+  };
 
-  generatePickAccuracy(activePickSoftmax, picks, preds) {
+  generatePickAccuracy = (activePickSoftmax, picks, preds) => {
     let botPickSoftmax = activePickSoftmax[preds[0]];
     let humanPickSoftmax = activePickSoftmax[picks[0]];
     let error = 1 - humanPickSoftmax / botPickSoftmax;
     let pickValue = -Math.pow(error, 2.8) + 1;
-    score += pickValue;
-    let scoreFixed = score.toFixed(1);
+    this.score += pickValue;
+    let scoreFixed = this.score.toFixed(1);
     feedbackHTML.style.color = "white";
     if (scoreFixed[scoreFixed.length - 1] === "0") {
-      scoreFixed = score.toFixed(0);
+      scoreFixed = this.score.toFixed(0);
     }
-    scoreHTML.innerHTML = `${scoreFixed} / ${currentPick + 1}`;
+    scoreHTML.innerHTML = `${scoreFixed} / ${this.currentPick + 1}`;
     if (pickValue >= 0.95) {
       feedbackHTML.innerHTML = "Excellent!";
     }
@@ -249,13 +296,13 @@ class DraftSimPackage {
       feedbackHTML.innerHTML = "Mistake";
     }
     return pickValue;
-  }
+  };
 
   ///////////////////////////////// DISPLAY //////////////////////////////////
   // Highlight the pick the bot likes
   displayBotPred(pred) {
-    if (feedbackActive === true) {
-      let predURL = masterHash["index_to_url"][pred];
+    if (this.feedbackActive === true) {
+      let predURL = this.masterHash["index_to_url"][pred];
       for (let i = 0; i < displayedPack.length; i++) {
         if (displayedPack[i].src === predURL) {
           displayedPack[i].style.border = "thick solid #33cc33";
@@ -266,80 +313,79 @@ class DraftSimPackage {
   }
   // Function that displays the images of the cards you have selected in the pool tab
   displayPoolImages(picks) {
-    let humanPick = masterHash["index_to_name"][picks[0]];
-    let humanPickCMC = masterHash["name_to_cmc"][humanPick];
-    let humanPickURL =
-      masterHash["name_to_url"][humanPick][
-        masterHash["name_to_url"][humanPick].length - 1
-      ];
+    let humanPick = this.masterHash["index_to_name"][picks[0]];
+    let humanPickCMC = this.masterHash["name_to_cmc"][humanPick];
+    let humanPickURL = this.masterHash["name_to_url"][humanPick][
+      this.masterHash["name_to_url"][humanPick].length - 1
+    ];
     if (humanPickCMC < 1) {
-      activePoolUrls[0].push(humanPickURL);
+      this.activePoolUrls[0].push(humanPickURL);
     } else if (humanPickCMC < 7) {
-      activePoolUrls[humanPickCMC - 1].push(humanPickURL);
+      this.activePoolUrls[humanPickCMC - 1].push(humanPickURL);
     } else {
-      activePoolUrls[5].push(humanPickURL);
+      this.activePoolUrls[5].push(humanPickURL);
     }
     for (let j = 0; j < 6; j++) {
-      for (let i = 0; i < activePoolUrls[j].length; i++) {
-        poolArray[j][i].src = activePoolUrls[j][i];
+      for (let i = 0; i < this.activePoolUrls[j].length; i++) {
+        poolArray[j][i].src = this.activePoolUrls[j][i];
       }
     }
     return;
   }
   //  Function that resets pool after you remove a card from it and hide it in the sideboard
-  displayPoolAfterSideboard() {
-    const clicked = this.id;
+  displayPoolAfterSideboard = (event) => {
+    const clicked = event.srcElement.id;
     const pile = clicked[0];
     const index = parseInt(clicked.slice(2, 4)); //note that index is one above the index used in array
-    const cutURL = activePoolUrls[pile - 1].splice(index - 1, 1);
-    poolSideboard[pile - 1].push(cutURL[0]);
+    const cutURL = this.activePoolUrls[pile - 1].splice(index - 1, 1);
+    this.poolSideboard[pile - 1].push(cutURL[0]);
     for (let k = 0; k < 15; k++) {
       poolArray[pile - 1][k].src = "";
     }
-    for (let z = 0; z < activePoolUrls[pile - 1].length; z++) {
-      poolArray[pile - 1][z].src = activePoolUrls[pile - 1][z];
+    for (let z = 0; z < this.activePoolUrls[pile - 1].length; z++) {
+      poolArray[pile - 1][z].src = this.activePoolUrls[pile - 1][z];
     }
     return;
-  }
+  };
   // Function that resets pool images after you click the button and returns sideboard cards to maindeck
-  displayPoolAfterReset() {
+  displayPoolAfterReset = () => {
     for (let i = 0; i < 6; i++) {
-      for (let j = 0; j < poolSideboard[i].length; j++) {
-        activePoolUrls[i].push(poolSideboard[i][j]);
+      for (let j = 0; j < this.poolSideboard[i].length; j++) {
+        this.activePoolUrls[i].push(this.poolSideboard[i][j]);
       }
     }
     for (let k = 0; k < 6; k++) {
-      for (let l = 0; l < activePoolUrls[k].length; l++) {
-        poolArray[k][l].src = activePoolUrls[k][l];
+      for (let l = 0; l < this.activePoolUrls[k].length; l++) {
+        poolArray[k][l].src = this.activePoolUrls[k][l];
       }
     }
-    poolSideboard = [[], [], [], [], [], []];
-  }
+    this.poolSideboard = [[], [], [], [], [], []];
+  };
 
   // Function that hides or displays player feedback based on user input in the menu
-  displayFeedbackToggle() {
-    if (feedbackActive === true) {
+  displayFeedbackToggle = () => {
+    if (this.feedbackActive === true) {
       feedbackHTML.style.visibility = "hidden";
       scoreHTML.style.visibility = "hidden";
-      feedbackActive = false;
+      this.feedbackActive = false;
       return;
     }
-    if (feedbackActive === false) {
+    if (this.feedbackActive === false) {
       feedbackHTML.style.visibility = "visible";
       scoreHTML.style.visibility = "visible";
-      feedbackActive = true;
+      this.feedbackActive = true;
       return;
     }
-  }
+  };
 
   ///////////////////////////////// UPDATE LOGIC //////////////////////////////////
 
   // Function that updates feature vectors
-  updateFeatureVectors(picks, featureVectors = activeFeatureVectors) {
+  updateFeatureVectors(picks, featureVectors = this.activeFeatureVectors) {
     for (let i = 0; i < 8; i++) {
-      let predName = masterHash["index_to_name"][picks[i]];
-      let predColor = masterHash["name_to_color"][predName];
-      let predCMC = masterHash["name_to_cmc"][predName];
+      let predName = this.masterHash["index_to_name"][picks[i]];
+      let predColor = this.masterHash["name_to_color"][predName];
+      let predCMC = this.masterHash["name_to_cmc"][predName];
       if (predColor.length === 0) {
         featureVectors[i][DraftMethods.feature_vector_index["Colorless"]] += 1;
       } else {
@@ -365,34 +411,34 @@ class DraftSimPackage {
   }
 
   // Function that updates the nested arrays that represent the cards in each pack after each player makes a pick
-  updatePacks(
+  updatePacks = (
     count = currentPick,
-    draftPack = activePacks,
-    picks = activePicks
-  ) {
-    let pack = Math.floor(currentPick / 15);
+    draftPack = this.activePacks,
+    picks = this.activePicks
+  ) => {
+    let pack = Math.floor(this.currentPick / 15);
     let arrayOfActivePacks = [];
     if (count !== 15 && count !== 30) {
       for (let i = 0; i < 8; i++) {
         draftPack[i][pack][picks[i]] = 0;
         arrayOfActivePacks.push(draftPack[i][pack]);
       }
-      if (currentPack !== 1) {
+      if (this.currentPack !== 1) {
         let last = arrayOfActivePacks.pop();
         arrayOfActivePacks.unshift(last);
         for (let j = 0; j < 8; j++) {
-          activePacks[j][pack] = arrayOfActivePacks[j];
+          this.activePacks[j][pack] = arrayOfActivePacks[j];
         }
       } else {
         let first = arrayOfActivePacks.shift();
         arrayOfActivePacks.push(first);
         for (let j = 0; j < 8; j++) {
-          activePacks[j][pack] = arrayOfActivePacks[j];
+          this.activePacks[j][pack] = arrayOfActivePacks[j];
         }
       }
     }
-    return activePacks;
-  }
+    return this.activePacks;
+  };
 
   // Function that takes players features, pools and pack and generates concatenated array
   updateOnehots(packs, features, pools, packnum) {
@@ -410,19 +456,19 @@ class DraftSimPackage {
   }
 
   // Updates the global gamestate variables to signify a new turn
-  updatePick() {
-    currentPick++;
-    currentPack = Math.floor(currentPick / 15);
-  }
+  updatePick = () => {
+    this.currentPick++;
+    this.currentPack = Math.floor(this.currentPick / 15);
+  };
   // Function that updates what is displayed when the pool window button is toggled
   updatePoolToggled() {
-    if (poolToggled === false) {
-      poolToggled = true;
+    if (this.poolToggled === false) {
+      this.poolToggled = true;
       restartIcon.style.display = "none";
       restartText.style.display = "none";
     } else {
-      poolToggled = false;
-      if (draftOver === true) {
+      this.poolToggled = false;
+      if (this.draftOver === true) {
         restartIcon.style.display = "block";
         restartText.style.display = "block";
       }
@@ -430,8 +476,8 @@ class DraftSimPackage {
   }
 
   // Function that prepares logic for player resetting draft on click
-  updateDraftIfOver() {
-    if (currentPick === 45) {
+  updateDraftIfOver = () => {
+    if (this.currentPick === 45) {
       for (let i = 0; i < DraftMethods.displayPack.length; i++) {
         displayedPack[i].style.display = "none";
         displayedPack[i].style.borderRadius = "0px";
@@ -442,66 +488,47 @@ class DraftSimPackage {
       restartText.addEventListener("click", resetDraft);
       restartIcon.addEventListener("click", resetDraft);
     }
-    draftOver = true;
-  }
+    this.draftOver = true;
+  };
   ////////////////////////////////// END DRAFT ////////////////////////////////////
 
   // Function that resets the gamestate from the beginning
   resetDraft = () => {
     // resetting all varaiables that store gamestate
-    score = 0;
-    currentPick = 0;
-    currentPack = 0;
-    picksActive = false;
-    feedbackActive = true;
-    activePacks = [];
-    activeOnehots = [];
-    activePreds = [];
-    activePicks = [];
-    activeFeatureVectors = DraftMethods.generateActiveFeatures();
-    activePools = DraftMethods.generateActivePools();
-    activePickSoftmax = [];
-    activePoolUrls = [[], [], [], [], [], []]; //array of 6 arrays representing pool pile urls
-    sideboardPoolOneCmc = [];
-    sideboardPoolTwoCmc = [];
-    sideboardPoolThreeCmc = [];
-    sideboardPoolFourCmc = [];
-    sideboardPoolFiveCmc = [];
-    sideboardPoolSixCmc = [];
-    poolSideboard = [
-      sideboardPoolOneCmc,
-      sideboardPoolTwoCmc,
-      sideboardPoolThreeCmc,
-      sideboardPoolFourCmc,
-      sideboardPoolFiveCmc,
-      sideboardPoolSixCmc,
-    ];
-    prevActivePicks = []; // the previous active pick made by all the bots
-    prevPrevActivePicks = []; // two picks back
+    this.score = 0;
+    this.currentPick = 0;
+    this.currentPack = 0;
+    this.picksActive = false;
+    this.feedbackActive = true;
+    this.activePacks = [];
+    this.activeOnehots = [];
+    this.activePreds = [];
+    this.activePicks = [];
+    this.activeFeatureVectors = this.generateActiveFeatures();
+    this.activePools = DraftMethods.generateActivePools();
+    this.activePickSoftmax = [];
+    this.activePoolUrls = [[], [], [], [], [], []];
+    this.poolSideboard = [[], [], [], [], [], []];
+    this.prevActivePicks = []; // the previous active pick made by all the bots
+    this.prevPrevActivePicks = []; // two picks back
     restartIcon.style.display = "none";
     restartText.style.display = "none";
-    draftOver = false;
+    this.draftOver = false;
 
     // generating new packs and startingone onehots and preds
-    let [
-      commons,
-      uncommons,
-      rares,
-      mythics,
-      snowLands,
-    ] = this.generateRarityArrays();
-    activePacks = DraftMethods.generateActivePacks();
-    activeOnehots = DraftMethods.updateOnehots(
-      activePacks,
-      activeFeatureVectors,
-      activePools,
-      currentPack
+    this.generateRarityArrays();
+    this.activePacks = DraftMethods.generateActivePacks();
+    this.activeOnehots = DraftMethods.updateOnehots(
+      this.activePacks,
+      this.activeFeatureVectors,
+      this.activePools,
+      this.currentPack
     );
-    DraftMethods.displayPack(activeOnehots[0]);
-    [activePreds, activePickSoftmax] = DraftMethods.makeBatchPreds(
-      activeOnehots
+    DraftMethods.displayPack(this.activeOnehots[0]);
+    [this.activePreds, this.activePickSoftmax] = DraftMethods.makeBatchPreds(
+      this.activeOnehots
     );
-    picksActive = true;
+    this.picksActive = true;
 
     // Resetting event listeners
     for (let i = 0; i < 15; i++) {
@@ -518,16 +545,16 @@ class DraftSimPackage {
     // Resetting inner HTML
     scoreHTML.innerHTML = "Score";
     feedbackHTML.innerHTML = "";
-  }
+  };
 
   ///////////////////////////////// UPDATEFUNCS //////////////////////////////////
   humanMakesPick = (event) => {
     // Changing border color of the card the player picked
-    if (picksActive === true) {
+    if (this.picksActive === true) {
       for (let i = 0; i < 15; i++) {
         displayedPack[i].removeEventListener("click", this.humanMakesPick);
       }
-      picksActive = false;
+      this.picksActive = false;
       let pickSRC = event.srcElement.src;
       for (let i = 0; i < displayedPack.length; i++) {
         if (displayedPack[i].src === pickSRC) {
@@ -535,14 +562,18 @@ class DraftSimPackage {
         }
       }
       // Highlighting bot pick and calculating accuracy of human pick
-      let pickName = masterHash["url_to_name"][pickSRC];
-      let pickIndex = masterHash["name_to_index"][pickName];
+      let pickName = this.masterHash["url_to_name"][pickSRC];
+      let pickIndex = this.masterHash["name_to_index"][pickName];
 
-      activePicks = JSON.parse(JSON.stringify(activePreds)); //this creates a deepcopy, because JS using shallowcopy for arrays
-      activePicks[0] = pickIndex;
+      this.activePicks = JSON.parse(JSON.stringify(this.activePreds)); //this creates a deepcopy, because JS using shallowcopy for arrays
+      this.activePicks[0] = pickIndex;
 
-      this.displayBotPred(activePreds[0]);
-      this.generatePickAccuracy(activePickSoftmax, activePicks, activePreds);
+      this.displayBotPred(this.activePreds[0]);
+      this.generatePickAccuracy(
+        this.activePickSoftmax,
+        this.activePicks,
+        this.activePreds
+      );
 
       // Updating event listeners
       setTimeout(() => {
@@ -553,34 +584,35 @@ class DraftSimPackage {
     }
   };
   humanSeesResults = () => {
-    if (picksActive === false) {
+    if (this.picksActive === false) {
       for (let i = 0; i < 15; i++) {
         displayedPack[i].removeEventListener("click", this.humanSeesResults);
       }
-      DraftMethods.updatePick();
-      if (currentPick < 45) {
-        DraftMethods.updatePools(activePicks, activePools);
-        activeFeatureVectors = DraftMethods.updateFeatureVectors(
-          activePicks,
-          activeFeatureVectors
+      this.updatePick();
+      if (this.currentPick < 45) {
+        this.updatePools(this.activePicks, this.activePools);
+        this.activeFeatureVectors = this.updateFeatureVectors(
+          this.activePicks,
+          this.activeFeatureVectors
         );
-        activePacks = DraftMethods.updatePacks(
-          currentPick,
-          activePacks,
-          activePicks
+        this.activePacks = this.updatePacks(
+          this.currentPick,
+          this.activePacks,
+          this.activePicks
         );
-        activeOnehots = DraftMethods.updateOnehots(
-          activePacks,
-          activeFeatureVectors,
-          activePools,
-          currentPack
+        this.activeOnehots = this.updateOnehots(
+          this.activePacks,
+          this.activeFeatureVectors,
+          this.activePools,
+          this.currentPack
         );
-        [activePreds, activePickSoftmax] = DraftMethods.makeBatchPreds(
-          activeOnehots
-        );
-        DraftMethods.displayPack(activeOnehots[0]);
-        picksActive = true;
-        DraftMethods.displayPoolImages(activePicks);
+        [
+          this.activePreds,
+          this.activePickSoftmax,
+        ] = this.makeBatchPreds(this.activeOnehots);
+        this.displayPack(this.activeOnehots[0]);
+        this.picksActive = true;
+        this.displayPoolImages(this.activePicks);
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
             displayedPack[i].addEventListener("click", this.humanMakesPick);
@@ -591,5 +623,36 @@ class DraftSimPackage {
         DraftMethods.updateDraftIfOver();
       }
     }
-  };
+    };
+    setupAfterPromise(data) {
+        this.masterHash = data[1];
+        this.model = data[0];
+        this.activePools = this.generateActivePools();
+        this.activeFeatureVectors = this.generateActiveFeatures();
+        [
+          this.commons,
+          this.uncommons,
+          this.rares,
+          this.mythics,
+          this.landSlot,
+        ] = this.generateRarityArrays();
+        this.activePacks = this.generateActivePacks();
+        this.activeOnehots = this.updateOnehots(
+          this.activePacks,
+          this.activeFeatureVectors,
+          this.activePools,
+          this.currentPack
+        );
+        loadingText.style.display = "none";
+        loadingSpinner.style.display = "none";
+        this.displayPack(this.activeOnehots[0]);
+        [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
+          this.activeOnehots
+        );
+        this.picksActive = true;
+        for (let i = 0; i < 15; i++) {
+        displayedPack[i].style.webkitAnimation = "none";
+        displayedPack[i].style.webkitAnimation = "fade-in";
+        }
+    }
 }
