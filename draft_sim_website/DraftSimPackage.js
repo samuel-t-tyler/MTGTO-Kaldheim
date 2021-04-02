@@ -269,34 +269,38 @@ class DraftSimPackage {
   };
 
   generatePickAccuracy = (activePickSoftmax, picks, preds) => {
-    let botPickSoftmax = activePickSoftmax[preds[0]];
-    let humanPickSoftmax = activePickSoftmax[picks[0]];
-    let error = 1 - humanPickSoftmax / botPickSoftmax;
-    let pickValue = -Math.pow(error, 2.8) + 1;
-    this.score += pickValue;
-    let scoreFixed = this.score.toFixed(1);
-    feedbackHTML.style.color = "white";
-    if (scoreFixed[scoreFixed.length - 1] === "0") {
-      scoreFixed = this.score.toFixed(0);
-    }
-    scoreHTML.innerHTML = `${scoreFixed} / ${this.currentPick + 1}`;
-    if (pickValue >= 0.95) {
-      feedbackHTML.innerHTML = "Excellent!";
-    }
-    if (pickValue >= 0.7 && pickValue < 0.95) {
-      feedbackHTML.innerHTML = "Great!";
-    }
-    if (pickValue >= 0.5 && pickValue < 0.7) {
-      feedbackHTML.innerHTML = "Not bad!";
-    }
-    if (pickValue >= 0.3 && pickValue < 0.5) {
-      feedbackHTML.innerHTML = "Possible Mistake";
-    }
-    if (pickValue < 0.3) {
-      feedbackHTML.innerHTML = "Mistake";
-    }
-    feedbackHTML.style.opacity = 1
-    return pickValue;
+    scoreHTML.style.opacity = 0;
+    setTimeout(() => {
+      feedbackHTML.style.opacity = 1;
+      let botPickSoftmax = activePickSoftmax[preds[0]];
+      let humanPickSoftmax = activePickSoftmax[picks[0]];
+      let error = 1 - humanPickSoftmax / botPickSoftmax;
+      let pickValue = -Math.pow(error, 2.8) + 1;
+      this.score += pickValue;
+      let scoreFixed = this.score.toFixed(1);
+      feedbackHTML.style.color = "white";
+      if (scoreFixed[scoreFixed.length - 1] === "0") {
+        scoreFixed = this.score.toFixed(0);
+      }
+      scoreHTML.innerHTML = `${scoreFixed} / ${this.currentPick + 1}`;
+      if (pickValue >= 0.95) {
+        feedbackHTML.innerHTML = "Excellent!";
+      }
+      if (pickValue >= 0.7 && pickValue < 0.95) {
+        feedbackHTML.innerHTML = "Great!";
+      }
+      if (pickValue >= 0.5 && pickValue < 0.7) {
+        feedbackHTML.innerHTML = "Not bad!";
+      }
+      if (pickValue >= 0.3 && pickValue < 0.5) {
+        feedbackHTML.innerHTML = "Possible Mistake";
+      }
+      if (pickValue < 0.3) {
+        feedbackHTML.innerHTML = "Mistake";
+      }
+      scoreHTML.style.opacity = 1
+    }, 150)
+    return
   };
 
   ///////////////////////////////// DISPLAY //////////////////////////////////
