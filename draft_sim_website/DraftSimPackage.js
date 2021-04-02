@@ -239,7 +239,7 @@ class DraftSimPackage {
     for (let z = 0; z < 15; z++) {
       displayedPack[z].style.display = "block";
       displayedPack[z].src = "";
-      displayedPack[z].style.border = 0;
+      displayedPack[z].style.border = "transparent";
     }
     for (let i = 0; i < humanPlayerActivePack.length; i++) {
       if (humanPlayerActivePack[i] > 0) {
@@ -290,11 +290,12 @@ class DraftSimPackage {
       feedbackHTML.innerHTML = "Not bad!";
     }
     if (pickValue >= 0.3 && pickValue < 0.5) {
-      feedbackHTML.innerHTML = "Potential Mistake";
+      feedbackHTML.innerHTML = "Possible Mistake";
     }
     if (pickValue < 0.3) {
       feedbackHTML.innerHTML = "Mistake";
     }
+    feedbackHTML.style.opacity = 1
     return pickValue;
   };
 
@@ -412,7 +413,7 @@ class DraftSimPackage {
 
   // Function that updates the nested arrays that represent the cards in each pack after each player makes a pick
   updatePacks = (
-    count = currentPick,
+    count = this.currentPick,
     draftPack = this.activePacks,
     picks = this.activePicks
   ) => {
@@ -480,8 +481,7 @@ class DraftSimPackage {
     if (this.currentPick === 45) {
       for (let i = 0; i < this.displayPack.length; i++) {
         displayedPack[i].style.display = "none";
-        displayedPack[i].style.borderRadius = "0px";
-        displayedPack[i].style.border = "none";
+        displayedPack[i].style.border = "transparent";
       }
       restartText.style.display = "block";
       restartIcon.style.display = "block";
@@ -495,6 +495,9 @@ class DraftSimPackage {
   // Function that resets the gamestate from the beginning
   resetDraft = () => {
     // resetting all varaiables that store gamestate
+    for (let i = 0; i < 15; i++) {
+      displayedPackDiv[i].style.animation = "fadeOut ease 0.25s";
+    }
     this.score = 0;
     this.currentPick = 0;
     this.currentPack = 0;
@@ -524,7 +527,6 @@ class DraftSimPackage {
       this.activePools,
       this.currentPack
     );
-    this.displayPack(this.activeOnehots[0]);
     [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
       this.activeOnehots
     );
@@ -545,6 +547,12 @@ class DraftSimPackage {
     // Resetting inner HTML
     scoreHTML.innerHTML = "Score";
     feedbackHTML.innerHTML = "";
+    setTimeout(() => {
+      for (let i = 0; i < 15; i++) {
+        this.displayPack(this.activeOnehots[0]);
+        displayedPackDiv[i].style.animation = "fadeIn ease 0.25s";
+      }
+    }, 250)
   };
 
   ///////////////////////////////// UPDATEFUNCS //////////////////////////////////
@@ -626,10 +634,10 @@ class DraftSimPackage {
           }
         }, 500);
 
-        feedbackHTML.innerHTML = "";
       } else {
         this.updateDraftIfOver();
       }
+      feedbackHTML.style.opacity = 0
     }
     };
     setupAfterPromise(data) {

@@ -3,6 +3,7 @@
 // python -m http.server (in console)
 // http://localhost:8000/path
 
+///////////////////////////////// KALDHEIM UNIQUE VARIABLES //////////////////////////////////
 let landSlot = [
   "Snow-Covered Mountain",
   "Snow-Covered Island",
@@ -21,8 +22,12 @@ let landSlot = [
   "Woodland Chasm",
 ];
 
+const setSize = 280
+const inputSize = 574
+const oddsRare = 0.875
+
 ///////////////////////////////// FETCH CLASS WITH METHODS  //////////////////////////////////
-let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", 280, 574, 0.875, landSlot);
+let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", setSize, inputSize, oddsRare, landSlot);
 ///////////////////////////////// DEFINING GLOBAL VARIABLES //////////////////////////////////
 // Fetching relevant cards by class, defining global variables
 let displayedPack = document.getElementsByClassName("pack-card-image");

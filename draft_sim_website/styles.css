@@ -3,9 +3,18 @@ body {
     font-family: 'Orbitron', sans-serif;
 }
 
+.noSelect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .loadingSpinner {
   border: 16px solid #ffffff; /* Light grey */
-  border-top: 16px solid #353535; /* Blue */
+  border-top: 16px solid rgba(22,22,22, 0); /* Blue */
   border-radius: 50%;
   width: 120px;
   height: 120px ;
@@ -85,24 +94,30 @@ body {
 #GTO-bot {
     font-size: 3vh;
     font-family: 'Orbitron', sans-serif;
-    color: rgb(255, 255, 255);
+    color: rgb(245, 245, 245);
 }
 
 #score {
-    color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
     margin-bottom: 0;
     font-size: 3.2vh;
     font-family: 'Orbitron', sans-serif;
 }
 
 #feedback {
-    color: rgb(0, 0, 0) !important;
+    opacity: 0;
+    color: rgb(255, 255, 255) !important;
     margin-bottom: 0;
     font-size: 3vh;
     box-sizing: border-box;
     width: 40vh;
     text-align: center;
     font-family: 'Orbitron', sans-serif;
+    -webkit-transition: opacity 0.15s ease-in-out;
+   -moz-transition: opacity 0.15s ease-in-out;
+   -ms-transition: opacity 0.15s ease-in-out;
+   -o-transition: opacity 0.15s ease-in-out;
+   transition: opacity 0.15s ease-in-out;
 }
 
 #pool-toggler, #menu {
@@ -133,7 +148,7 @@ body {
     min-height: 92vh;
     z-index: 5;
     justify-content: center;
-    background-color: black !important;
+    background-color: rgba(22,22,22, 100) !important;
 }
 
 .collapsing {
@@ -160,6 +175,15 @@ transition:opacity 0.3s linear;
 -o-transition:opacity 0.3s linear;
 }
 
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: inherit;
+  text-decoration: inherit;
+}
 
 img {
     width: auto;
@@ -178,13 +202,16 @@ img {
     cursor: pointer;
 }
 
+.pack-card-image {
+}
+
+
 .pack-card-image-div {
     justify-content: center;
     max-height: 35vh ;
     max-width: 25vh ;
     margin: 0vh;
     cursor: pointer;
-
 }
 
 .pool-col {
@@ -307,6 +334,8 @@ animation: fadeIn ease 0.5s;
   }
   #score {
     display: none;
+    color: white !important;
+    background-color: white;
   }
   #GTO-bot {
     font-size: 3vh;
