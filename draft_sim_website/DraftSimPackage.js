@@ -120,7 +120,7 @@ class DraftSimPackage {
     return activePoolsTemp;
   };
   //Creating function to represent player feature vectors
-  generateActiveFeatures() {
+  generateActiveFeatures = () => {
     this.activeFeatureVectors = [];
     let features;
     for (let i = 0; i < 8; i++) {
@@ -167,12 +167,12 @@ class DraftSimPackage {
   };
 
   // Function to generate array of 8 arrays of 3 packs
-  generateActivePacks() {
+  generateActivePacks = () => {
     let activePacksTemp = [];
     for (let l = 0; l < 8; l++) {
       let temp = [];
       for (let k = 0; k < 3; k++) {
-        let pack = DraftMethods.generatePack();
+        let pack = this.generatePack();
         temp.push(pack);
       }
       activePacksTemp.push(temp);
@@ -300,7 +300,7 @@ class DraftSimPackage {
 
   ///////////////////////////////// DISPLAY //////////////////////////////////
   // Highlight the pick the bot likes
-  displayBotPred(pred) {
+  displayBotPred = (pred) => {
     if (this.feedbackActive === true) {
       let predURL = this.masterHash["index_to_url"][pred];
       for (let i = 0; i < displayedPack.length; i++) {
@@ -312,7 +312,7 @@ class DraftSimPackage {
     return;
   }
   // Function that displays the images of the cards you have selected in the pool tab
-  displayPoolImages(picks) {
+  displayPoolImages = (picks) => {
     let humanPick = this.masterHash["index_to_name"][picks[0]];
     let humanPickCMC = this.masterHash["name_to_cmc"][humanPick];
     let humanPickURL = this.masterHash["name_to_url"][humanPick][
@@ -381,32 +381,32 @@ class DraftSimPackage {
   ///////////////////////////////// UPDATE LOGIC //////////////////////////////////
 
   // Function that updates feature vectors
-  updateFeatureVectors(picks, featureVectors = this.activeFeatureVectors) {
+  updateFeatureVectors = (picks, featureVectors = this.activeFeatureVectors) => {
     for (let i = 0; i < 8; i++) {
       let predName = this.masterHash["index_to_name"][picks[i]];
       let predColor = this.masterHash["name_to_color"][predName];
       let predCMC = this.masterHash["name_to_cmc"][predName];
       if (predColor.length === 0) {
-        featureVectors[i][DraftMethods.feature_vector_index["Colorless"]] += 1;
+        featureVectors[i][this.feature_vector_index["Colorless"]] += 1;
       } else {
         for (let m = 0; m < predColor.length; m++) {
-          featureVectors[i][DraftMethods.feature_vector_index[predColor[m]]] +=
+          featureVectors[i][this.feature_vector_index[predColor[m]]] +=
             1 / predColor.length;
         }
       }
       if (predCMC > 7) {
-        featureVectors[i][DraftMethods.feature_vector_index[7.0]] += 1;
+        featureVectors[i][this.feature_vector_index[7.0]] += 1;
       } else {
-        featureVectors[i][DraftMethods.feature_vector_index[predCMC]] += 1;
+        featureVectors[i][this.feature_vector_index[predCMC]] += 1;
       }
     }
     return featureVectors;
   }
 
   // Function that adds the prediction to the pool onehot of all 7 bots and human player
-  updatePools(picks, arrayOfPools) {
+  updatePools = (picks, arrayOfPools) => {
     for (let i = 0; i < 8; i++) {
-      arrayOfPools[i][picks[i]] += 1.5;
+      arrayOfPools[i][picks[i]] += 1;
     }
   }
 
@@ -441,7 +441,7 @@ class DraftSimPackage {
   };
 
   // Function that takes players features, pools and pack and generates concatenated array
-  updateOnehots(packs, features, pools, packnum) {
+  updateOnehots = (packs, features, pools, packnum) => {
     let activeOnehotsTemp = [];
     for (let i = 0; i < 8; i++) {
       let playersOnehot = [];
@@ -461,7 +461,7 @@ class DraftSimPackage {
     this.currentPack = Math.floor(this.currentPick / 15);
   };
   // Function that updates what is displayed when the pool window button is toggled
-  updatePoolToggled() {
+  updatePoolToggled = () => {
     if (this.poolToggled === false) {
       this.poolToggled = true;
       restartIcon.style.display = "none";
@@ -478,7 +478,7 @@ class DraftSimPackage {
   // Function that prepares logic for player resetting draft on click
   updateDraftIfOver = () => {
     if (this.currentPick === 45) {
-      for (let i = 0; i < DraftMethods.displayPack.length; i++) {
+      for (let i = 0; i < this.displayPack.length; i++) {
         displayedPack[i].style.display = "none";
         displayedPack[i].style.borderRadius = "0px";
         displayedPack[i].style.border = "none";
@@ -505,7 +505,7 @@ class DraftSimPackage {
     this.activePreds = [];
     this.activePicks = [];
     this.activeFeatureVectors = this.generateActiveFeatures();
-    this.activePools = DraftMethods.generateActivePools();
+    this.activePools = this.generateActivePools();
     this.activePickSoftmax = [];
     this.activePoolUrls = [[], [], [], [], [], []];
     this.poolSideboard = [[], [], [], [], [], []];
@@ -517,15 +517,15 @@ class DraftSimPackage {
 
     // generating new packs and startingone onehots and preds
     this.generateRarityArrays();
-    this.activePacks = DraftMethods.generateActivePacks();
-    this.activeOnehots = DraftMethods.updateOnehots(
+    this.activePacks = this.generateActivePacks();
+    this.activeOnehots = this.updateOnehots(
       this.activePacks,
       this.activeFeatureVectors,
       this.activePools,
       this.currentPack
     );
-    DraftMethods.displayPack(this.activeOnehots[0]);
-    [this.activePreds, this.activePickSoftmax] = DraftMethods.makeBatchPreds(
+    this.displayPack(this.activeOnehots[0]);
+    [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
       this.activeOnehots
     );
     this.picksActive = true;
@@ -587,6 +587,7 @@ class DraftSimPackage {
     if (this.picksActive === false) {
       for (let i = 0; i < 15; i++) {
         displayedPack[i].removeEventListener("click", this.humanSeesResults);
+        displayedPackDiv[i].style.animation = "fadeOut ease 0.25s";
       }
       this.updatePick();
       if (this.currentPick < 45) {
@@ -610,17 +611,24 @@ class DraftSimPackage {
           this.activePreds,
           this.activePickSoftmax,
         ] = this.makeBatchPreds(this.activeOnehots);
-        this.displayPack(this.activeOnehots[0]);
         this.picksActive = true;
         this.displayPoolImages(this.activePicks);
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
-            displayedPack[i].addEventListener("click", this.humanMakesPick);
+            this.displayPack(this.activeOnehots[0]);
+            displayedPackDiv[i].style.animation = "fadeIn ease 0.25s";
           }
-        }, 100);
+        }, 250);
+
+        setTimeout(() => {
+          for (let m = 0; m < 15; m++) {
+            displayedPack[m].addEventListener("click", this.humanMakesPick);
+          }
+        }, 500);
+
         feedbackHTML.innerHTML = "";
       } else {
-        DraftMethods.updateDraftIfOver();
+        this.updateDraftIfOver();
       }
     }
     };

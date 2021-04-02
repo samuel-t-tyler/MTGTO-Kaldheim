@@ -22,10 +22,11 @@ let landSlot = [
 ];
 
 ///////////////////////////////// FETCH CLASS WITH METHODS  //////////////////////////////////
-let DraftMethods = new DraftSimPackage("Kaldheim", 280, 574, 0.875, landSlot);
+let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", 280, 574, 0.875, landSlot);
 ///////////////////////////////// DEFINING GLOBAL VARIABLES //////////////////////////////////
 // Fetching relevant cards by class, defining global variables
 let displayedPack = document.getElementsByClassName("pack-card-image");
+let displayedPackDiv = document.getElementsByClassName("pack-card-image-div");
 
 let scoreHTML = document.getElementById("score");
 let feedbackHTML = document.getElementById("feedback");
@@ -34,6 +35,7 @@ let loadingSpinner = document.getElementById("loadingSpinner");
 let restartText = document.getElementById("restartText")
 let restartIcon = document.getElementById("restartIcon")
 let poolToggle = document.getElementById("pool-toggler");
+let poolWindow = document.getElementById("pool_window");
 
 let resetSideboardButton = document.getElementById("resetSideboard");
 let toggleFeedbackButton = document.getElementById("toggleFeedback");
@@ -51,7 +53,6 @@ let poolArray = [poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc,
 
 Promise.all([
   tf.loadLayersModel("./draft_sim_website/tfjs_4/model.json"),
-  fetch("./draft_sim_website/data/output_dict.txt"),
   fetch("./draft_sim_website/data/output_master_hash.txt"),
 ])
   .then(function (responses) {
@@ -63,7 +64,7 @@ Promise.all([
     return Promise.all([model, json_response[0], json_response[1]]);
   })
   .then(function (data) {
-    DraftMethods.setupAfterPromise(data);
+    KaldheimDraftPackage.setupAfterPromise(data);
 /////////////////////////////////// SETUP ////////////////////////////////////
   })
   .catch(function (error) {
@@ -74,17 +75,17 @@ Promise.all([
 ////////////////////////////////// EVENT LISTENERS //////////////////////////////////// 
 
 for (let i = 0; i < 15; i++) {
-  displayedPack[i].addEventListener("click", DraftMethods.humanMakesPick);
+  displayedPack[i].addEventListener("click", KaldheimDraftPackage.humanMakesPick);
 }
 
 for (let j = 0; j < poolArray.length; j++){
   for (let i = 0; i < poolArray[j].length; i++) {
-    poolArray[j][i].addEventListener("click", DraftMethods.displayPoolAfterSideboard)
+    poolArray[j][i].addEventListener("click", KaldheimDraftPackage.displayPoolAfterSideboard)
   }
 }
 
-resetSideboardButton.addEventListener("click", DraftMethods.displayPoolAfterReset);
-toggleFeedbackButton.addEventListener("click", DraftMethods.displayFeedbackToggle);
-resetDraftButton.addEventListener("click", DraftMethods.resetDraft)
-poolToggle.addEventListener("click", DraftMethods.updatePoolToggled)
-restartIcon.addEventListener("click", DraftMethods.resetDraft)
+resetSideboardButton.addEventListener("click", KaldheimDraftPackage.displayPoolAfterReset);
+toggleFeedbackButton.addEventListener("click", KaldheimDraftPackage.displayFeedbackToggle);
+resetDraftButton.addEventListener("click", KaldheimDraftPackage.resetDraft);
+poolToggle.addEventListener("click", KaldheimDraftPackage.updatePoolToggled);
+restartIcon.addEventListener("click", KaldheimDraftPackage.resetDraft);
