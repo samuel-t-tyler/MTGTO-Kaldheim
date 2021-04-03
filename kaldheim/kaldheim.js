@@ -28,6 +28,22 @@ const oddsRare = 0.875
 
 ///////////////////////////////// FETCH CLASS WITH METHODS  //////////////////////////////////
 let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", setSize, inputSize, oddsRare, landSlot);
+
+///////////////////////////////// CREATE HTML WITH LOOP //////////////////////////////////
+let mainWindow = document.getElementById("main_window");
+
+KaldheimDraftPackage.createPackHTML(mainWindow);
+
+let poolOneCmcCol = document.getElementById("one_cmc");
+let poolTwoCmcCol = document.getElementById("two_cmc");
+let poolThreeCmcCol = document.getElementById("three_cmc");
+let poolFourCmcCol = document.getElementById("four_cmc");
+let poolFiveCmcCol = document.getElementById("five_cmc");
+let poolSixCmcCol = document.getElementById("six_cmc");
+let poolColArray = [poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol];
+
+KaldheimDraftPackage.createPoolHTML(poolColArray);
+
 ///////////////////////////////// DEFINING GLOBAL VARIABLES //////////////////////////////////
 // Fetching relevant cards by class, defining global variables
 let displayedPack = document.getElementsByClassName("pack-card-image");
@@ -46,32 +62,13 @@ let resetSideboardButton = document.getElementById("resetSideboard");
 let toggleFeedbackButton = document.getElementById("toggleFeedback");
 let resetDraftButton = document.getElementById("resetDraft")
 
-let poolOneCmc = document.getElementsByClassName("one-cmc-image");
-let poolTwoCmc = document.getElementsByClassName("two-cmc-image");
-let poolThreeCmc = document.getElementsByClassName("three-cmc-image");
-let poolFourCmc = document.getElementsByClassName("four-cmc-image");
-let poolFiveCmc = document.getElementsByClassName("five-cmc-image");
-let poolSixCmc = document.getElementsByClassName("six-cmc-image");
+let poolOneCmc = document.getElementsByClassName("1-cmc-image");
+let poolTwoCmc = document.getElementsByClassName("2-cmc-image");
+let poolThreeCmc = document.getElementsByClassName("3-cmc-image");
+let poolFourCmc = document.getElementsByClassName("4-cmc-image");
+let poolFiveCmc = document.getElementsByClassName("5-cmc-image");
+let poolSixCmc = document.getElementsByClassName("6-cmc-image");
 let poolArray = [poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
-
-let poolOneCmcCol = document.getElementById("one-cmc");
-let poolTwoCmcCol = document.getElementById("two-cmc");
-let poolThreeCmcCol = document.getElementById("three-cmc");
-let poolFourCmcCol = document.getElementById("four-cmc");
-let poolFiveCmcCol = document.getElementById("five-cmc");
-let poolSixCmcCol = document.getElementById("six-cmc");
-let poolColArray = [poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol]
-let mainWindow = document.getElementById("main_window");
-
-function createPoolHTML(colsArray = poolColArray) {
-  
-}
-
-// let TESTelement = document.createElement("img")
-// TESTelement.src =
-//   "https://c1.scryfall.com/file/scryfall-cards/png/front/8/0/8059c52b-5d25-4052-b48a-e9e219a7a546.png?1594736914";
-// mainWindow.appendChild(TESTelement);
-
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
 
@@ -88,8 +85,8 @@ Promise.all([
     return Promise.all([model, json_response[0], json_response[1]]);
   })
   .then(function (data) {
-    KaldheimDraftPackage.setupAfterPromise(data);
     /////////////////////////////////// SETUP ////////////////////////////////////
+    KaldheimDraftPackage.setupAfterPromise(data);
   })
   .catch(function (error) {
     // if there's an error, log it

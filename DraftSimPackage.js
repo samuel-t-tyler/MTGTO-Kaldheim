@@ -1,14 +1,20 @@
 "use strict";
 
 class DraftSimPackage {
-  constructor(set, setSize, inputSize, oddsOfRare, landSlot = ["Mountain, Swamp, Forest, Plains, Island"]) {
+  constructor(
+    set,
+    setSize,
+    inputSize,
+    oddsOfRare,
+    landSlot = ["Mountain, Swamp, Forest, Plains, Island"]
+  ) {
     this.set = set; //String of the set name
     this.setSize = setSize; //Number of cards in the set
     this.inputSize = inputSize; //Size of the input array into the neural net
     this.oddsOfRare = oddsOfRare; //Odds of opening a rare in any given pack, relateive to a mythic (0-1)
     this.landSlot = landSlot; //Array of strings that represent the unique set of cards that can be in the land slot for a se
   }
-  // Critical variables 
+  // Critical variables
   masterHash; // Layered object that can take any card representation and turn into any other card representation
   model; //Tensorflow JS model file
   // Variables used to maintain the gamestate
@@ -55,6 +61,39 @@ class DraftSimPackage {
     6.0: 12,
     7.0: 13,
   };
+  ///////////////////////////////// CREATING HTML //////////////////////////////////
+  createPackHTML(main) {
+    for (let i = 0; i < 15; i++) {
+      let imageDiv = document.createElement("div");
+      let imageElement = document.createElement("img");
+      imageDiv.className = "pack-card-image-div";
+      imageElement.className = "pack-card-image rounded noSelect zoom";
+      imageDiv.appendChild(imageElement);
+      main.appendChild(imageDiv);
+    }
+  }
+
+
+  createPoolHTML(colsArray) {
+    for (let j = 0; j < 6; j++) {
+      for (let i = 0; i < 45; i++) {  //Note i starts at one
+        let imageDiv = document.createElement("div");
+        let imageElement = document.createElement("img")
+        let breakDiv = document.createElement("div")
+        breakDiv.className = "w-100"
+        imageDiv.className = "col pool-col";
+        imageElement.className = `pool-card-image noSelect ${j+1}-cmc-image zoom`;
+        if (i < 9) {
+          imageElement.id = `${j}-0${i+1}`
+        } else {
+          imageElement.id = `${j}-${i+1}`;
+        }
+        imageDiv.appendChild(imageElement);
+        colsArray[j].appendChild(imageDiv);
+        colsArray[j].appendChild(breakDiv);
+      }
+    }
+  }
 
   ///////////////////////////////// HELPER FUNCTIONS //////////////////////////////////
   findContense(onehot) {
@@ -129,7 +168,7 @@ class DraftSimPackage {
       this.activeFeatureVectors.push(features);
     }
     return this.activeFeatureVectors;
-  }
+  };
   // Function to generate a random pack of Kaldheim cards
   generatePack = () => {
     let activePackTemp;
@@ -178,7 +217,7 @@ class DraftSimPackage {
       activePacksTemp.push(temp);
     }
     return activePacksTemp;
-  }
+  };
 
   ///////////////////////////////// MAKING PREDICTIONS //////////////////////////////////
 
@@ -267,7 +306,7 @@ class DraftSimPackage {
       for (let k = 0; k < arrayOfSortedURLS.length; k++) {
         displayedPack[k].src = arrayOfSortedURLS[k];
       }
-    }, 150)
+    }, 150);
   };
 
   generatePickAccuracy = (activePickSoftmax, picks, preds) => {
@@ -300,9 +339,9 @@ class DraftSimPackage {
       if (pickValue < 0.3) {
         feedbackHTML.innerHTML = "Mistake";
       }
-      scoreHTML.style.opacity = 1
-    }, 150)
-    return
+      scoreHTML.style.opacity = 1;
+    }, 150);
+    return;
   };
 
   ///////////////////////////////// DISPLAY //////////////////////////////////
@@ -317,7 +356,7 @@ class DraftSimPackage {
       }
     }
     return;
-  }
+  };
   // Function that displays the images of the cards you have selected in the pool tab
   displayPoolImages = (picks) => {
     let humanPick = this.masterHash["index_to_name"][picks[0]];
@@ -338,7 +377,7 @@ class DraftSimPackage {
       }
     }
     return;
-  }
+  };
   //  Function that resets pool after you remove a card from it and hide it in the sideboard
   displayPoolAfterSideboard = (event) => {
     const clicked = event.srcElement.id;
@@ -388,7 +427,10 @@ class DraftSimPackage {
   ///////////////////////////////// UPDATE LOGIC //////////////////////////////////
 
   // Function that updates feature vectors
-  updateFeatureVectors = (picks, featureVectors = this.activeFeatureVectors) => {
+  updateFeatureVectors = (
+    picks,
+    featureVectors = this.activeFeatureVectors
+  ) => {
     for (let i = 0; i < 8; i++) {
       let predName = this.masterHash["index_to_name"][picks[i]];
       let predColor = this.masterHash["name_to_color"][predName];
@@ -408,14 +450,14 @@ class DraftSimPackage {
       }
     }
     return featureVectors;
-  }
+  };
 
   // Function that adds the prediction to the pool onehot of all 7 bots and human player
   updatePools = (picks, arrayOfPools) => {
     for (let i = 0; i < 8; i++) {
       arrayOfPools[i][picks[i]] += 1;
     }
-  }
+  };
 
   // Function that updates the nested arrays that represent the cards in each pack after each player makes a pick
   updatePacks = (
@@ -460,7 +502,7 @@ class DraftSimPackage {
       activeOnehotsTemp.push(playerOnehotTemp);
     }
     return activeOnehotsTemp;
-  }
+  };
 
   // Updates the global gamestate variables to signify a new turn
   updatePick = () => {
@@ -480,7 +522,7 @@ class DraftSimPackage {
         restartText.style.display = "block";
       }
     }
-  }
+  };
 
   // Function that prepares logic for player resetting draft on click
   updateDraftIfOver = () => {
@@ -558,7 +600,7 @@ class DraftSimPackage {
         this.displayPack(this.activeOnehots[0]);
         displayedPackDiv[i].style.animation = "fadeIn ease 0.25s";
       }
-    }, 250)
+    }, 250);
   };
 
   ///////////////////////////////// UPDATEFUNCS //////////////////////////////////
@@ -594,7 +636,7 @@ class DraftSimPackage {
         for (let i = 0; i < 15; i++) {
           displayedPack[i].addEventListener("click", this.humanSeesResults);
         }
-      }, 100);
+      }, 250);
     }
   };
   humanSeesResults = () => {
@@ -621,10 +663,9 @@ class DraftSimPackage {
           this.activePools,
           this.currentPack
         );
-        [
-          this.activePreds,
-          this.activePickSoftmax,
-        ] = this.makeBatchPreds(this.activeOnehots);
+        [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
+          this.activeOnehots
+        );
         this.picksActive = true;
         this.displayPoolImages(this.activePicks);
         setTimeout(() => {
@@ -639,42 +680,41 @@ class DraftSimPackage {
             displayedPack[m].addEventListener("click", this.humanMakesPick);
           }
         }, 500);
-
       } else {
         this.updateDraftIfOver();
       }
-      feedbackHTML.style.opacity = 0
+      feedbackHTML.style.opacity = 0;
     }
-    };
-    setupAfterPromise(data) {
-        this.masterHash = data[1];
-        this.model = data[0];
-        this.activePools = this.generateActivePools();
-        this.activeFeatureVectors = this.generateActiveFeatures();
-        [
-          this.commons,
-          this.uncommons,
-          this.rares,
-          this.mythics,
-          this.landSlot,
-        ] = this.generateRarityArrays();
-        this.activePacks = this.generateActivePacks();
-        this.activeOnehots = this.updateOnehots(
-          this.activePacks,
-          this.activeFeatureVectors,
-          this.activePools,
-          this.currentPack
-        );
-        loadingText.style.display = "none";
-        loadingSpinner.style.display = "none";
-        this.displayPack(this.activeOnehots[0]);
-        [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
-          this.activeOnehots
-        );
-        this.picksActive = true;
-        for (let i = 0; i < 15; i++) {
-        displayedPack[i].style.webkitAnimation = "none";
-        displayedPack[i].style.webkitAnimation = "fade-in";
-        }
+  };
+  setupAfterPromise(data) {
+    this.masterHash = data[1];
+    this.model = data[0];
+    this.activePools = this.generateActivePools();
+    this.activeFeatureVectors = this.generateActiveFeatures();
+    [
+      this.commons,
+      this.uncommons,
+      this.rares,
+      this.mythics,
+      this.landSlot,
+    ] = this.generateRarityArrays();
+    this.activePacks = this.generateActivePacks();
+    this.activeOnehots = this.updateOnehots(
+      this.activePacks,
+      this.activeFeatureVectors,
+      this.activePools,
+      this.currentPack
+    );
+    loadingText.style.display = "none";
+    loadingSpinner.style.display = "none";
+    this.displayPack(this.activeOnehots[0]);
+    [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
+      this.activeOnehots
+    );
+    this.picksActive = true;
+    for (let i = 0; i < 15; i++) {
+      displayedPack[i].style.webkitAnimation = "none";
+      displayedPack[i].style.webkitAnimation = "fade-in";
     }
+  }
 }
