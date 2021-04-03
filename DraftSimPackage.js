@@ -76,7 +76,7 @@ class DraftSimPackage {
 
   createPoolHTML(colsArray) {
     for (let j = 0; j < 6; j++) {
-      for (let i = 0; i < 45; i++) {  //Note i starts at one
+      for (let i = 0; i < 30; i++) {  //Note i starts at one
         let imageDiv = document.createElement("div");
         let imageElement = document.createElement("img")
         let breakDiv = document.createElement("div")
