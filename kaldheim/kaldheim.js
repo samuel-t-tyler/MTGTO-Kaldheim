@@ -54,10 +54,29 @@ let poolFiveCmc = document.getElementsByClassName("five-cmc-image");
 let poolSixCmc = document.getElementsByClassName("six-cmc-image");
 let poolArray = [poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
 
+let poolOneCmcCol = document.getElementById("one-cmc");
+let poolTwoCmcCol = document.getElementById("two-cmc");
+let poolThreeCmcCol = document.getElementById("three-cmc");
+let poolFourCmcCol = document.getElementById("four-cmc");
+let poolFiveCmcCol = document.getElementById("five-cmc");
+let poolSixCmcCol = document.getElementById("six-cmc");
+let poolColArray = [poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol]
+let mainWindow = document.getElementById("main_window");
+
+function createPoolHTML(colsArray = poolColArray) {
+  
+}
+
+// let TESTelement = document.createElement("img")
+// TESTelement.src =
+//   "https://c1.scryfall.com/file/scryfall-cards/png/front/8/0/8059c52b-5d25-4052-b48a-e9e219a7a546.png?1594736914";
+// mainWindow.appendChild(TESTelement);
+
+
 ////////////////////////////////// IMPORT ////////////////////////////////////
 
 Promise.all([
-  tf.loadLayersModel("./kaldheim/tfjs_4/model.json"),
+  tf.loadLayersModel("./kaldheim/tfjs_model/model.json"),
   fetch("./kaldheim/data/output_master_hash.txt"),
 ])
   .then(function (responses) {

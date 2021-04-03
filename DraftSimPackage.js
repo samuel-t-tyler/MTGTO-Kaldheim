@@ -1,12 +1,12 @@
 "use strict";
 
 class DraftSimPackage {
-  constructor(set, setSize, inputSize, oddsOfRare, landSlot) {
+  constructor(set, setSize, inputSize, oddsOfRare, landSlot = ["Mountain, Swamp, Forest, Plains, Island"]) {
     this.set = set; //String of the set name
     this.setSize = setSize; //Number of cards in the set
     this.inputSize = inputSize; //Size of the input array into the neural net
     this.oddsOfRare = oddsOfRare; //Odds of opening a rare in any given pack, relateive to a mythic (0-1)
-    this.landSlot = landSlot
+    this.landSlot = landSlot; //Array of strings that represent the unique set of cards that can be in the land slot for a se
   }
   // Critical variables 
   masterHash; // Layered object that can take any card representation and turn into any other card representation
@@ -263,9 +263,11 @@ class DraftSimPackage {
       }
     }
     arrayOfSortedURLS = arrayOfSortedURLS.concat(rares, uncommons, commons);
-    for (let k = 0; k < arrayOfSortedURLS.length; k++) {
-      displayedPack[k].src = arrayOfSortedURLS[k];
-    }
+    setTimeout(() => {
+      for (let k = 0; k < arrayOfSortedURLS.length; k++) {
+        displayedPack[k].src = arrayOfSortedURLS[k];
+      }
+    }, 150)
   };
 
   generatePickAccuracy = (activePickSoftmax, picks, preds) => {
