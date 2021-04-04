@@ -6,7 +6,7 @@ class DraftSimPackage {
     setSize,
     inputSize,
     oddsOfRare,
-    landSlot = ["Mountain, Swamp, Forest, Plains, Island"]
+    landSlot = ["Mountain", "Swamp", "Forest", "Plains", "Island"]
   ) {
     this.set = set; //String of the set name
     this.setSize = setSize; //Number of cards in the set
@@ -382,7 +382,7 @@ class DraftSimPackage {
     const index = parseInt(clicked.slice(2, 4)); //note that index is one above the index used in array
     const cutURL = this.activePoolUrls[pile - 1].splice(index - 1, 1);
     this.poolSideboard[pile - 1].push(cutURL[0]);
-    for (let k = 0; k < 15; k++) {
+    for (let k = 0; k < 30; k++) {
       poolArray[pile - 1][k].src = "";
     }
     for (let z = 0; z < this.activePoolUrls[pile - 1].length; z++) {
@@ -463,7 +463,7 @@ class DraftSimPackage {
   ) => {
     let pack = Math.floor(this.currentPick / 15);
     let arrayOfActivePacks = [];
-    if (count !== 15 && count !== 30) {
+    if (count !== 15 && count !== 30 && count !== 0) {
       for (let i = 0; i < 8; i++) {
         draftPack[i][pack][picks[i]] = 0;
         arrayOfActivePacks.push(draftPack[i][pack]);
@@ -563,8 +563,8 @@ class DraftSimPackage {
     this.draftOver = false;
 
     // generating new packs and startingone onehots and preds
-    this.generateRarityArrays();
     this.activePacks = this.generateActivePacks();
+    console.log(this.findContense(this.activePacks[0][0]));
     this.activeOnehots = this.updateOnehots(
       this.activePacks,
       this.activeFeatureVectors,
