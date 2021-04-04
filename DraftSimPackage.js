@@ -84,9 +84,9 @@ class DraftSimPackage {
         imageDiv.className = "col pool-col";
         imageElement.className = `pool-card-image noSelect ${j+1}-cmc-image zoom`;
         if (i < 9) {
-          imageElement.id = `${j}-0${i+1}`
+          imageElement.id = `${j+1}-0${i+1}`
         } else {
-          imageElement.id = `${j}-${i+1}`;
+          imageElement.id = `${j+1}-${i+1}`;
         }
         imageDiv.appendChild(imageElement);
         colsArray[j].appendChild(imageDiv);
