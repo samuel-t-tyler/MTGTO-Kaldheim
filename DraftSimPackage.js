@@ -301,11 +301,9 @@ class DraftSimPackage {
       }
     }
     arrayOfSortedURLS = arrayOfSortedURLS.concat(rares, uncommons, commons);
-    setTimeout(() => {
       for (let k = 0; k < arrayOfSortedURLS.length; k++) {
         displayedPack[k].src = arrayOfSortedURLS[k];
       }
-    }, 150);
   };
 
   generatePickAccuracy = (activePickSoftmax, picks, preds) => {
@@ -596,6 +594,7 @@ class DraftSimPackage {
     setTimeout(() => {
       for (let i = 0; i < 15; i++) {
         this.displayPack(this.activeOnehots[0]);
+        displayedPackDiv[i].style.animation = "";
         displayedPackDiv[i].style.animation = "fadeIn ease 0.25s";
       }
     }, 250);
@@ -641,7 +640,7 @@ class DraftSimPackage {
     if (this.picksActive === false) {
       for (let i = 0; i < 15; i++) {
         displayedPack[i].removeEventListener("click", this.humanSeesResults);
-        displayedPackDiv[i].style.animation = "fadeOut ease 0.25s";
+        displayedPackDiv[i].style.animation = "fadeOut ease 0.3s";
       }
       this.updatePick();
       if (this.currentPick < 45) {
@@ -669,9 +668,10 @@ class DraftSimPackage {
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
             this.displayPack(this.activeOnehots[0]);
-            displayedPackDiv[i].style.animation = "fadeIn ease 0.25s";
+            displayedPackDiv[i].style.animation = "";
+            displayedPackDiv[i].style.animation = "fadeIn ease 0.3s";
           }
-        }, 250);
+        }, 210);
 
         setTimeout(() => {
           for (let m = 0; m < 15; m++) {
@@ -710,9 +710,5 @@ class DraftSimPackage {
       this.activeOnehots
     );
     this.picksActive = true;
-    for (let i = 0; i < 15; i++) {
-      displayedPack[i].style.webkitAnimation = "none";
-      displayedPack[i].style.webkitAnimation = "fade-in";
-    }
   }
 }

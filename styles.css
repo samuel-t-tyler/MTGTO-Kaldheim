@@ -158,26 +158,26 @@ body {
 
 .collapsing {
 opacity: 0;
-transition:opacity 0.3s linear; 
--webkit-transition:opacity 0.3s linear; 
--moz-transition:opacity 0.3s linear; 
--o-transition:opacity 0.3s linear;
+transition:opacity 0.2s linear; 
+-webkit-transition:opacity 0.2s linear; 
+-moz-transition:opacity 0.2s linear; 
+-o-transition:opacity 0.2s linear;
 }
 
 .collapse.in{
 opacity:0;
-transition:opacity 0.3s linear; 
--webkit-transition:opacity 0.3s linear; 
--moz-transition:opacity 0.3s linear; 
--o-transition:opacity 0.3s linear;
+transition:opacity 0.2s linear; 
+-webkit-transition:opacity 0.2s linear; 
+-moz-transition:opacity 0.2s linear; 
+-o-transition:opacity 0.2s linear;
 }
 
 .collapse{
 opacity: 1;
-transition:opacity 0.3s linear; 
--webkit-transition:opacity 0.3s linear; 
--moz-transition:opacity 0.3s linear; 
--o-transition:opacity 0.3s linear;
+transition:opacity 0.2s linear; 
+-webkit-transition:opacity 0.2s linear; 
+-moz-transition:opacity 0.2s linear; 
+-o-transition:opacity 0.2s linear;
 }
 
 a {
