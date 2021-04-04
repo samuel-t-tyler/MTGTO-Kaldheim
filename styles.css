@@ -102,11 +102,11 @@ body {
     margin-bottom: 0;
     font-size: 3.2vh;
     font-family: 'Orbitron', sans-serif;
-    -webkit-transition: opacity 0.15s ease-in-out;
-   -moz-transition: opacity 0.15s ease-in-out;
-   -ms-transition: opacity 0.15s ease-in-out;
-   -o-transition: opacity 0.15s ease-in-out;
-   transition: opacity 0.15s ease-in-out;
+    -webkit-transition: opacity 0.1s ease-in-out;
+   -moz-transition: opacity 0.1s ease-in-out;
+   -ms-transition: opacity 0.1s ease-in-out;
+   -o-transition: opacity 0.1s ease-in-out;
+   transition: opacity 0.1s ease-in-out;
 }
 
 #feedback {
@@ -118,11 +118,11 @@ body {
     width: 40vh;
     text-align: center;
     font-family: 'Orbitron', sans-serif;
-    -webkit-transition: opacity 0.15s ease-in-out;
-   -moz-transition: opacity 0.15s ease-in-out;
-   -ms-transition: opacity 0.15s ease-in-out;
-   -o-transition: opacity 0.15s ease-in-out;
-   transition: opacity 0.15s ease-in-out;
+    -webkit-transition: opacity 0.1s ease-in-out;
+   -moz-transition: opacity 0.1s ease-in-out;
+   -ms-transition: opacity 0.1s ease-in-out;
+   -o-transition: opacity 0.1s ease-in-out;
+   transition: opacity 0.1s ease-in-out;
 }
 
 #pool-toggler, #menu {
