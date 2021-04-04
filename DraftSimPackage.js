@@ -61,6 +61,7 @@ class DraftSimPackage {
     6.0: 12,
     7.0: 13,
   };
+
   ///////////////////////////////// CREATING HTML //////////////////////////////////
   createPackHTML(main) {
     for (let i = 0; i < 15; i++) {
@@ -112,8 +113,8 @@ class DraftSimPackage {
     }
     return count;
   }
-  ////////////////////////////// GENERATING ACTIVE VARIABLES ///////////////////////////////
 
+  ////////////////////////////// GENERATING ACTIVE VARIABLES ///////////////////////////////
   // Populating the arrays of cards
   generateRarityArrays = () => {
     let cardsAvailable = [];
@@ -220,7 +221,6 @@ class DraftSimPackage {
   };
 
   ///////////////////////////////// MAKING PREDICTIONS //////////////////////////////////
-
   //Function that makes a prediction for all players
   makeBatchPreds = (arrayOfOnehots) => {
     //save previous active picks
@@ -267,7 +267,6 @@ class DraftSimPackage {
     return [this.activePreds, this.activePickSoftmax];
   };
   ///////////////////////////////// DISPLAY //////////////////////////////////
-
   // Change the displayed pack SRCs to the image of the current pack
   displayPack = (playerOnehot) => {
     let humanPlayerActivePack = playerOnehot.slice(
@@ -425,7 +424,6 @@ class DraftSimPackage {
   };
 
   ///////////////////////////////// UPDATE LOGIC //////////////////////////////////
-
   // Function that updates feature vectors
   updateFeatureVectors = (
     picks,
