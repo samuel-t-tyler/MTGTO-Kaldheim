@@ -87,6 +87,7 @@ Promise.all([
   .then(function (data) {
     /////////////////////////////////// SETUP ////////////////////////////////////
     KaldheimDraftPackage.setupAfterPromise(data);
+    console.log(KaldheimDraftPackage.masterHash);
   })
   .catch(function (error) {
     // if there's an error, log it

@@ -354,6 +354,34 @@ class DraftSimPackage {
     }
     return;
   };
+  //Function that sorts a column of the pool by color
+  displayPoolSortedByColor(poolArray) {
+    let sortedSRCS = [];
+    let tuples = []
+    for (let i = 0; i < poolArray.length; i++) {
+      if (poolArray[i].length > 100) {  //75 represents a length between an empty SRC (basic path) and 117, scryfall path length
+        // let temp = [poolArrayCol[i], this.masterHash["name_to_color"][this.masterHash["src_to_name"][poolArrayCol[i]]]];
+        let cardURL = poolArray[i];
+        let cardName = this.masterHash["url_to_name"][cardURL];
+        let cardColor = this.masterHash["name_to_color"][cardName];
+        if (cardColor.length === 0) {
+          cardColor = "AColorless"
+        } else if (cardColor.length > 1) {
+          cardColor = "ZMulticolor";
+        } else {
+          cardColor = cardColor[0]
+        }
+        let cardTuple = [cardURL, cardColor];
+        tuples.push(cardTuple);
+      }
+    }
+    tuples = tuples.sort((a, b) => a[1].toUpperCase().localeCompare(b[1].toUpperCase()));
+    for (let j = 0; j < tuples.length; j++) {
+      sortedSRCS.push(tuples[j][0]);
+    }
+    return sortedSRCS
+  }
+
   // Function that displays the images of the cards you have selected in the pool tab
   displayPoolImages = (picks) => {
     let humanPick = this.masterHash["index_to_name"][picks[0]];
@@ -369,6 +397,7 @@ class DraftSimPackage {
       this.activePoolUrls[5].push(humanPickURL);
     }
     for (let j = 0; j < 6; j++) {
+      this.activePoolUrls[j] = this.displayPoolSortedByColor(this.activePoolUrls[j]);
       for (let i = 0; i < this.activePoolUrls[j].length; i++) {
         poolArray[j][i].src = this.activePoolUrls[j][i];
       }
@@ -564,7 +593,6 @@ class DraftSimPackage {
 
     // generating new packs and startingone onehots and preds
     this.activePacks = this.generateActivePacks();
-    console.log(this.findContense(this.activePacks[0][0]));
     this.activeOnehots = this.updateOnehots(
       this.activePacks,
       this.activeFeatureVectors,
