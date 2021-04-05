@@ -275,9 +275,8 @@ class DraftSimPackage {
     );
     let arrayOfURLs = [];
     for (let z = 0; z < 15; z++) {
-      displayedPack[z].style.display = "block";
+      displayedPack[z].classList.add("fullPack");
       displayedPack[z].src = "";
-      displayedPack[z].style.border = "transparent";
     }
     for (let i = 0; i < humanPlayerActivePack.length; i++) {
       if (humanPlayerActivePack[i] > 0) {
@@ -348,7 +347,8 @@ class DraftSimPackage {
       let predURL = this.masterHash["index_to_url"][pred];
       for (let i = 0; i < displayedPack.length; i++) {
         if (displayedPack[i].src === predURL) {
-          displayedPack[i].style.border = "thick solid #33cc33";
+          //using ID instead of classname here because it's easier + faster to remove between card draws:
+          displayedPack[i].id = "greenSelect";
         }
       }
     }
@@ -356,6 +356,20 @@ class DraftSimPackage {
   };
   // Function that displays the images of the cards you have selected in the pool tab
   displayPoolImages = (picks) => {
+    // Remove css IDs for border styles: 
+    // There might be a better function for you to move this to,
+    // like if if you have one doing any cleanup after the pick.
+    // I couldn't find one and it's fine here if not.
+    // removing these IDs so you don't get duplicate borders next pick
+
+    if (document.getElementById('orangeSelect')) {
+      document.getElementById('orangeSelect').removeAttribute('id');
+    }
+
+    if (document.getElementById('greenSelect')) {
+      document.getElementById('greenSelect').removeAttribute('id');
+    }
+
     let humanPick = this.masterHash["index_to_name"][picks[0]];
     let humanPickCMC = this.masterHash["name_to_cmc"][humanPick];
     let humanPickURL = this.masterHash["name_to_url"][humanPick][
@@ -611,7 +625,8 @@ class DraftSimPackage {
       let pickSRC = event.srcElement.src;
       for (let i = 0; i < displayedPack.length; i++) {
         if (displayedPack[i].src === pickSRC) {
-          displayedPack[i].style.border = "thick solid #ff9966";
+          //using ID instead of classname here because it's easier + faster to remove between card draws:
+          displayedPack[i].id = "orangeSelect";
         }
       }
       // Highlighting bot pick and calculating accuracy of human pick
