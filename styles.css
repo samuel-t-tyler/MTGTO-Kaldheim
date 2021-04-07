@@ -15,16 +15,17 @@ body {
 .fullPack {
   display: block;
   border: transparent !important;
-  transition: border 1s !important;
 }
 
 /* add these when you click on card */
 #greenSelect {
   border: thick solid #33cc33 !important;
+  transition: border 0.2s !important;
 }
 
 #orangeSelect {
   border: thick solid #ff9966 !important;
+  transition: border 0.1s !important;
 }
 
 .loadingSpinner {
@@ -145,6 +146,17 @@ body {
   background-color: black;
   color: white;
   border-color: rgba(219, 219, 219, 0.89) ;
+}
+
+.tooltip {
+  background-color: transparent;
+}
+.tooltip.show {
+  opacity: 1;
+  background-color: transparent;
+}
+.tooltip img {
+  min-width: 35vh !important;
 }
 
 #main_window {

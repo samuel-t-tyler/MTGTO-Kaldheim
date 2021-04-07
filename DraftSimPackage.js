@@ -86,6 +86,7 @@ class DraftSimPackage {
         breakDiv.className = "w-100";
         imageDiv.className = "col pool-row";
         imageElement.className = `pool-card-image noSelect ${j}-cmc-image zoom`;
+
         if (i < 9) {
           imageElement.id = `${j}-0${i + 1}`;
         } else {
@@ -439,7 +440,7 @@ class DraftSimPackage {
         this.activePoolUrls[j]
       );
       for (let i = 0; i < this.activePoolUrls[j].length; i++) {
-        poolArray[j][i].src = this.activePoolUrls[j][i];
+        poolArray[j][i].src = this.activePoolUrls[j][i]; 
       }
     }
     return;
@@ -520,7 +521,7 @@ class DraftSimPackage {
   displayMainDeckCount() {
     scoreHTML.style.opacity = 0
     setTimeout(() => {
-      scoreHTML.innerHTML = `Maindeck: ${this.mainDeckCount}`;
+      scoreHTML.innerHTML = `  ${this.mainDeckCount}  `;
       scoreHTML.style.opacity = 1;
     }, 150);
   }
@@ -627,6 +628,7 @@ class DraftSimPackage {
       restartIcon.style.display = "none";
       restartText.style.display = "none";
     } else {
+      scoreHTML.innerHTML = "        "
       console.log(this.currentPick)
       this.poolToggled = false;
       poolToggle.style.color = "white";
@@ -652,6 +654,30 @@ class DraftSimPackage {
     }
     this.draftOver = true;
   };
+
+  updatePoolTooltips() {
+    for (let j = 0; j < 7; j++) {
+      for (let i = 0; i < this.activePoolUrls[j].length; i++) {
+        let src = poolArray[j][i].src;
+        poolArray[j][i].removeAttribute("title");
+        poolArray[j][i].removeAttribute("data-toggle");
+        poolArray[j][i].setAttribute("data-toggle", "tooltip");
+        poolArray[j][i].setAttribute(
+          "title",
+          `<img src="${src}" class="tooltip-popup" />`
+        );
+        console.log("added:", this.masterHash["url_to_name"][src], "to element row:", j, "element:", i)
+        $('[data-toggle="tooltip"]').tooltip("dispose");
+        $(document).ready(function () {
+          $("[data-toggle=tooltip]").tooltip({
+            animated: "fade",
+            placement: "right",
+            html: true,
+          });
+        });
+      }
+    }
+  }
   ////////////////////////////////// END DRAFT ////////////////////////////////////
 
   // Function that resets the gamestate from the beginning
@@ -796,6 +822,7 @@ class DraftSimPackage {
             displayedPackDiv[i].style.animation = "fadeIn ease 0.3s";
           }
         }, 210);
+        this.updatePoolTooltips()
 
         setTimeout(() => {
           for (let m = 0; m < 15; m++) {
