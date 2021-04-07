@@ -460,7 +460,8 @@ class DraftSimPackage {
     }
     this.displaySideboard();
     this.mainDeckCount -= 1
-    this.displayMainDeckCount()
+    this.displayMainDeckCount();
+    this.updatePoolTooltips();
     return;
   };
 
@@ -515,13 +516,14 @@ class DraftSimPackage {
       }
     }
     this.mainDeckCount++
-    this.displayMainDeckCount()
+    this.displayMainDeckCount();
+    this.updatePoolTooltips();
   }
 
   displayMainDeckCount() {
     scoreHTML.style.opacity = 0
     setTimeout(() => {
-      scoreHTML.innerHTML = `  ${this.mainDeckCount}  `;
+      scoreHTML.innerHTML = `Maindeck: ${this.mainDeckCount}`;
       scoreHTML.style.opacity = 1;
     }, 150);
   }

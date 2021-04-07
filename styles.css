@@ -142,7 +142,19 @@ body {
    transition: opacity 0.1s ease-in-out;
 }
 
-#pool-toggler, #menu {
+#pool-toggler {
+  position: sticky;
+  left: 50vh;
+  background-color: black;
+  color: white;
+  border-color: rgba(219, 219, 219, 0.89) ;
+}
+#pool-toggler:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+#menu {
   background-color: black;
   color: white;
   border-color: rgba(219, 219, 219, 0.89) ;
@@ -157,6 +169,7 @@ body {
 }
 .tooltip img {
   min-width: 35vh !important;
+  height: auto;
 }
 
 #main_window {
