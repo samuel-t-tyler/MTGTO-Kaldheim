@@ -12,6 +12,21 @@ body {
     user-select: none;
 }
 
+.fullPack {
+  display: block;
+  border: transparent !important;
+  transition: border 1s !important;
+}
+
+/* add these when you click on card */
+#greenSelect {
+  border: thick solid #33cc33 !important;
+}
+
+#orangeSelect {
+  border: thick solid #ff9966 !important;
+}
+
 .loadingSpinner {
   border: 16px solid #ffffff; /* Light grey */
   border-top: 16px solid rgba(22,22,22, 0); /* Blue */
