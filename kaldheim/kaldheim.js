@@ -111,9 +111,9 @@ for (let j = 0; j < poolArray.length; j++){
   }
 }
 
-// for (let i = 0; i < 30; i++) {
-//   poolSideboardImg[i].addEventListener("click", KaldheimDraftPackage.moveSideboardToPool);
-// }
+for (let i = 0; i < 30; i++) {
+  poolSideboardImg[i].addEventListener("click", KaldheimDraftPackage.moveSideboardToPool);
+}
 
 resetSideboardButton.addEventListener("click", KaldheimDraftPackage.displayPoolAfterReset);
 toggleFeedbackButton.addEventListener("click", KaldheimDraftPackage.displayFeedbackToggle);

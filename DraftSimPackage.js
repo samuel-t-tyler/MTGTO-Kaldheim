@@ -25,6 +25,8 @@ class DraftSimPackage {
   feedbackActive = true;
   poolToggled = false;
   draftOver = false;
+  mainDeckCount = 0;
+  scoreFixed = 0;
 
   // Variables that store the active state of players (human and bots)
   activePacks; // Onehot array of shape [8, 3, 280] representing all packs in the draft
@@ -315,12 +317,12 @@ class DraftSimPackage {
       let error = 1 - humanPickSoftmax / botPickSoftmax;
       let pickValue = -Math.pow(error, 2.8) + 1;
       this.score += pickValue;
-      let scoreFixed = this.score.toFixed(1);
+      this.scoreFixed = this.score.toFixed(1);
       feedbackHTML.style.color = "white";
-      if (scoreFixed[scoreFixed.length - 1] === "0") {
-        scoreFixed = this.score.toFixed(0);
+      if (this.scoreFixed[this.scoreFixed.length - 1] === "0") {
+        this.scoreFixed = this.score.toFixed(0);
       }
-      scoreHTML.innerHTML = `${scoreFixed} / ${this.currentPick + 1}`;
+      scoreHTML.innerHTML = `${this.scoreFixed} / ${this.currentPick + 1}`;
       if (pickValue >= 0.95) {
         feedbackHTML.innerHTML = "Excellent!";
       }
@@ -393,8 +395,11 @@ class DraftSimPackage {
         arrayOfSideboardImages.push(this.poolSideboard[j][i]);
       }
     }
-    for (let k = 0; k < arrayOfSideboardImages.length; k++) {
-      poolSideboardImg[k].src = arrayOfSideboardImages[k];
+    for (let k = 0; k < 30; k++) {
+      poolSideboardImg[k].src = "";
+      if (arrayOfSideboardImages[k]) {
+        poolSideboardImg[k].src = arrayOfSideboardImages[k];
+      }
     }
   }
   displayResetSideboard() {
@@ -439,6 +444,8 @@ class DraftSimPackage {
       poolArray[pile][z].src = this.activePoolUrls[pile][z];
     }
     this.displaySideboard();
+    this.mainDeckCount -= 1
+    this.displayMainDeckCount()
     return;
   };
 
@@ -474,39 +481,43 @@ class DraftSimPackage {
     }
   };
 
-  // moveSideboardToPool = (event) => {
-  //   let sideboardSrc = event.srcElement.src
-  //   let cmc = this.masterHash["name_to_cmc"][this.masterHash["url_to_name"][sideboardSrc]]
-  //   if (cmc > 6) {
-  //     cmc = 6
-  //   }
-  //   let id = event.srcElement.id;
-  //   let index = parseInt(id.slice(2, 4));
-  //   console.log("index", index)
-  //   poolSideboardImg[index - 1].src = ""
-  //   let savedSideboardSRCs = []
-  //   for (let i = 0; i < 30; i++) {
-  //     if (poolSideboardImg[i].src.length > 100) {
-  //       savedSideboardSRCs.push(poolSideboardImg[i].src)
-  //     }
-  //   }
-  //   for (let i = 0; i < 30; i++) {
-  //     if (savedSideboardSRCs[i]) {
-  //       poolSideboardImg[i].src = savedSideboardSRCs[i];
-  //     } else {
-  //       poolSideboardImg[i].src = ""
-  //     }
-  //   }
-  //   this.activePoolUrls[cmc].push(sideboardSrc);
-  //   for (let j = 0; j < 7; j++) {
-  //     this.activePoolUrls[j] = this.displayPoolSortedByColor(
-  //       this.activePoolUrls[j]
-  //     );
-  //     for (let i = 0; i < this.activePoolUrls[j].length; i++) {
-  //       poolArray[j][i].src = this.activePoolUrls[j][i];
-  //     }
-  //   } 
-  // }
+  moveSideboardToPool = (event) => {
+    let sideboardSrc = event.srcElement.src
+    let cmc = this.masterHash["name_to_cmc"][this.masterHash["url_to_name"][sideboardSrc]]
+    if (cmc > 6) {
+      cmc = 6
+    }
+    let PSindex = this.poolSideboard[cmc].findIndex(e => e === sideboardSrc);
+    this.poolSideboard[cmc].splice(PSindex, 1);
+    this.displaySideboard()
+    this.activePoolUrls[cmc].push(sideboardSrc);
+    for (let j = 0; j < 7; j++) {
+      this.activePoolUrls[j] = this.displayPoolSortedByColor(
+        this.activePoolUrls[j]
+      );
+      for (let i = 0; i < this.activePoolUrls[j].length; i++) {
+        poolArray[j][i].src = this.activePoolUrls[j][i];
+      }
+    }
+    this.mainDeckCount++
+    this.displayMainDeckCount()
+  }
+
+  displayMainDeckCount() {
+    scoreHTML.style.opacity = 0
+    setTimeout(() => {
+      scoreHTML.innerHTML = `Maindeck: ${this.mainDeckCount}`;
+      scoreHTML.style.opacity = 1;
+    }, 150);
+  }
+
+  displayScore() {
+    scoreHTML.style.opacity = 0
+    setTimeout(() => {
+      scoreHTML.innerHTML = `${this.scoreFixed} / ${this.currentPick + 1}`;
+      scoreHTML.style.opacity = 1;
+    },150)
+  }
 
   ///////////////////////////////// UPDATE LOGIC //////////////////////////////////
   // Function that updates feature vectors
@@ -595,12 +606,14 @@ class DraftSimPackage {
   // Function that updates what is displayed when the pool window button is toggled
   updatePoolToggled = () => {
     if (this.poolToggled === false) {
+      this.displayMainDeckCount()
       this.poolToggled = true;
       poolToggle.style.color = "black";
       poolToggle.style.backgroundColor = "white";
       restartIcon.style.display = "none";
       restartText.style.display = "none";
     } else {
+      console.log(this.currentPick)
       this.poolToggled = false;
       poolToggle.style.color = "white";
       poolToggle.style.backgroundColor = "black";
@@ -634,6 +647,7 @@ class DraftSimPackage {
       displayedPackDiv[i].style.animation = "fadeOut ease 0.25s";
     }
     this.score = 0;
+    this.scoreFixed = 0
     this.currentPick = 0;
     this.currentPack = 0;
     this.picksActive = false;
@@ -652,6 +666,7 @@ class DraftSimPackage {
     restartIcon.style.display = "none";
     restartText.style.display = "none";
     this.draftOver = false;
+    this.mainDeckCount = 0
 
     // generating new packs and startingone onehots and preds
     this.activePacks = this.generateActivePacks();
@@ -758,6 +773,7 @@ class DraftSimPackage {
         );
         this.picksActive = true;
         this.displayPoolImages(this.activePicks);
+        this.mainDeckCount++
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
             this.displayPack(this.activeOnehots[0]);
