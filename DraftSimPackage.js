@@ -37,8 +37,8 @@ class DraftSimPackage {
   prevActivePicks; // the previous active pick made by all bots and humans
   prevPrevActivePicks; // 2 picks back active pick made by all bots and humans
 
-  activePoolUrls = [[], [], [], [], [], []];
-  poolSideboard = [[], [], [], [], [], []];
+  activePoolUrls = [[], [], [], [], [], [], []];
+  poolSideboard = [[], [], [], [], [], [], []];
 
   commons = [];
   uncommons = [];
@@ -74,20 +74,20 @@ class DraftSimPackage {
     }
   }
 
-
   createPoolHTML(colsArray) {
-    for (let j = 0; j < 6; j++) {
-      for (let i = 0; i < 30; i++) {  //Note i starts at one
+    for (let j = 0; j < 8; j++) {
+      for (let i = 0; i < 30; i++) {
+        //Note i starts at one
         let imageDiv = document.createElement("div");
-        let imageElement = document.createElement("img")
-        let breakDiv = document.createElement("div")
-        breakDiv.className = "w-100"
-        imageDiv.className = "col pool-col";
-        imageElement.className = `pool-card-image noSelect ${j+1}-cmc-image zoom`;
+        let imageElement = document.createElement("img");
+        let breakDiv = document.createElement("div");
+        breakDiv.className = "w-100";
+        imageDiv.className = "col pool-row";
+        imageElement.className = `pool-card-image noSelect ${j}-cmc-image zoom`;
         if (i < 9) {
-          imageElement.id = `${j+1}-0${i+1}`
+          imageElement.id = `${j}-0${i + 1}`;
         } else {
-          imageElement.id = `${j+1}-${i+1}`;
+          imageElement.id = `${j}-${i + 1}`;
         }
         imageDiv.appendChild(imageElement);
         colsArray[j].appendChild(imageDiv);
@@ -301,12 +301,12 @@ class DraftSimPackage {
       }
     }
     arrayOfSortedURLS = arrayOfSortedURLS.concat(rares, uncommons, commons);
-      for (let k = 0; k < arrayOfSortedURLS.length; k++) {
-        displayedPack[k].src = arrayOfSortedURLS[k];
-      }
+    for (let k = 0; k < arrayOfSortedURLS.length; k++) {
+      displayedPack[k].src = arrayOfSortedURLS[k];
+    }
   };
 
-  generatePickAccuracy = (activePickSoftmax, picks, preds) => {
+  displayPickAccuracy = (activePickSoftmax, picks, preds) => {
     scoreHTML.style.opacity = 0;
     setTimeout(() => {
       feedbackHTML.style.opacity = 1;
@@ -354,32 +354,53 @@ class DraftSimPackage {
     }
     return;
   };
+
   //Function that sorts a column of the pool by color
   displayPoolSortedByColor(poolArray) {
     let sortedSRCS = [];
-    let tuples = []
+    let tuples = [];
     for (let i = 0; i < poolArray.length; i++) {
-      if (poolArray[i].length > 100) {  //75 represents a length between an empty SRC (basic path) and 117, scryfall path length
+      if (poolArray[i].length > 100) {
+        //75 represents a length between an empty SRC (basic path) and 117, scryfall path length
         // let temp = [poolArrayCol[i], this.masterHash["name_to_color"][this.masterHash["src_to_name"][poolArrayCol[i]]]];
         let cardURL = poolArray[i];
         let cardName = this.masterHash["url_to_name"][cardURL];
         let cardColor = this.masterHash["name_to_color"][cardName];
         if (cardColor.length === 0) {
-          cardColor = "AColorless"
+          cardColor = "AColorless";
         } else if (cardColor.length > 1) {
           cardColor = "ZMulticolor";
         } else {
-          cardColor = cardColor[0]
+          cardColor = cardColor[0];
         }
         let cardTuple = [cardURL, cardColor];
         tuples.push(cardTuple);
       }
     }
-    tuples = tuples.sort((a, b) => a[1].toUpperCase().localeCompare(b[1].toUpperCase()));
+    tuples = tuples.sort((a, b) =>
+      a[1].toUpperCase().localeCompare(b[1].toUpperCase())
+    );
     for (let j = 0; j < tuples.length; j++) {
       sortedSRCS.push(tuples[j][0]);
     }
-    return sortedSRCS
+    return sortedSRCS;
+  }
+
+  displaySideboard() {
+    let arrayOfSideboardImages = [];
+    for (let j = 0; j < 7; j++) {
+      for (let i = 0; i < this.poolSideboard[j].length; i++) {
+        arrayOfSideboardImages.push(this.poolSideboard[j][i]);
+      }
+    }
+    for (let k = 0; k < arrayOfSideboardImages.length; k++) {
+      poolSideboardImg[k].src = arrayOfSideboardImages[k];
+    }
+  }
+  displayResetSideboard() {
+    for (let k = 0; k < poolSideboardImg.length; k++) {
+      poolSideboardImg[k].src = "";
+    }
   }
 
   // Function that displays the images of the cards you have selected in the pool tab
@@ -389,15 +410,15 @@ class DraftSimPackage {
     let humanPickURL = this.masterHash["name_to_url"][humanPick][
       this.masterHash["name_to_url"][humanPick].length - 1
     ];
-    if (humanPickCMC < 1) {
-      this.activePoolUrls[0].push(humanPickURL);
-    } else if (humanPickCMC < 7) {
-      this.activePoolUrls[humanPickCMC - 1].push(humanPickURL);
+    if (humanPickCMC < 7) {
+      this.activePoolUrls[humanPickCMC].push(humanPickURL);
     } else {
       this.activePoolUrls[5].push(humanPickURL);
     }
-    for (let j = 0; j < 6; j++) {
-      this.activePoolUrls[j] = this.displayPoolSortedByColor(this.activePoolUrls[j]);
+    for (let j = 0; j < 7; j++) {
+      this.activePoolUrls[j] = this.displayPoolSortedByColor(
+        this.activePoolUrls[j]
+      );
       for (let i = 0; i < this.activePoolUrls[j].length; i++) {
         poolArray[j][i].src = this.activePoolUrls[j][i];
       }
@@ -409,29 +430,32 @@ class DraftSimPackage {
     const clicked = event.srcElement.id;
     const pile = clicked[0];
     const index = parseInt(clicked.slice(2, 4)); //note that index is one above the index used in array
-    const cutURL = this.activePoolUrls[pile - 1].splice(index - 1, 1);
-    this.poolSideboard[pile - 1].push(cutURL[0]);
+    const cutURL = this.activePoolUrls[pile].splice(index - 1, 1);
+    this.poolSideboard[pile].push(cutURL[0]);
     for (let k = 0; k < 30; k++) {
-      poolArray[pile - 1][k].src = "";
+      poolArray[pile][k].src = "";
     }
-    for (let z = 0; z < this.activePoolUrls[pile - 1].length; z++) {
-      poolArray[pile - 1][z].src = this.activePoolUrls[pile - 1][z];
+    for (let z = 0; z < this.activePoolUrls[pile].length; z++) {
+      poolArray[pile][z].src = this.activePoolUrls[pile][z];
     }
+    this.displaySideboard();
     return;
   };
+
   // Function that resets pool images after you click the button and returns sideboard cards to maindeck
   displayPoolAfterReset = () => {
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 7; i++) {
       for (let j = 0; j < this.poolSideboard[i].length; j++) {
         this.activePoolUrls[i].push(this.poolSideboard[i][j]);
       }
     }
-    for (let k = 0; k < 6; k++) {
+    for (let k = 0; k < 7; k++) {
       for (let l = 0; l < this.activePoolUrls[k].length; l++) {
         poolArray[k][l].src = this.activePoolUrls[k][l];
       }
     }
-    this.poolSideboard = [[], [], [], [], [], []];
+    this.poolSideboard = [[], [], [], [], [], [], []];
+    this.displayResetSideboard();
   };
 
   // Function that hides or displays player feedback based on user input in the menu
@@ -449,6 +473,40 @@ class DraftSimPackage {
       return;
     }
   };
+
+  // moveSideboardToPool = (event) => {
+  //   let sideboardSrc = event.srcElement.src
+  //   let cmc = this.masterHash["name_to_cmc"][this.masterHash["url_to_name"][sideboardSrc]]
+  //   if (cmc > 6) {
+  //     cmc = 6
+  //   }
+  //   let id = event.srcElement.id;
+  //   let index = parseInt(id.slice(2, 4));
+  //   console.log("index", index)
+  //   poolSideboardImg[index - 1].src = ""
+  //   let savedSideboardSRCs = []
+  //   for (let i = 0; i < 30; i++) {
+  //     if (poolSideboardImg[i].src.length > 100) {
+  //       savedSideboardSRCs.push(poolSideboardImg[i].src)
+  //     }
+  //   }
+  //   for (let i = 0; i < 30; i++) {
+  //     if (savedSideboardSRCs[i]) {
+  //       poolSideboardImg[i].src = savedSideboardSRCs[i];
+  //     } else {
+  //       poolSideboardImg[i].src = ""
+  //     }
+  //   }
+  //   this.activePoolUrls[cmc].push(sideboardSrc);
+  //   for (let j = 0; j < 7; j++) {
+  //     this.activePoolUrls[j] = this.displayPoolSortedByColor(
+  //       this.activePoolUrls[j]
+  //     );
+  //     for (let i = 0; i < this.activePoolUrls[j].length; i++) {
+  //       poolArray[j][i].src = this.activePoolUrls[j][i];
+  //     }
+  //   } 
+  // }
 
   ///////////////////////////////// UPDATE LOGIC //////////////////////////////////
   // Function that updates feature vectors
@@ -538,10 +596,14 @@ class DraftSimPackage {
   updatePoolToggled = () => {
     if (this.poolToggled === false) {
       this.poolToggled = true;
+      poolToggle.style.color = "black";
+      poolToggle.style.backgroundColor = "white";
       restartIcon.style.display = "none";
       restartText.style.display = "none";
     } else {
       this.poolToggled = false;
+      poolToggle.style.color = "white";
+      poolToggle.style.backgroundColor = "black";
       if (this.draftOver === true) {
         restartIcon.style.display = "block";
         restartText.style.display = "block";
@@ -583,8 +645,8 @@ class DraftSimPackage {
     this.activeFeatureVectors = this.generateActiveFeatures();
     this.activePools = this.generateActivePools();
     this.activePickSoftmax = [];
-    this.activePoolUrls = [[], [], [], [], [], []];
-    this.poolSideboard = [[], [], [], [], [], []];
+    this.activePoolUrls = [[], [], [], [], [], [], []];
+    this.poolSideboard = [[], [], [], [], [], [], []];
     this.prevActivePicks = []; // the previous active pick made by all the bots
     this.prevPrevActivePicks = []; // two picks back
     restartIcon.style.display = "none";
@@ -608,10 +670,13 @@ class DraftSimPackage {
     for (let i = 0; i < 15; i++) {
       displayedPack[i].addEventListener("click", this.humanMakesPick);
     }
+    for (let i = 0; i < 30; i++) {
+      poolSideboardImg[i].src = ""
+    }
 
     // Resetting pool SRCs
-    for (let j = 0; j < 6; j++) {
-      for (let i = 0; i < 15; i++) {
+    for (let j = 0; j < 7; j++) {
+      for (let i = 0; i < 30; i++) {
         poolArray[j][i].src = "";
       }
     }
@@ -650,7 +715,7 @@ class DraftSimPackage {
       this.activePicks[0] = pickIndex;
 
       this.displayBotPred(this.activePreds[0]);
-      this.generatePickAccuracy(
+      this.displayPickAccuracy(
         this.activePickSoftmax,
         this.activePicks,
         this.activePreds

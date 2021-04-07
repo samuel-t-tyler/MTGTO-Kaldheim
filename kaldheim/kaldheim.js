@@ -34,13 +34,15 @@ let mainWindow = document.getElementById("main_window");
 
 KaldheimDraftPackage.createPackHTML(mainWindow);
 
+let poolZeroCmcCol = document.getElementById("zero_cmc");
 let poolOneCmcCol = document.getElementById("one_cmc");
 let poolTwoCmcCol = document.getElementById("two_cmc");
 let poolThreeCmcCol = document.getElementById("three_cmc");
 let poolFourCmcCol = document.getElementById("four_cmc");
 let poolFiveCmcCol = document.getElementById("five_cmc");
 let poolSixCmcCol = document.getElementById("six_cmc");
-let poolColArray = [poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol];
+let poolSideboardCol = document.getElementById("sideboard");
+let poolColArray = [poolZeroCmcCol, poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol, poolSideboardCol];
 
 KaldheimDraftPackage.createPoolHTML(poolColArray);
 
@@ -62,13 +64,16 @@ let resetSideboardButton = document.getElementById("resetSideboard");
 let toggleFeedbackButton = document.getElementById("toggleFeedback");
 let resetDraftButton = document.getElementById("resetDraft")
 
+let poolZeroCmc = document.getElementsByClassName("0-cmc-image");
 let poolOneCmc = document.getElementsByClassName("1-cmc-image");
 let poolTwoCmc = document.getElementsByClassName("2-cmc-image");
 let poolThreeCmc = document.getElementsByClassName("3-cmc-image");
 let poolFourCmc = document.getElementsByClassName("4-cmc-image");
 let poolFiveCmc = document.getElementsByClassName("5-cmc-image");
 let poolSixCmc = document.getElementsByClassName("6-cmc-image");
-let poolArray = [poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
+let poolArray = [poolZeroCmc, poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
+
+let poolSideboardImg = document.getElementsByClassName("7-cmc-image");
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
 
@@ -105,6 +110,10 @@ for (let j = 0; j < poolArray.length; j++){
     poolArray[j][i].addEventListener("click", KaldheimDraftPackage.displayPoolAfterSideboard)
   }
 }
+
+// for (let i = 0; i < 30; i++) {
+//   poolSideboardImg[i].addEventListener("click", KaldheimDraftPackage.moveSideboardToPool);
+// }
 
 resetSideboardButton.addEventListener("click", KaldheimDraftPackage.displayPoolAfterReset);
 toggleFeedbackButton.addEventListener("click", KaldheimDraftPackage.displayFeedbackToggle);

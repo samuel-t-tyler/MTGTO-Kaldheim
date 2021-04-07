@@ -80,6 +80,7 @@ body {
 }
 
 #navbar {
+    position: sticky;
     z-index: 6;
     min-height: 8vh;
     width: 100%;
@@ -207,10 +208,6 @@ img {
     cursor: pointer;
 }
 
-.pack-card-image {
-}
-
-
 .pack-card-image-div {
     justify-content: center;
     max-height: 35vh ;
@@ -219,9 +216,14 @@ img {
     cursor: pointer;
 }
 
-.pool-col {
-    max-height: 5vh;
+.pool-row {
+    max-height: 4.5vh;
+    padding: 0;
     background-color: transparent;
+}
+
+.pool-col {
+  padding: 0 1.5vh 0 1.5vh;
 }
 
 #particles-js {
@@ -238,6 +240,18 @@ img {
 
 .zoom {
   transition: transform .2s; /* Animation */
+}
+
+#sideboard {
+  display: block;
+  margin-top: -13vh ;
+  padding-top: 13vh;
+  min-height: 92vh;
+  background-color: rgb(36, 36, 36);
+}
+
+#sideboard .pool-row {
+  max-height: 3.5vh !important;
 }
 
 .zoom:hover {
