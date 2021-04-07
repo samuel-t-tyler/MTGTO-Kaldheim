@@ -85,7 +85,7 @@ class DraftSimPackage {
         let breakDiv = document.createElement("div");
         breakDiv.className = "w-100";
         imageDiv.className = "col pool-row";
-        imageElement.className = `pool-card-image noSelect ${j}-cmc-image zoom`;
+        imageElement.className = `pool-card-image noSelect ${j}-cmc-image lift`;
 
         if (i < 9) {
           imageElement.id = `${j}-0${i + 1}`;

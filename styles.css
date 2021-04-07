@@ -294,6 +294,16 @@ img {
   max-height: 3.5vh !important;
 }
 
+.lift {
+  top: 0;
+  transition: all 0.2s ease 0s;/* Animation */
+  position: relative;
+}
+
+.lift:hover {
+  top: -0.7vh;
+}
+
 .zoom:hover {
   transform: scale(1.08); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
 }
