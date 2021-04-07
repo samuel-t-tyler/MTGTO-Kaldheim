@@ -479,6 +479,7 @@ class DraftSimPackage {
     }
     this.poolSideboard = [[], [], [], [], [], [], []];
     this.displayResetSideboard();
+    this.updatePoolTooltips();
   };
 
   // Function that hides or displays player feedback based on user input in the menu
