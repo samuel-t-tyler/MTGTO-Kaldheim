@@ -42,27 +42,25 @@ let poolFourCmcCol = document.getElementById("four_cmc");
 let poolFiveCmcCol = document.getElementById("five_cmc");
 let poolSixCmcCol = document.getElementById("six_cmc");
 let poolSideboardCol = document.getElementById("sideboard");
-let poolColArray = [poolZeroCmcCol, poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol, poolSideboardCol];
 
-KaldheimDraftPackage.createPoolHTML(poolColArray);
+let elementPoolColArray = [poolZeroCmcCol, poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol, poolSideboardCol];
+
+KaldheimDraftPackage.createPoolHTML(elementPoolColArray);
 
 ///////////////////////////////// DEFINING GLOBAL VARIABLES //////////////////////////////////
 // Fetching relevant cards by class, defining global variables
-let displayedPack = document.getElementsByClassName("pack-card-image");
-let displayedPackDiv = document.getElementsByClassName("pack-card-image-div");
+let elementDisplayedPack = document.getElementsByClassName("pack-card-image");
+let elementDisplayedPackDiv = document.getElementsByClassName("pack-card-image-div");
 
-let scoreHTML = document.getElementById("score");
-let feedbackHTML = document.getElementById("feedback");
-let loadingText = document.getElementById("loadingText");
-let loadingSpinner = document.getElementById("loadingSpinner");
-let restartText = document.getElementById("restartText")
-let restartIcon = document.getElementById("restartIcon")
-let poolToggle = document.getElementById("pool-toggler");
-let poolWindow = document.getElementById("pool_window");
+let elementScoreHTML = document.getElementById("score");
+let elementFeedbackHTML = document.getElementById("feedback");
+let elementLoadingSpinner = document.getElementById("loadingSpinner");
+let elementRestartIcon = document.getElementById("restartIcon")
+let elementPoolToggle = document.getElementById("pool-toggler");
 
-let resetSideboardButton = document.getElementById("resetSideboard");
-let toggleFeedbackButton = document.getElementById("toggleFeedback");
-let resetDraftButton = document.getElementById("resetDraft")
+let elementResetPool = document.getElementById("resetSideboard");
+let elementToggleFeedback = document.getElementById("toggleFeedback");
+let elementRestart = document.getElementById("resetDraft")
 
 let poolZeroCmc = document.getElementsByClassName("0-cmc-image");
 let poolOneCmc = document.getElementsByClassName("1-cmc-image");
@@ -71,9 +69,9 @@ let poolThreeCmc = document.getElementsByClassName("3-cmc-image");
 let poolFourCmc = document.getElementsByClassName("4-cmc-image");
 let poolFiveCmc = document.getElementsByClassName("5-cmc-image");
 let poolSixCmc = document.getElementsByClassName("6-cmc-image");
-let poolArray = [poolZeroCmc, poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
 
-let poolSideboardImg = document.getElementsByClassName("7-cmc-image");
+let elementPoolArray = [poolZeroCmc, poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
+let elementSideboardArray = document.getElementsByClassName("7-cmc-image");
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
 
@@ -102,21 +100,21 @@ Promise.all([
 ////////////////////////////////// EVENT LISTENERS //////////////////////////////////// 
 
 for (let i = 0; i < 15; i++) {
-  displayedPack[i].addEventListener("click", KaldheimDraftPackage.humanMakesPick);
+  elementDisplayedPack[i].addEventListener("click", KaldheimDraftPackage.humanMakesPick);
 }
 
-for (let j = 0; j < poolArray.length; j++){
-  for (let i = 0; i < poolArray[j].length; i++) {
-    poolArray[j][i].addEventListener("click", KaldheimDraftPackage.displayPoolAfterSideboard)
+for (let j = 0; j < elementPoolArray.length; j++){
+  for (let i = 0; i < elementPoolArray[j].length; i++) {
+    elementPoolArray[j][i].addEventListener("click", KaldheimDraftPackage.displayPoolAfterSideboard)
   }
 }
 
 for (let i = 0; i < 30; i++) {
-  poolSideboardImg[i].addEventListener("click", KaldheimDraftPackage.moveSideboardToPool);
+  elementSideboardArray[i].addEventListener("click", KaldheimDraftPackage.moveSideboardToPool);
 }
 
-resetSideboardButton.addEventListener("click", KaldheimDraftPackage.displayPoolAfterReset);
-toggleFeedbackButton.addEventListener("click", KaldheimDraftPackage.displayFeedbackToggle);
-resetDraftButton.addEventListener("click", KaldheimDraftPackage.resetDraft);
-poolToggle.addEventListener("click", KaldheimDraftPackage.updatePoolToggled);
-restartIcon.addEventListener("click", KaldheimDraftPackage.resetDraft);
+elementResetPool.addEventListener("click", KaldheimDraftPackage.displayPoolAfterReset);
+elementToggleFeedback.addEventListener("click", KaldheimDraftPackage.displayFeedbackToggle);
+elementRestart.addEventListener("click", KaldheimDraftPackage.resetDraft);
+elementPoolToggle.addEventListener("click", KaldheimDraftPackage.updatePoolToggled);
+elementRestartIcon.addEventListener("click", KaldheimDraftPackage.resetDraft);

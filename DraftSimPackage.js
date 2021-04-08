@@ -1,5 +1,38 @@
 "use strict";
 
+/*  
+
+Two functions, "humanMakesPick" and "humanSeesResults" guide the logic of the site.  We start with "humanMakesPick", 
+and alternate back and forth between the two for the remainder of the draft.  Most of the other functions called here 
+are callback functons within these two.  There is also a "setupAfterPromise" function that is called once the promise all 
+resolves that prepares the site for the first pick by generating packs.
+
+masterHash:
+  masterHash is a layered object that is critical to the function the the site and errorproofing.  It takes a representation of
+  a card using a datatype and converts it into a different representation of that card.  For example, masterHash["name_to_url"][name]
+  takes a card name, and spits out the URL we use for the image.  the available datatypes are "name", "url", and "index".  Index
+  is the index of the onehot vector coding for the card used in machine learning.  masterHash can also take name and spit out the card
+  color, cmc, and rarity.  Examples:
+    masterHash["index_to_name"][232]
+    masterHash["url_to_index"][someurl]
+    masterHash["name_to_color"][somename]
+
+I created groups for the functions:
+  Create HTML:  Loops to create HTML for the pack and pools.  See index.HTML for where this HTML is generated
+  Helper Functions:   Helper functions are not actually used in the logic of the site, but can be used to errorproof by checking onehots.
+  Generate:  Used to create variables or data not visible to the player
+  Display:  Functions that change what is visible on the screen.
+  Update:  Functions that updata data 
+  End Draft:  A single function called resetDraft that resets the samestate and prepares a new game
+  Main Logic:  The three functions that do most of the heavy lifting and contain a lot of sub-functions
+
+I also created a few naming conventions:
+  current - means the variable stores information about global gamestate.  Examples:  currentPack, currentPick
+  active - means the variable stores information about players.  Examples: activePacks, activeOnehots (player's active packs+onehots)
+  element - DOM element from document
+
+*/
+
 class DraftSimPackage {
   constructor(
     set,
@@ -17,18 +50,19 @@ class DraftSimPackage {
   // Critical variables
   masterHash; // Layered object that can take any card representation and turn into any other card representation
   model; //Tensorflow JS model file
-  // Variables used to maintain the gamestate
-  score = 0;
+
+  // Variables used to maintain the global gamestate. All start with the word "current"
+  currentScore = 0;
   currentPick = 0;
   currentPack = 0;
-  picksActive = false;
-  feedbackActive = true;
-  poolToggled = false;
-  draftOver = false;
-  mainDeckCount = 0;
-  scoreFixed = 0;
+  currentPicksActive = false;
+  currentFeedbackActive = true;
+  currentPoolToggled = false;
+  currentDraftOver = false;
+  currentMainDeckCount = 0;
+  currentScoreFixed = 0;
 
-  // Variables that store the active state of players (human and bots)
+  // Variables that store gamestate information of players, like decks and onehots.  All start with the word "active"
   activePacks; // Onehot array of shape [8, 3, 280] representing all packs in the draft
   activeOnehots; // Array of shape [8, 574] representing the vector being fed into the prediction matrix
   activePreds; // Array of length 8 representing the bot pred of each pick being made
@@ -36,17 +70,16 @@ class DraftSimPackage {
   activeFeatureVectors; // Array of shape [8, 14] representing all players feature vectors
   activePools; //Array of shape [8, 280] representing all pools for all players
   activePickSoftmax; // the softmax output of the human pick
-  prevActivePicks; // the previous active pick made by all bots and humans
-  prevPrevActivePicks; // 2 picks back active pick made by all bots and humans
+  activePoolUrls = [[], [], [], [], [], [], []]; //Initalizing empty array that we append pool urls to later
+  activePoolSideboard = [[], [], [], [], [], [], []]; //Even though sideboard is one pile, we keep urls in piles to easily convert back to pool later
 
-  activePoolUrls = [[], [], [], [], [], [], []];
-  poolSideboard = [[], [], [], [], [], [], []];
-
+  // initalizing variables to save the commons, uncommons, rares and mythics in the set, used to make packs
   commons = [];
   uncommons = [];
   rares = [];
   mythics = [];
 
+  // this is the way we code feature fectors for the ML model.  A white 2 drop would be [0,1,0,0,0,0,0,0,1,0,0,0,0,0,0] (W and 2.0)
   feature_vector_index = {
     Colorless: 0,
     W: 1,
@@ -65,6 +98,7 @@ class DraftSimPackage {
   };
 
   ///////////////////////////////// CREATING HTML //////////////////////////////////
+  // This html is the image elements and divs for the 15 cards that make up the pack shown the player each pick
   createPackHTML(main) {
     for (let i = 0; i < 15; i++) {
       let imageDiv = document.createElement("div");
@@ -75,7 +109,7 @@ class DraftSimPackage {
       main.appendChild(imageDiv);
     }
   }
-
+  // HTML used to create image and div elements for the pool window
   createPoolHTML(colsArray) {
     for (let j = 0; j < 8; j++) {
       for (let i = 0; i < 30; i++) {
@@ -118,7 +152,7 @@ class DraftSimPackage {
   }
 
   ////////////////////////////// GENERATING ACTIVE VARIABLES ///////////////////////////////
-  // Populating the arrays of cards
+  // To generate packs, we need to first sort the cards by rarity.  This function does this, using data provided by masterHash
   generateRarityArrays = () => {
     let cardsAvailable = [];
     for (let key in this.masterHash["name_to_collector"]) {
@@ -151,7 +185,8 @@ class DraftSimPackage {
       this.landSlot,
     ];
   };
-  // Creating function to create arrays to represent players pools
+
+  // this function sets up 8 empty onehot vector pool arrays that will be populated as the players move through the draft
   generateActivePools = () => {
     let activePoolsTemp = [];
     let pool;
@@ -162,7 +197,7 @@ class DraftSimPackage {
     }
     return activePoolsTemp;
   };
-  //Creating function to represent player feature vectors
+  //this function sets up 8 empty feature vector pool arrays that will be populated as the players move through the draft
   generateActiveFeatures = () => {
     this.activeFeatureVectors = [];
     let features;
@@ -209,7 +244,7 @@ class DraftSimPackage {
     return activePackTemp;
   };
 
-  // Function to generate array of 8 arrays of 3 packs
+  // This function is called once at the beginning of each draft, and generates the 24 packs passed between bots
   generateActivePacks = () => {
     let activePacksTemp = [];
     for (let l = 0; l < 8; l++) {
@@ -224,11 +259,10 @@ class DraftSimPackage {
   };
 
   ///////////////////////////////// MAKING PREDICTIONS //////////////////////////////////
-  //Function that makes a prediction for all players
+
+  //This is the ML model hosted by TFJS.  This function takes a onehot of shape this.inputShape and spits out a onehot vector
+  // We need to manutally take the argmax of the softmax and use masterHash["index_to_name"] to find the card name of that output
   makeBatchPreds = (arrayOfOnehots) => {
-    //save previous active picks
-    this.prevPrevActivePicks = this.prevActivePicks;
-    this.prevActivePicks = this.activePicks;
     // generating packs to multiply predictions by
     let arrayOfPacks = [];
     for (let k = 0; k < arrayOfOnehots.length; k++) {
@@ -269,6 +303,7 @@ class DraftSimPackage {
     this.activePreds = arrayOfIndexes;
     return [this.activePreds, this.activePickSoftmax];
   };
+
   ///////////////////////////////// DISPLAY //////////////////////////////////
   // Change the displayed pack SRCs to the image of the current pack
   displayPack = (playerOnehot) => {
@@ -278,8 +313,8 @@ class DraftSimPackage {
     );
     let arrayOfURLs = [];
     for (let z = 0; z < 15; z++) {
-      displayedPack[z].classList.add("fullPack");
-      displayedPack[z].src = "";
+      elementDisplayedPack[z].classList.add("fullPack");
+      elementDisplayedPack[z].src = "";
     }
     for (let i = 0; i < humanPlayerActivePack.length; i++) {
       if (humanPlayerActivePack[i] > 0) {
@@ -304,54 +339,61 @@ class DraftSimPackage {
     }
     arrayOfSortedURLS = arrayOfSortedURLS.concat(rares, uncommons, commons);
     for (let k = 0; k < arrayOfSortedURLS.length; k++) {
-      displayedPack[k].src = arrayOfSortedURLS[k];
+      elementDisplayedPack[k].src = arrayOfSortedURLS[k];
     }
   };
-
+  /*
+  We use the formula (y = -(error*error)^e + 1), where e is the natural log 2.8, and error is (humansoftmax / botsoftmax)  
+  to generate a number between zero and one that represents the "correctness" of the human pick.  If the human and bot pick 
+  the same card, the error is 0, and y=1.  If the bot hates the human pick, error is close to 1, so y is close to zero.  The error is 
+  never greater than one since the bot always picks the highest softmax in each pack.  This function makes that calculation and 
+  then updates the score.innerHTML to reflect the result
+  */
   displayPickAccuracy = (activePickSoftmax, picks, preds) => {
-    scoreHTML.style.opacity = 0;
+    elementScoreHTML.style.opacity = 0;
     setTimeout(() => {
-      feedbackHTML.style.opacity = 1;
+      elementFeedbackHTML.style.opacity = 1;
       let botPickSoftmax = activePickSoftmax[preds[0]];
       let humanPickSoftmax = activePickSoftmax[picks[0]];
       let error = 1 - humanPickSoftmax / botPickSoftmax;
       let pickValue = -Math.pow(error, 2.8) + 1;
-      this.score += pickValue;
-      this.scoreFixed = this.score.toFixed(1);
-      feedbackHTML.style.color = "white";
-      if (this.scoreFixed[this.scoreFixed.length - 1] === "0") {
-        this.scoreFixed = this.score.toFixed(0);
+      this.currentScore += pickValue;
+      this.currentScoreFixed = this.currentScore.toFixed(1);
+      elementFeedbackHTML.style.color = "white";
+      if (this.currentScoreFixed[this.currentScoreFixed.length - 1] === "0") {
+        this.currentScoreFixed = this.currentScore.toFixed(0);
       }
-      scoreHTML.innerHTML = `${this.scoreFixed} / ${this.currentPick + 1}`;
+      elementScoreHTML.innerHTML = `${this.currentScoreFixed} / ${
+        this.currentPick + 1
+      }`;
       if (pickValue >= 0.95) {
-        feedbackHTML.innerHTML = "Excellent!";
+        elementFeedbackHTML.innerHTML = "Excellent!";
       }
       if (pickValue >= 0.7 && pickValue < 0.95) {
-        feedbackHTML.innerHTML = "Great!";
+        elementFeedbackHTML.innerHTML = "Great!";
       }
       if (pickValue >= 0.5 && pickValue < 0.7) {
-        feedbackHTML.innerHTML = "Not bad!";
+        elementFeedbackHTML.innerHTML = "Not bad!";
       }
       if (pickValue >= 0.3 && pickValue < 0.5) {
-        feedbackHTML.innerHTML = "Possible Mistake";
+        elementFeedbackHTML.innerHTML = "Possible Mistake";
       }
       if (pickValue < 0.3) {
-        feedbackHTML.innerHTML = "Mistake";
+        elementFeedbackHTML.innerHTML = "Mistake";
       }
-      scoreHTML.style.opacity = 1;
+      elementScoreHTML.style.opacity = 1;
     }, 150);
     return;
   };
 
-  ///////////////////////////////// DISPLAY //////////////////////////////////
   // Highlight the pick the bot likes
   displayBotPred = (pred) => {
-    if (this.feedbackActive === true) {
+    if (this.currentFeedbackActive === true) {
       let predURL = this.masterHash["index_to_url"][pred];
-      for (let i = 0; i < displayedPack.length; i++) {
-        if (displayedPack[i].src === predURL) {
+      for (let i = 0; i < elementDisplayedPack.length; i++) {
+        if (elementDisplayedPack[i].src === predURL) {
           //using ID instead of classname here because it's easier + faster to remove between card draws:
-          displayedPack[i].id = "greenSelect";
+          elementDisplayedPack[i].id = "greenSelect";
         }
       }
     }
@@ -359,14 +401,14 @@ class DraftSimPackage {
   };
 
   //Function that sorts a column of the pool by color
-  displayPoolSortedByColor(poolArray) {
+  displayPoolSortedByColor(elementPoolArray) {
     let sortedSRCS = [];
     let tuples = [];
-    for (let i = 0; i < poolArray.length; i++) {
-      if (poolArray[i].length > 100) {
+    for (let i = 0; i < elementPoolArray.length; i++) {
+      if (elementPoolArray[i].length > 100) {
         //75 represents a length between an empty SRC (basic path) and 117, scryfall path length
         // let temp = [poolArrayCol[i], this.masterHash["name_to_color"][this.masterHash["src_to_name"][poolArrayCol[i]]]];
-        let cardURL = poolArray[i];
+        let cardURL = elementPoolArray[i];
         let cardName = this.masterHash["url_to_name"][cardURL];
         let cardColor = this.masterHash["name_to_color"][cardName];
         if (cardColor.length === 0) {
@@ -388,41 +430,42 @@ class DraftSimPackage {
     }
     return sortedSRCS;
   }
-
+  // Function that updates the src's of the sideboard column elements generated by our HTML function to show sideboarded card images.
   displaySideboard() {
     let arrayOfSideboardImages = [];
     for (let j = 0; j < 7; j++) {
-      for (let i = 0; i < this.poolSideboard[j].length; i++) {
-        arrayOfSideboardImages.push(this.poolSideboard[j][i]);
+      for (let i = 0; i < this.activePoolSideboard[j].length; i++) {
+        arrayOfSideboardImages.push(this.activePoolSideboard[j][i]);
       }
     }
     for (let k = 0; k < 30; k++) {
-      poolSideboardImg[k].src = "";
+      elementSideboardArray[k].src = "";
       if (arrayOfSideboardImages[k]) {
-        poolSideboardImg[k].src = arrayOfSideboardImages[k];
+        elementSideboardArray[k].src = arrayOfSideboardImages[k];
       }
     }
   }
+  //  Function that resets the card srcs of sideboard cards if the player presses the "resetSideboard button"
   displayResetSideboard() {
-    for (let k = 0; k < poolSideboardImg.length; k++) {
-      poolSideboardImg[k].src = "";
+    for (let k = 0; k < elementSideboardArray.length; k++) {
+      elementSideboardArray[k].src = "";
     }
   }
 
   // Function that displays the images of the cards you have selected in the pool tab
   displayPoolImages = (picks) => {
-    // Remove css IDs for border styles: 
+    // Remove css IDs for border styles:
     // There might be a better function for you to move this to,
     // like if if you have one doing any cleanup after the pick.
     // I couldn't find one and it's fine here if not.
     // removing these IDs so you don't get duplicate borders next pick
 
-    if (document.getElementById('orangeSelect')) {
-      document.getElementById('orangeSelect').removeAttribute('id');
+    if (document.getElementById("orangeSelect")) {
+      document.getElementById("orangeSelect").removeAttribute("id");
     }
 
-    if (document.getElementById('greenSelect')) {
-      document.getElementById('greenSelect').removeAttribute('id');
+    if (document.getElementById("greenSelect")) {
+      document.getElementById("greenSelect").removeAttribute("id");
     }
 
     let humanPick = this.masterHash["index_to_name"][picks[0]];
@@ -440,7 +483,7 @@ class DraftSimPackage {
         this.activePoolUrls[j]
       );
       for (let i = 0; i < this.activePoolUrls[j].length; i++) {
-        poolArray[j][i].src = this.activePoolUrls[j][i]; 
+        elementPoolArray[j][i].src = this.activePoolUrls[j][i];
       }
     }
     return;
@@ -451,15 +494,15 @@ class DraftSimPackage {
     const pile = clicked[0];
     const index = parseInt(clicked.slice(2, 4)); //note that index is one above the index used in array
     const cutURL = this.activePoolUrls[pile].splice(index - 1, 1);
-    this.poolSideboard[pile].push(cutURL[0]);
+    this.activePoolSideboard[pile].push(cutURL[0]);
     for (let k = 0; k < 30; k++) {
-      poolArray[pile][k].src = "";
+      elementPoolArray[pile][k].src = "";
     }
     for (let z = 0; z < this.activePoolUrls[pile].length; z++) {
-      poolArray[pile][z].src = this.activePoolUrls[pile][z];
+      elementPoolArray[pile][z].src = this.activePoolUrls[pile][z];
     }
     this.displaySideboard();
-    this.mainDeckCount -= 1
+    this.currentMainDeckCount -= 1;
     this.displayMainDeckCount();
     this.updatePoolTooltips();
     return;
@@ -468,73 +511,79 @@ class DraftSimPackage {
   // Function that resets pool images after you click the button and returns sideboard cards to maindeck
   displayPoolAfterReset = () => {
     for (let i = 0; i < 7; i++) {
-      for (let j = 0; j < this.poolSideboard[i].length; j++) {
-        this.activePoolUrls[i].push(this.poolSideboard[i][j]);
+      for (let j = 0; j < this.activePoolSideboard[i].length; j++) {
+        this.activePoolUrls[i].push(this.activePoolSideboard[i][j]);
       }
     }
     for (let k = 0; k < 7; k++) {
       for (let l = 0; l < this.activePoolUrls[k].length; l++) {
-        poolArray[k][l].src = this.activePoolUrls[k][l];
+        elementPoolArray[k][l].src = this.activePoolUrls[k][l];
       }
     }
-    this.poolSideboard = [[], [], [], [], [], [], []];
+    this.activePoolSideboard = [[], [], [], [], [], [], []];
     this.displayResetSideboard();
     this.updatePoolTooltips();
   };
 
   // Function that hides or displays player feedback based on user input in the menu
   displayFeedbackToggle = () => {
-    if (this.feedbackActive === true) {
-      feedbackHTML.style.visibility = "hidden";
-      scoreHTML.style.visibility = "hidden";
-      this.feedbackActive = false;
+    if (this.currentFeedbackActive === true) {
+      elementFeedbackHTML.style.visibility = "hidden";
+      elementScoreHTML.style.visibility = "hidden";
+      this.currentFeedbackActive = false;
       return;
     }
-    if (this.feedbackActive === false) {
-      feedbackHTML.style.visibility = "visible";
-      scoreHTML.style.visibility = "visible";
-      this.feedbackActive = true;
+    if (this.currentFeedbackActive === false) {
+      elementFeedbackHTML.style.visibility = "visible";
+      elementScoreHTML.style.visibility = "visible";
+      this.currentFeedbackActive = true;
       return;
     }
   };
-
+  // Function that is called when a player clicks on a sideboard card to move it back into the pool
   moveSideboardToPool = (event) => {
-    let sideboardSrc = event.srcElement.src
-    let cmc = this.masterHash["name_to_cmc"][this.masterHash["url_to_name"][sideboardSrc]]
+    let sideboardSrc = event.srcElement.src;
+    let cmc = this.masterHash["name_to_cmc"][
+      this.masterHash["url_to_name"][sideboardSrc]
+    ];
     if (cmc > 6) {
-      cmc = 6
+      cmc = 6;
     }
-    let PSindex = this.poolSideboard[cmc].findIndex(e => e === sideboardSrc);
-    this.poolSideboard[cmc].splice(PSindex, 1);
-    this.displaySideboard()
+    let PSindex = this.activePoolSideboard[cmc].findIndex(
+      (e) => e === sideboardSrc
+    );
+    this.activePoolSideboard[cmc].splice(PSindex, 1);
+    this.displaySideboard();
     this.activePoolUrls[cmc].push(sideboardSrc);
     for (let j = 0; j < 7; j++) {
       this.activePoolUrls[j] = this.displayPoolSortedByColor(
         this.activePoolUrls[j]
       );
       for (let i = 0; i < this.activePoolUrls[j].length; i++) {
-        poolArray[j][i].src = this.activePoolUrls[j][i];
+        elementPoolArray[j][i].src = this.activePoolUrls[j][i];
       }
     }
-    this.mainDeckCount++
+    this.currentMainDeckCount++;
     this.displayMainDeckCount();
     this.updatePoolTooltips();
-  }
+  };
 
   displayMainDeckCount() {
-    scoreHTML.style.opacity = 0
+    elementScoreHTML.style.opacity = 0;
     setTimeout(() => {
-      scoreHTML.innerHTML = `Maindeck: ${this.mainDeckCount}`;
-      scoreHTML.style.opacity = 1;
+      elementScoreHTML.innerHTML = `Maindeck: ${this.currentMainDeckCount}`;
+      elementScoreHTML.style.opacity = 1;
     }, 150);
   }
 
   displayScore() {
-    scoreHTML.style.opacity = 0
+    elementScoreHTML.style.opacity = 0;
     setTimeout(() => {
-      scoreHTML.innerHTML = `${this.scoreFixed} / ${this.currentPick + 1}`;
-      scoreHTML.style.opacity = 1;
-    },150)
+      elementScoreHTML.innerHTML = `${this.currentScoreFixed} / ${
+        this.currentPick + 1
+      }`;
+      elementScoreHTML.style.opacity = 1;
+    }, 150);
   }
 
   ///////////////////////////////// UPDATE LOGIC //////////////////////////////////
@@ -623,22 +672,19 @@ class DraftSimPackage {
   };
   // Function that updates what is displayed when the pool window button is toggled
   updatePoolToggled = () => {
-    if (this.poolToggled === false) {
-      this.displayMainDeckCount()
-      this.poolToggled = true;
-      poolToggle.style.color = "black";
-      poolToggle.style.backgroundColor = "white";
-      restartIcon.style.display = "none";
-      restartText.style.display = "none";
+    if (this.currentPoolToggled === false) {
+      this.displayMainDeckCount();
+      this.currentPoolToggled = true;
+      elementPoolToggle.style.color = "black";
+      elementPoolToggle.style.backgroundColor = "white";
+      elementRestartIcon.style.display = "none";
     } else {
-      scoreHTML.innerHTML = "        "
-      console.log(this.currentPick)
-      this.poolToggled = false;
-      poolToggle.style.color = "white";
-      poolToggle.style.backgroundColor = "black";
-      if (this.draftOver === true) {
-        restartIcon.style.display = "block";
-        restartText.style.display = "block";
+      elementScoreHTML.innerHTML = "";
+      this.currentPoolToggled = false;
+      elementPoolToggle.style.color = "white";
+      elementPoolToggle.style.backgroundColor = "black";
+      if (this.currentDraftOver === true) {
+        elementRestartIcon.style.display = "block";
       }
     }
   };
@@ -647,29 +693,34 @@ class DraftSimPackage {
   updateDraftIfOver = () => {
     if (this.currentPick === 45) {
       for (let i = 0; i < this.displayPack.length; i++) {
-        displayedPack[i].style.display = "none";
-        displayedPack[i].style.border = "transparent";
+        elementDisplayedPack[i].style.display = "none";
+        elementDisplayedPack[i].style.border = "transparent";
       }
-      restartText.style.display = "block";
-      restartIcon.style.display = "block";
-      restartText.addEventListener("click", resetDraft);
-      restartIcon.addEventListener("click", resetDraft);
+      elementRestartIcon.style.display = "block";
+      elementRestartIcon.addEventListener("click", resetDraft);
     }
-    this.draftOver = true;
+    this.currentDraftOver = true;
   };
 
   updatePoolTooltips() {
     for (let j = 0; j < 7; j++) {
       for (let i = 0; i < this.activePoolUrls[j].length; i++) {
-        let src = poolArray[j][i].src;
-        poolArray[j][i].removeAttribute("title");
-        poolArray[j][i].removeAttribute("data-toggle");
-        poolArray[j][i].setAttribute("data-toggle", "tooltip");
-        poolArray[j][i].setAttribute(
+        let src = elementPoolArray[j][i].src;
+        elementPoolArray[j][i].removeAttribute("title");
+        elementPoolArray[j][i].removeAttribute("data-toggle");
+        elementPoolArray[j][i].setAttribute("data-toggle", "tooltip");
+        elementPoolArray[j][i].setAttribute(
           "title",
           `<img src="${src}" class="tooltip-popup" />`
         );
-        console.log("added:", this.masterHash["url_to_name"][src], "to element row:", j, "element:", i)
+        console.log(
+          "added:",
+          this.masterHash["url_to_name"][src],
+          "to element row:",
+          j,
+          "element:",
+          i
+        );
         $('[data-toggle="tooltip"]').tooltip("dispose");
         $(document).ready(function () {
           $("[data-toggle=tooltip]").tooltip({
@@ -687,14 +738,14 @@ class DraftSimPackage {
   resetDraft = () => {
     // resetting all varaiables that store gamestate
     for (let i = 0; i < 15; i++) {
-      displayedPackDiv[i].style.animation = "fadeOut ease 0.25s";
+      elementDisplayedPackDiv[i].style.animation = "fadeOut ease 0.25s";
     }
-    this.score = 0;
-    this.scoreFixed = 0
+    this.currentScore = 0;
+    this.currentScoreFixed = 0;
     this.currentPick = 0;
     this.currentPack = 0;
-    this.picksActive = false;
-    this.feedbackActive = true;
+    this.currentPicksActive = false;
+    this.currentFeedbackActive = true;
     this.activePacks = [];
     this.activeOnehots = [];
     this.activePreds = [];
@@ -703,13 +754,10 @@ class DraftSimPackage {
     this.activePools = this.generateActivePools();
     this.activePickSoftmax = [];
     this.activePoolUrls = [[], [], [], [], [], [], []];
-    this.poolSideboard = [[], [], [], [], [], [], []];
-    this.prevActivePicks = []; // the previous active pick made by all the bots
-    this.prevPrevActivePicks = []; // two picks back
-    restartIcon.style.display = "none";
-    restartText.style.display = "none";
-    this.draftOver = false;
-    this.mainDeckCount = 0
+    this.activePoolSideboard = [[], [], [], [], [], [], []];
+    elementRestartIcon.style.display = "none";
+    this.currentDraftOver = false;
+    this.currentMainDeckCount = 0;
 
     // generating new packs and startingone onehots and preds
     this.activePacks = this.generateActivePacks();
@@ -722,48 +770,51 @@ class DraftSimPackage {
     [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
       this.activeOnehots
     );
-    this.picksActive = true;
+    this.currentPicksActive = true;
 
     // Resetting event listeners
     for (let i = 0; i < 15; i++) {
-      displayedPack[i].addEventListener("click", this.humanMakesPick);
+      elementDisplayedPack[i].addEventListener("click", this.humanMakesPick);
     }
     for (let i = 0; i < 30; i++) {
-      poolSideboardImg[i].src = ""
+      elementSideboardArray[i].src = "";
     }
 
     // Resetting pool SRCs
     for (let j = 0; j < 7; j++) {
       for (let i = 0; i < 30; i++) {
-        poolArray[j][i].src = "";
+        elementPoolArray[j][i].src = "";
       }
     }
 
     // Resetting inner HTML
-    scoreHTML.innerHTML = "Score";
-    feedbackHTML.innerHTML = "";
+    elementScoreHTML.innerHTML = "Score";
+    elementFeedbackHTML.innerHTML = "";
     setTimeout(() => {
       for (let i = 0; i < 15; i++) {
         this.displayPack(this.activeOnehots[0]);
-        displayedPackDiv[i].style.animation = "";
-        displayedPackDiv[i].style.animation = "fadeIn ease 0.25s";
+        elementDisplayedPackDiv[i].style.animation = "";
+        elementDisplayedPackDiv[i].style.animation = "fadeIn ease 0.25s";
       }
     }, 250);
   };
 
-  ///////////////////////////////// UPDATEFUNCS //////////////////////////////////
+  ///////////////////////////////// MAIN LOGIC //////////////////////////////////
   humanMakesPick = (event) => {
     // Changing border color of the card the player picked
-    if (this.picksActive === true) {
+    if (this.currentPicksActive === true) {
       for (let i = 0; i < 15; i++) {
-        displayedPack[i].removeEventListener("click", this.humanMakesPick);
+        elementDisplayedPack[i].removeEventListener(
+          "click",
+          this.humanMakesPick
+        );
       }
-      this.picksActive = false;
+      this.currentPicksActive = false;
       let pickSRC = event.srcElement.src;
-      for (let i = 0; i < displayedPack.length; i++) {
-        if (displayedPack[i].src === pickSRC) {
+      for (let i = 0; i < elementDisplayedPack.length; i++) {
+        if (elementDisplayedPack[i].src === pickSRC) {
           //using ID instead of classname here because it's easier + faster to remove between card draws:
-          displayedPack[i].id = "orangeSelect";
+          elementDisplayedPack[i].id = "orangeSelect";
         }
       }
       // Highlighting bot pick and calculating accuracy of human pick
@@ -783,16 +834,22 @@ class DraftSimPackage {
       // Updating event listeners
       setTimeout(() => {
         for (let i = 0; i < 15; i++) {
-          displayedPack[i].addEventListener("click", this.humanSeesResults);
+          elementDisplayedPack[i].addEventListener(
+            "click",
+            this.humanSeesResults
+          );
         }
       }, 250);
     }
   };
   humanSeesResults = () => {
-    if (this.picksActive === false) {
+    if (this.currentPicksActive === false) {
       for (let i = 0; i < 15; i++) {
-        displayedPack[i].removeEventListener("click", this.humanSeesResults);
-        displayedPackDiv[i].style.animation = "fadeOut ease 0.3s";
+        elementDisplayedPack[i].removeEventListener(
+          "click",
+          this.humanSeesResults
+        );
+        elementDisplayedPackDiv[i].style.animation = "fadeOut ease 0.3s";
       }
       this.updatePick();
       if (this.currentPick < 45) {
@@ -815,27 +872,30 @@ class DraftSimPackage {
         [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
           this.activeOnehots
         );
-        this.picksActive = true;
+        this.currentPicksActive = true;
         this.displayPoolImages(this.activePicks);
-        this.mainDeckCount++
+        this.currentMainDeckCount++;
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
             this.displayPack(this.activeOnehots[0]);
-            displayedPackDiv[i].style.animation = "";
-            displayedPackDiv[i].style.animation = "fadeIn ease 0.3s";
+            elementDisplayedPackDiv[i].style.animation = "";
+            elementDisplayedPackDiv[i].style.animation = "fadeIn ease 0.3s";
           }
         }, 210);
-        this.updatePoolTooltips()
+        this.updatePoolTooltips();
 
         setTimeout(() => {
           for (let m = 0; m < 15; m++) {
-            displayedPack[m].addEventListener("click", this.humanMakesPick);
+            elementDisplayedPack[m].addEventListener(
+              "click",
+              this.humanMakesPick
+            );
           }
         }, 500);
       } else {
         this.updateDraftIfOver();
       }
-      feedbackHTML.style.opacity = 0;
+      elementFeedbackHTML.style.opacity = 0;
     }
   };
   setupAfterPromise(data) {
@@ -857,12 +917,11 @@ class DraftSimPackage {
       this.activePools,
       this.currentPack
     );
-    loadingText.style.display = "none";
-    loadingSpinner.style.display = "none";
+    elementLoadingSpinner.style.display = "none";
     this.displayPack(this.activeOnehots[0]);
     [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
       this.activeOnehots
     );
-    this.picksActive = true;
+    this.currentPicksActive = true;
   }
 }
