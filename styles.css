@@ -19,13 +19,13 @@ body {
 
 /* add these when you click on card */
 #greenSelect {
-  outline: 4px solid #33cc33 !important;
-  transition: all 0.1s !important;
+  box-shadow: 0 0 4pt 3pt #33cc33 !important;
+  transition: all 0.2s !important;
 }
 
 #orangeSelect {
-  outline: 4px solid #ff9966 !important;
-  transition: all 0.1s !important;
+  box-shadow: 0 0 4pt 3pt #ff9966 !important;
+  transition: all 0.2s !important;
 }
 
 .loadingSpinner {
@@ -240,8 +240,8 @@ img {
 }
 
 .pool-card-image {
-    margin-right: 1vh;
-    margin-left: 1vh;
+    margin-right: 5vw;
+    margin-left: 5vw;
     width: auto;
     min-width: 100%;
     margin: 0%;
@@ -252,7 +252,7 @@ img {
     justify-content: center;
     max-height: 35vh ;
     max-width: 25vh ;
-    margin: 0vh;
+    margin: 0.2vh;
     cursor: pointer;
 }
 
@@ -305,7 +305,7 @@ img {
 }
 
 .zoom:hover {
-  transform: scale(1.06); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+  transform: scale(1.07); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
 }
 
 .fade-out {
@@ -387,6 +387,7 @@ animation: fadeIn ease 0.5s;
   .zoom:hover {
   transform: scale(1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
   }
+
   #pool-toggler {
     display: none;
   }
