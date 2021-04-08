@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MTGTO Kaldheim</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+  <!-- Modal -->
+    <div id="loading">
+        <h1 id="loadingText">  </h1>
+        <div id="loadingSpinner" class="loadingSpinner">
+        </div>
+    </div>
+    <div id="restart">
+        <img src="../resources/images/arrow-clockwise.svg" id="restartIcon">
+        </div>
+    </div>
+    <div class="container col-12" id="main">
+        <div class="row">
+            <div id="particles-js">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-12" id="navbar_div">
+                        <nav id="navbar" class="navbar navbar-dark bg-dark sticky-top">
+                            <span class="navbar-brand mb-0 h1" id="GTO-bot">
+                                <a href ="../index.html"> MTGTO Kaldheim </a>
+                            </span>
+                            <button id="pool-toggler" class="btn btn-primary mx-auto noSelect" type="button" data-toggle="collapse" data-target="#pool_window" aria-expanded="false" aria-controls="pool_window">
+                                Pool
+                            </button>
+                            <span id="feedback" class="mx-auto h3 white"></span>
+                            <span id="score" class="mx-auto h3"> 
+                                Score 
+                            </span>
+                            <div class="dropdown ml-auto dropleft">
+                            <button id="menu" class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Menu
+                            </button>
+                            <div id="menu" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="../index.html" id="home">Home</a>
+                                <a class="dropdown-item" id="resetSideboard">Reset Pool</a>
+                                <a class="dropdown-item" id="toggleFeedback">Toggle Feedback</a>
+                                <a class="dropdown-item" id="resetDraft">Restart</a>
+                            </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            <div class="row">
+                <div class="col-12">
+                    <div id="main_window" class="d-flex justify-content-center flex-wrap noSelect">
+                        <!-- Pack Loop creates HTML Here --> 
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="pool_window" class="grid col-12 collapse fixed-top bg-light h-100">
+                        <div class="row" id="main-pool-row">
+                            <div id="zero_cmc" class="col pool-col">
+                                <!-- Pool Loop creates HTML Here --> 
+                            </div>
+                            <div id="one_cmc" class="col pool-col">
+                                <!-- Pool Loop creates HTML Here --> 
+                            </div>
+                            <div id="two_cmc" class="col pool-col">
+                                <!-- Pool Loop creates HTML Here -->    
+                            </div>
+                            <div id="three_cmc" class="col pool-col">
+                                <!-- Pool Loop creates HTML Here --> 
+                            </div>
+                            <div id="four_cmc" class="col pool-col">
+                                <!-- Pool Loop creates HTML Here --> 
+                            </div>
+                            <div id="five_cmc" class="col pool-col">
+                                <!-- Pool Loop creates HTML Here --> 
+                            </div>
+                            <div id="six_cmc" class="col pool-col">
+                                <!-- Pool Loop creates HTML Here --> 
+                            </div>
+                            <div id="sideboard" class="col pool-col">
+                                <!-- Pool Loop creates HTML Here --> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="../HTMLGeneration.js"></script>
+    <script type="text/javascript" src="../DraftSimPackage.js"></script>
+    <script type="text/javascript" src="./kaldheim.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+        $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+    });
+    </script>
+  </body>
+</html>

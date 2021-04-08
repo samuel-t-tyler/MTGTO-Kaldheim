@@ -80,8 +80,8 @@ const oddsRare = 0.875;
 let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", setSize, inputSize, oddsRare, landSlot, elements);
 
 Promise.all([
-  tf.loadLayersModel("./kaldheim/tfjs_model/model.json"),
-  fetch("./kaldheim/data/output_master_hash.txt"),
+  tf.loadLayersModel("./tfjs_model/model.json"),
+  fetch("./data/output_master_hash.txt"),
 ])
   .then(function (responses) {
     // Get a JSON object from each of the responses

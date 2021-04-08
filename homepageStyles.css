@@ -1,0 +1,146 @@
+html {
+    background-color: black;
+}
+body {
+    padding: 0;
+    margin: 0;
+    background-color: black;
+}
+
+.background-image {
+    z-index: -1;
+    position: fixed;
+    width: 110% ;
+    height: 110%;
+    background-repeat: no-repeat;
+    object-fit: cover;
+    opacity: 0%;
+    overflow: hidden;
+    transition: 500ms linear;
+}
+
+h1 {
+    z-index: 1;
+}
+
+#test {
+    display: none;
+    position: fixed;
+    z-index: 100000;
+    opacity: 1 !important;
+    min-width: 50vw;
+    min-height: 100vw;
+    max-width: 50vw;
+    max-height: 100vw;
+    left: 25vw;
+    background-color: rgb(32, 32, 32);
+}
+
+
+.particles-js-canvas-el {
+    position: absolute;
+}
+
+#title {
+    background-color: transparent;
+    color: white;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 10vh;
+    margin-top: -20vh; /* Negative half of height. */
+    margin-left: -20.1vh; /* Negative half of width. */
+    font-family: 'Orbitron', sans-serif;
+}
+
+#kaldheim {
+    background-color: transparent;
+    color: white;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 5vh;
+    filter: brightness(50%);
+    margin-top: -8vh; /* Negative half of height. */
+    margin-left: -14.4vh; /* Negative half of width. */
+    font-family: 'Orbitron', sans-serif;
+}
+
+#strixhaven {
+    background-color: transparent;
+    color: white;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 5vh;
+    filter: brightness(50%);
+    margin-top: -2vh; /* Negative half of height. */
+    margin-left: -19.4vh; /* Negative half of width. */
+    font-family: 'Orbitron', sans-serif;
+}
+
+#about {
+    background-color: transparent;
+    color: white;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 5vh;
+    filter: brightness(50%);
+    margin-top: 4vh; /* Negative half of height. */
+    margin-left: -10.3vh; /* Negative half of width. */
+    font-family: 'Orbitron', sans-serif;
+}
+
+#about:hover {
+    filter: brightness(200%);
+    animation-name: brighten;
+    animation-duration: 1s;
+    animation-fill-mode: forwards; 
+    cursor: pointer;  
+}
+
+#kaldheim:hover {
+    filter: brightness(200%);
+    animation-name: brighten;
+    animation-duration: 1s;
+    animation-fill-mode: forwards; 
+    cursor: pointer;
+}
+
+#strixhaven:hover {
+    filter: brightness(200%);
+    animation-name: brighten;
+    animation-duration: 1s;
+    animation-fill-mode: forwards; 
+    cursor: pointer;
+}
+
+a {
+  color: inherit; /* blue colors for links too */
+  text-decoration: inherit; /* no underline */
+}
+
+          
+.mystyle { 
+    animation-name: reverse; 
+    animation-duration: 1s; 
+} 
+          
+@keyframes brighten { 
+    from { 
+        filter: brightness(50%)
+    } 
+    to { 
+        filter: brightness(150%)
+    } 
+} 
+          
+@keyframes reverse { 
+    from { 
+        filter: brightness(150%)
+    } 
+    to { 
+        filter: brightness(50%) 
+    } 
+} 
