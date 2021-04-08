@@ -3,7 +3,55 @@
 // python -m http.server (in console)
 // http://localhost:8000/path
 
-///////////////////////////////// KALDHEIM UNIQUE VARIABLES //////////////////////////////////
+///////////////////////////////// CREATE HTML WITH LOOP //////////////////////////////////
+let KaldheimHTMLGeneration = new HTMLGeneration();
+
+let mainWindow = document.getElementById("main_window");
+KaldheimHTMLGeneration.createPackHTML(mainWindow);
+
+//Element naming convention not used because these variables are not directly reference anywhere, accessed though elemenetPoolColArray
+let poolZeroCmcCol = document.getElementById("zero_cmc");
+let poolOneCmcCol = document.getElementById("one_cmc");
+let poolTwoCmcCol = document.getElementById("two_cmc");
+let poolThreeCmcCol = document.getElementById("three_cmc");
+let poolFourCmcCol = document.getElementById("four_cmc");
+let poolFiveCmcCol = document.getElementById("five_cmc");
+let poolSixCmcCol = document.getElementById("six_cmc");
+let poolSideboardCol = document.getElementById("sideboard");
+
+let elementPoolColArray = [poolZeroCmcCol, poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol, poolSideboardCol];
+
+KaldheimHTMLGeneration.createPoolHTML(elementPoolColArray);
+
+///////////////////////////////// DEFINING GLOBAL VARIABLES //////////////////////////////////
+// Fetching relevant cards by class, defining global variables
+let elementDisplayedPack = document.getElementsByClassName("pack-card-image");
+let elementDisplayedPackDiv = document.getElementsByClassName("pack-card-image-div");
+
+let elementScoreHTML = document.getElementById("score");
+let elementFeedbackHTML = document.getElementById("feedback");
+let elementLoadingSpinner = document.getElementById("loadingSpinner");
+let elementRestartIcon = document.getElementById("restartIcon")
+let elementPoolToggle = document.getElementById("pool-toggler");
+
+let elementResetPool = document.getElementById("resetSideboard");
+let elementToggleFeedback = document.getElementById("toggleFeedback");
+let elementRestart = document.getElementById("resetDraft")
+
+//Element naming convention not used because these variables are not directly reference anywhere, accessed though elemenetPoolArray
+let poolZeroCmc = document.getElementsByClassName("0-cmc-image");
+let poolOneCmc = document.getElementsByClassName("1-cmc-image");
+let poolTwoCmc = document.getElementsByClassName("2-cmc-image");
+let poolThreeCmc = document.getElementsByClassName("3-cmc-image");
+let poolFourCmc = document.getElementsByClassName("4-cmc-image");
+let poolFiveCmc = document.getElementsByClassName("5-cmc-image");
+let poolSixCmc = document.getElementsByClassName("6-cmc-image");
+
+let elementPoolArray = [poolZeroCmc, poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
+let elementSideboardArray = document.getElementsByClassName("7-cmc-image");
+
+//////////////////////////////// KALDHEIM UNIQUE VARIABLES //////////////////////////////
+
 let landSlot = [
   "Snow-Covered Mountain",
   "Snow-Covered Island",
@@ -22,58 +70,12 @@ let landSlot = [
   "Woodland Chasm",
 ];
 
-const setSize = 280
-const inputSize = 574
-const oddsRare = 0.875
-
-///////////////////////////////// FETCH CLASS WITH METHODS  //////////////////////////////////
-let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", setSize, inputSize, oddsRare, landSlot);
-
-///////////////////////////////// CREATE HTML WITH LOOP //////////////////////////////////
-let mainWindow = document.getElementById("main_window");
-
-KaldheimDraftPackage.createPackHTML(mainWindow);
-
-let poolZeroCmcCol = document.getElementById("zero_cmc");
-let poolOneCmcCol = document.getElementById("one_cmc");
-let poolTwoCmcCol = document.getElementById("two_cmc");
-let poolThreeCmcCol = document.getElementById("three_cmc");
-let poolFourCmcCol = document.getElementById("four_cmc");
-let poolFiveCmcCol = document.getElementById("five_cmc");
-let poolSixCmcCol = document.getElementById("six_cmc");
-let poolSideboardCol = document.getElementById("sideboard");
-
-let elementPoolColArray = [poolZeroCmcCol, poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol, poolSideboardCol];
-
-KaldheimDraftPackage.createPoolHTML(elementPoolColArray);
-
-///////////////////////////////// DEFINING GLOBAL VARIABLES //////////////////////////////////
-// Fetching relevant cards by class, defining global variables
-let elementDisplayedPack = document.getElementsByClassName("pack-card-image");
-let elementDisplayedPackDiv = document.getElementsByClassName("pack-card-image-div");
-
-let elementScoreHTML = document.getElementById("score");
-let elementFeedbackHTML = document.getElementById("feedback");
-let elementLoadingSpinner = document.getElementById("loadingSpinner");
-let elementRestartIcon = document.getElementById("restartIcon")
-let elementPoolToggle = document.getElementById("pool-toggler");
-
-let elementResetPool = document.getElementById("resetSideboard");
-let elementToggleFeedback = document.getElementById("toggleFeedback");
-let elementRestart = document.getElementById("resetDraft")
-
-let poolZeroCmc = document.getElementsByClassName("0-cmc-image");
-let poolOneCmc = document.getElementsByClassName("1-cmc-image");
-let poolTwoCmc = document.getElementsByClassName("2-cmc-image");
-let poolThreeCmc = document.getElementsByClassName("3-cmc-image");
-let poolFourCmc = document.getElementsByClassName("4-cmc-image");
-let poolFiveCmc = document.getElementsByClassName("5-cmc-image");
-let poolSixCmc = document.getElementsByClassName("6-cmc-image");
-
-let elementPoolArray = [poolZeroCmc, poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
-let elementSideboardArray = document.getElementsByClassName("7-cmc-image");
+const setSize = 280;
+const inputSize = 574;
+const oddsRare = 0.875;
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
+let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", setSize, inputSize, oddsRare, landSlot);
 
 Promise.all([
   tf.loadLayersModel("./kaldheim/tfjs_model/model.json"),

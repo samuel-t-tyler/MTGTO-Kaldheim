@@ -12,11 +12,6 @@ body {
     user-select: none;
 }
 
-.fullPack {
-  display: block;
-  border: transparent !important;
-}
-
 .pool-card-image {
   outline: 10px !important;
   outline-color: transparent;
