@@ -117,7 +117,7 @@ body {
 #score {
     color: rgb(255, 255, 255);
     margin-bottom: 0;
-    font-size: 3.2vh;
+    font-size: 3vh;
     font-family: 'Orbitron', sans-serif;
     -webkit-transition: opacity 0.1s ease-in-out;
    -moz-transition: opacity 0.1s ease-in-out;

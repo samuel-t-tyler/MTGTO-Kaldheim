@@ -6,13 +6,15 @@ class DraftSimPackage {
     setSize,
     inputSize,
     oddsOfRare,
-    landSlot = ["Mountain", "Swamp", "Forest", "Plains", "Island"]
+    landSlot = ["Mountain", "Swamp", "Forest", "Plains", "Island"],
+    elements
   ) {
     this.set = set; //String of the set name
     this.setSize = setSize; //Number of cards in the set
     this.inputSize = inputSize; //Size of the input array into the neural net
     this.oddsOfRare = oddsOfRare; //Odds of opening a rare in any given pack, relateive to a mythic (0-1)
     this.landSlot = landSlot; //Array of strings that represent the unique set of cards that can be in the land slot for a se
+    this.elements = elements
   }
   // Critical variables
   masterHash; // Layered object that can take any card representation and turn into any other card representation
@@ -248,8 +250,8 @@ class DraftSimPackage {
     );
     let arrayOfURLs = [];
     for (let z = 0; z < 15; z++) {
-      elementDisplayedPack[z].classList.add("fullPack");
-      elementDisplayedPack[z].src = "";
+      this.elements["DisplayedPack"][z].classList.add("fullPack");
+      this.elements["DisplayedPack"][z].src = "";
     }
     for (let i = 0; i < humanPlayerActivePack.length; i++) {
       if (humanPlayerActivePack[i] > 0) {
@@ -274,7 +276,7 @@ class DraftSimPackage {
     }
     arrayOfSortedURLS = arrayOfSortedURLS.concat(rares, uncommons, commons);
     for (let k = 0; k < arrayOfSortedURLS.length; k++) {
-      elementDisplayedPack[k].src = arrayOfSortedURLS[k];
+      this.elements["DisplayedPack"][k].src = arrayOfSortedURLS[k];
     }
   };
   /*
@@ -285,38 +287,38 @@ class DraftSimPackage {
   then updates the score.innerHTML to reflect the result
   */
   displayPickAccuracy = (activePickSoftmax, picks, preds) => {
-    elementScoreHTML.style.opacity = 0;
+    this.elements["ScoreHTML"].style.opacity = 0;
     setTimeout(() => {
-      elementFeedbackHTML.style.opacity = 1;
+      this.elements["FeedbackHTML"].style.opacity = 1;
       let botPickSoftmax = activePickSoftmax[preds[0]];
       let humanPickSoftmax = activePickSoftmax[picks[0]];
       let error = 1 - humanPickSoftmax / botPickSoftmax;
       let pickValue = -Math.pow(error, 2.8) + 1;
       this.currentScore += pickValue;
       this.currentScoreFixed = this.currentScore.toFixed(1);
-      elementFeedbackHTML.style.color = "white";
+      this.elements["FeedbackHTML"].style.color = "white";
       if (this.currentScoreFixed[this.currentScoreFixed.length - 1] === "0") {
         this.currentScoreFixed = this.currentScore.toFixed(0);
       }
-      elementScoreHTML.innerHTML = `${this.currentScoreFixed} / ${
+      this.elements["ScoreHTML"].innerHTML = `${this.currentScoreFixed} / ${
         this.currentPick + 1
       }`;
       if (pickValue >= 0.95) {
-        elementFeedbackHTML.innerHTML = "Excellent!";
+        this.elements["FeedbackHTML"].innerHTML = "Excellent!";
       }
       if (pickValue >= 0.7 && pickValue < 0.95) {
-        elementFeedbackHTML.innerHTML = "Great!";
+        this.elements["FeedbackHTML"].innerHTML = "Great!";
       }
       if (pickValue >= 0.5 && pickValue < 0.7) {
-        elementFeedbackHTML.innerHTML = "Not bad!";
+        this.elements["FeedbackHTML"].innerHTML = "Not bad!";
       }
       if (pickValue >= 0.3 && pickValue < 0.5) {
-        elementFeedbackHTML.innerHTML = "Possible Mistake";
+        this.elements["FeedbackHTML"].innerHTML = "Possible Mistake";
       }
       if (pickValue < 0.3) {
-        elementFeedbackHTML.innerHTML = "Mistake";
+        this.elements["FeedbackHTML"].innerHTML = "Mistake";
       }
-      elementScoreHTML.style.opacity = 1;
+      this.elements["ScoreHTML"].style.opacity = 1;
     }, 150);
     return;
   };
@@ -325,10 +327,10 @@ class DraftSimPackage {
   displayBotPred = (pred) => {
     if (this.currentFeedbackActive === true) {
       let predURL = this.masterHash["index_to_url"][pred];
-      for (let i = 0; i < elementDisplayedPack.length; i++) {
-        if (elementDisplayedPack[i].src === predURL) {
+      for (let i = 0; i < this.elements["DisplayedPack"].length; i++) {
+        if (this.elements["DisplayedPack"][i].src === predURL) {
           //using ID instead of classname here because it's easier + faster to remove between card draws:
-          elementDisplayedPack[i].id = "greenSelect";
+          this.elements["DisplayedPack"][i].id = "greenSelect";
         }
       }
     }
@@ -374,16 +376,16 @@ class DraftSimPackage {
       }
     }
     for (let k = 0; k < 30; k++) {
-      elementSideboardArray[k].src = "";
+      this.elements["SideboardArray"][k].src = "";
       if (arrayOfSideboardImages[k]) {
-        elementSideboardArray[k].src = arrayOfSideboardImages[k];
+        this.elements["SideboardArray"][k].src = arrayOfSideboardImages[k];
       }
     }
   }
   //  Function that resets the card srcs of sideboard cards if the player presses the "resetSideboard button"
   displayResetSideboard() {
-    for (let k = 0; k < elementSideboardArray.length; k++) {
-      elementSideboardArray[k].src = "";
+    for (let k = 0; k < this.elements["SideboardArray"].length; k++) {
+      this.elements["SideboardArray"][k].src = "";
     }
   }
 
@@ -418,7 +420,7 @@ class DraftSimPackage {
         this.activePoolUrls[j]
       );
       for (let i = 0; i < this.activePoolUrls[j].length; i++) {
-        elementPoolArray[j][i].src = this.activePoolUrls[j][i];
+        this.elements["PoolArray"][j][i].src = this.activePoolUrls[j][i];
       }
     }
     return;
@@ -431,10 +433,10 @@ class DraftSimPackage {
     const cutURL = this.activePoolUrls[pile].splice(index - 1, 1);
     this.activePoolSideboard[pile].push(cutURL[0]);
     for (let k = 0; k < 30; k++) {
-      elementPoolArray[pile][k].src = "";
+      this.elements["PoolArray"][pile][k].src = "";
     }
     for (let z = 0; z < this.activePoolUrls[pile].length; z++) {
-      elementPoolArray[pile][z].src = this.activePoolUrls[pile][z];
+      this.elements["PoolArray"][pile][z].src = this.activePoolUrls[pile][z];
     }
     this.displaySideboard();
     this.currentMainDeckCount -= 1;
@@ -452,7 +454,7 @@ class DraftSimPackage {
     }
     for (let k = 0; k < 7; k++) {
       for (let l = 0; l < this.activePoolUrls[k].length; l++) {
-        elementPoolArray[k][l].src = this.activePoolUrls[k][l];
+        this.elements["PoolArray"][k][l].src = this.activePoolUrls[k][l];
       }
     }
     this.activePoolSideboard = [[], [], [], [], [], [], []];
@@ -463,14 +465,14 @@ class DraftSimPackage {
   // Function that hides or displays player feedback based on user input in the menu
   displayFeedbackToggle = () => {
     if (this.currentFeedbackActive === true) {
-      elementFeedbackHTML.style.visibility = "hidden";
-      elementScoreHTML.style.visibility = "hidden";
+      this.elements["FeedbackHTML"].style.visibility = "hidden";
+      this.elements["ScoreHTML"].style.visibility = "hidden";
       this.currentFeedbackActive = false;
       return;
     }
     if (this.currentFeedbackActive === false) {
-      elementFeedbackHTML.style.visibility = "visible";
-      elementScoreHTML.style.visibility = "visible";
+      this.elements["FeedbackHTML"].style.visibility = "visible";
+      this.elements["ScoreHTML"].style.visibility = "visible";
       this.currentFeedbackActive = true;
       return;
     }
@@ -495,7 +497,7 @@ class DraftSimPackage {
         this.activePoolUrls[j]
       );
       for (let i = 0; i < this.activePoolUrls[j].length; i++) {
-        elementPoolArray[j][i].src = this.activePoolUrls[j][i];
+        this.elements["PoolArray"][j][i].src = this.activePoolUrls[j][i];
       }
     }
     this.currentMainDeckCount++;
@@ -504,20 +506,20 @@ class DraftSimPackage {
   };
 
   displayMainDeckCount() {
-    elementScoreHTML.style.opacity = 0;
+    this.elements["ScoreHTML"].style.opacity = 0;
     setTimeout(() => {
-      elementScoreHTML.innerHTML = `Maindeck: ${this.currentMainDeckCount}`;
-      elementScoreHTML.style.opacity = 1;
+      this.elements["ScoreHTML"].innerHTML = `Maindeck: ${this.currentMainDeckCount}`;
+      this.elements["ScoreHTML"].style.opacity = 1;
     }, 150);
   }
 
   displayScore() {
-    elementScoreHTML.style.opacity = 0;
+    this.elements["ScoreHTML"].style.opacity = 0;
     setTimeout(() => {
-      elementScoreHTML.innerHTML = `${this.currentScoreFixed} / ${
+      this.elements["ScoreHTML"].innerHTML = `${this.currentScoreFixed} / ${
         this.currentPick + 1
       }`;
-      elementScoreHTML.style.opacity = 1;
+      this.elements["ScoreHTML"].style.opacity = 1;
     }, 150);
   }
 
@@ -610,16 +612,16 @@ class DraftSimPackage {
     if (this.currentPoolToggled === false) {
       this.displayMainDeckCount();
       this.currentPoolToggled = true;
-      elementPoolToggle.style.color = "black";
-      elementPoolToggle.style.backgroundColor = "white";
-      elementRestartIcon.style.display = "none";
+      this.elements["PoolToggle"].style.color = "black";
+      this.elements["PoolToggle"].style.backgroundColor = "white";
+      this.elements["RestartIcon"].style.display = "none";
     } else {
-      elementScoreHTML.innerHTML = "";
+      this.elements["ScoreHTML"].innerHTML = "";
       this.currentPoolToggled = false;
-      elementPoolToggle.style.color = "white";
-      elementPoolToggle.style.backgroundColor = "black";
+      this.elements["PoolToggle"].style.color = "white";
+      this.elements["PoolToggle"].style.backgroundColor = "black";
       if (this.currentDraftOver === true) {
-        elementRestartIcon.style.display = "block";
+        this.elements["RestartIcon"].style.display = "block";
       }
     }
   };
@@ -628,11 +630,11 @@ class DraftSimPackage {
   updateDraftIfOver = () => {
     if (this.currentPick === 45) {
       for (let i = 0; i < this.displayPack.length; i++) {
-        elementDisplayedPack[i].style.display = "none";
-        elementDisplayedPack[i].style.border = "transparent";
+        this.elements["DisplayedPack"][i].style.display = "none";
+        this.elements["DisplayedPack"][i].style.border = "transparent";
       }
-      elementRestartIcon.style.display = "block";
-      elementRestartIcon.addEventListener("click", resetDraft);
+      this.elements["RestartIcon"].style.display = "block";
+      this.elements["RestartIcon"].addEventListener("click", resetDraft);
     }
     this.currentDraftOver = true;
   };
@@ -640,11 +642,11 @@ class DraftSimPackage {
   updatePoolTooltips() {
     for (let j = 0; j < 7; j++) {
       for (let i = 0; i < this.activePoolUrls[j].length; i++) {
-        let src = elementPoolArray[j][i].src;
-        elementPoolArray[j][i].removeAttribute("title");
-        elementPoolArray[j][i].removeAttribute("data-toggle");
-        elementPoolArray[j][i].setAttribute("data-toggle", "tooltip");
-        elementPoolArray[j][i].setAttribute(
+        let src = this.elements["PoolArray"][j][i].src;
+        this.elements["PoolArray"][j][i].removeAttribute("title");
+        this.elements["PoolArray"][j][i].removeAttribute("data-toggle");
+        this.elements["PoolArray"][j][i].setAttribute("data-toggle", "tooltip");
+        this.elements["PoolArray"][j][i].setAttribute(
           "title",
           `<img src="${src}" class="tooltip-popup" />`
         );
@@ -673,7 +675,7 @@ class DraftSimPackage {
   resetDraft = () => {
     // resetting all varaiables that store gamestate
     for (let i = 0; i < 15; i++) {
-      elementDisplayedPackDiv[i].style.animation = "fadeOut ease 0.25s";
+      this.elements["DisplayedPackDiv"][i].style.animation = "fadeOut ease 0.25s";
     }
     this.currentScore = 0;
     this.currentScoreFixed = 0;
@@ -690,7 +692,7 @@ class DraftSimPackage {
     this.activePickSoftmax = [];
     this.activePoolUrls = [[], [], [], [], [], [], []];
     this.activePoolSideboard = [[], [], [], [], [], [], []];
-    elementRestartIcon.style.display = "none";
+    this.elements["RestartIcon"].style.display = "none";
     this.currentDraftOver = false;
     this.currentMainDeckCount = 0;
 
@@ -709,27 +711,27 @@ class DraftSimPackage {
 
     // Resetting event listeners
     for (let i = 0; i < 15; i++) {
-      elementDisplayedPack[i].addEventListener("click", this.humanMakesPick);
+      this.elements["DisplayedPack"][i].addEventListener("click", this.humanMakesPick);
     }
     for (let i = 0; i < 30; i++) {
-      elementSideboardArray[i].src = "";
+      this.elements["SideboardArray"][i].src = "";
     }
 
     // Resetting pool SRCs
     for (let j = 0; j < 7; j++) {
       for (let i = 0; i < 30; i++) {
-        elementPoolArray[j][i].src = "";
+        this.elements["PoolArray"][j][i].src = "";
       }
     }
 
     // Resetting inner HTML
-    elementScoreHTML.innerHTML = "Score";
-    elementFeedbackHTML.innerHTML = "";
+    this.elements["ScoreHTML"].innerHTML = "Score";
+    this.elements["FeedbackHTML"].innerHTML = "";
     setTimeout(() => {
       for (let i = 0; i < 15; i++) {
         this.displayPack(this.activeOnehots[0]);
-        elementDisplayedPackDiv[i].style.animation = "";
-        elementDisplayedPackDiv[i].style.animation = "fadeIn ease 0.25s";
+        this.elements["DisplayedPack"][i].style.animation = "";
+        this.elements["DisplayedPack"][i].style.animation = "fadeIn ease 0.25s";
       }
     }, 250);
   };
@@ -739,17 +741,17 @@ class DraftSimPackage {
     // Changing border color of the card the player picked
     if (this.currentPicksActive === true) {
       for (let i = 0; i < 15; i++) {
-        elementDisplayedPack[i].removeEventListener(
+        this.elements["DisplayedPack"][i].removeEventListener(
           "click",
           this.humanMakesPick
         );
       }
       this.currentPicksActive = false;
       let pickSRC = event.srcElement.src;
-      for (let i = 0; i < elementDisplayedPack.length; i++) {
-        if (elementDisplayedPack[i].src === pickSRC) {
+      for (let i = 0; i < this.elements["DisplayedPack"].length; i++) {
+        if (this.elements["DisplayedPack"][i].src === pickSRC) {
           //using ID instead of classname here because it's easier + faster to remove between card draws:
-          elementDisplayedPack[i].id = "orangeSelect";
+          this.elements["DisplayedPack"][i].id = "orangeSelect";
         }
       }
       // Highlighting bot pick and calculating accuracy of human pick
@@ -769,7 +771,7 @@ class DraftSimPackage {
       // Updating event listeners
       setTimeout(() => {
         for (let i = 0; i < 15; i++) {
-          elementDisplayedPack[i].addEventListener(
+          this.elements["DisplayedPack"][i].addEventListener(
             "click",
             this.humanSeesResults
           );
@@ -780,11 +782,11 @@ class DraftSimPackage {
   humanSeesResults = () => {
     if (this.currentPicksActive === false) {
       for (let i = 0; i < 15; i++) {
-        elementDisplayedPack[i].removeEventListener(
+        this.elements["DisplayedPack"][i].removeEventListener(
           "click",
           this.humanSeesResults
         );
-        elementDisplayedPackDiv[i].style.animation = "fadeOut ease 0.3s";
+        this.elements["DisplayedPackDiv"][i].style.animation = "fadeOut ease 0.3s";
       }
       this.updatePick();
       if (this.currentPick < 45) {
@@ -813,15 +815,15 @@ class DraftSimPackage {
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
             this.displayPack(this.activeOnehots[0]);
-            elementDisplayedPackDiv[i].style.animation = "";
-            elementDisplayedPackDiv[i].style.animation = "fadeIn ease 0.3s";
+            this.elements["DisplayedPackDiv"][i].style.animation = "";
+            this.elements["DisplayedPackDiv"][i].style.animation = "fadeIn ease 0.3s";
           }
         }, 210);
         this.updatePoolTooltips();
 
         setTimeout(() => {
           for (let m = 0; m < 15; m++) {
-            elementDisplayedPack[m].addEventListener(
+            this.elements["DisplayedPack"][m].addEventListener(
               "click",
               this.humanMakesPick
             );
@@ -830,7 +832,7 @@ class DraftSimPackage {
       } else {
         this.updateDraftIfOver();
       }
-      elementFeedbackHTML.style.opacity = 0;
+      this.elements["FeedbackHTML"].style.opacity = 0;
     }
   };
   setupAfterPromise(data) {
@@ -852,7 +854,7 @@ class DraftSimPackage {
       this.activePools,
       this.currentPack
     );
-    elementLoadingSpinner.style.display = "none";
+    this.elements["LoadingSpinner"].style.display = "none";
     this.displayPack(this.activeOnehots[0]);
     [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
       this.activeOnehots
