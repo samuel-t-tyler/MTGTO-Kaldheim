@@ -19,12 +19,12 @@ body {
 
 /* add these when you click on card */
 #greenSelect {
-  box-shadow: 0 0 4pt 3pt #33cc33 !important;
+  box-shadow: 0 0 4pt 3pt #46e646 !important;
   transition: all 0.2s !important;
 }
 
 #orangeSelect {
-  box-shadow: 0 0 4pt 3pt #ff9966 !important;
+  box-shadow: 0 0 4pt 3pt #ffa77b !important;
   transition: all 0.2s !important;
 }
 
@@ -174,7 +174,7 @@ body {
 
 #main_window {
     height: 92vh;
-    padding-top: 3vh;
+    padding-top: 4.3vh;
     background-color: transparent;
 }
 
@@ -240,8 +240,6 @@ img {
 }
 
 .pool-card-image {
-    margin-right: 5vw;
-    margin-left: 5vw;
     width: auto;
     min-width: 100%;
     margin: 0%;
@@ -397,7 +395,6 @@ animation: fadeIn ease 0.5s;
   }
 
   #feedback {
-      width: 15vh;
       font-size: 2vh !important;
       text-align: center;
       margin-left: 100%;
