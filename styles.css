@@ -131,8 +131,8 @@ body {
     color: rgb(255, 255, 255) !important;
     margin-bottom: 0;
     font-size: 3vh;
+    width: 30vh;
     box-sizing: border-box;
-    width: 40vh;
     text-align: center;
     font-family: 'Orbitron', sans-serif;
     -webkit-transition: opacity 0.1s ease-in-out;
@@ -394,11 +394,6 @@ animation: fadeIn ease 0.5s;
     min-width: 2vh;
   }
 
-  #feedback {
-      font-size: 2vh !important;
-      text-align: center;
-      margin-left: 100%;
-  }
   #score {
     display: none;
     color: white !important;

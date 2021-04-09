@@ -14,11 +14,12 @@ class DraftSimPackage {
     this.inputSize = inputSize; //Size of the input array into the neural net
     this.oddsOfRare = oddsOfRare; //Odds of opening a rare in any given pack, relateive to a mythic (0-1)
     this.landSlot = landSlot; //Array of strings that represent the unique set of cards that can be in the land slot for a se
-    this.elements = elements
+    this.elements = elements;
   }
   // Critical variables
   masterHash; // Layered object that can take any card representation and turn into any other card representation
   model; //Tensorflow JS model file
+  ratings;
 
   // Variables used to maintain the global gamestate. All start with the word "current"
   currentScore = 0;
@@ -199,7 +200,7 @@ class DraftSimPackage {
 
   //This is the ML model hosted by TFJS.  This function takes a onehot of shape this.inputShape and spits out a onehot vector
   // We need to manutally take the argmax of the softmax and use masterHash["index_to_name"] to find the card name of that output
-  makeBatchPreds = (arrayOfOnehots) => {
+  makeMLPreds = (arrayOfOnehots) => {
     // generating packs to multiply predictions by
     let arrayOfPacks = [];
     for (let k = 0; k < arrayOfOnehots.length; k++) {
@@ -240,6 +241,108 @@ class DraftSimPackage {
     this.activePreds = arrayOfIndexes;
     return [this.activePreds, this.activePickSoftmax];
   };
+  
+  // Bot algorithm that uses heuristics to make predictions rather than machine learning.  For when we have insufficient ML data
+  makeHeuristicPreds() {
+    for (let i = 0; i < 8; i++) {
+      if (i === 0) {
+        this.activePickSoftmax = Array(this.setSize).fill(0);
+      }
+      let colorcomitted = false;
+      let colorComitOne;
+      let colorComitTwo;
+      let colorValueSum;
+      let colorPull = {
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0,
+      }
+      let pack = this.findContense(this.activePacks[i][this.currentPack]);
+      let pool = this.findContense(this.activePools[i]);
+
+      // Calcuating the pull for each players colors to apply bonus to card value
+      for (let k = 0; k < pool.length; k++) {
+        let color = this.masterHash["name_to_color"][pool[k]];
+        let rating = 1  //Change this using rating hash, take max 2 - rating
+        for (let l = 0; l < color.length; l++) {
+          colorPull[color[l]] += rating * 0.25;
+        }
+      }
+
+      // Determining if we are in the "two color locked" threshold
+      let colorPullArray = Object.entries(colorPull);
+      colorPullArray.sort(function (a, b) { return b[1] - a[1] })
+      if (colorPullArray[0][1] > 3.3 && colorPullArray[1][1] > 3.3) {
+        colorcomitted = true
+        colorComitOne = colorPullArray[0][0];
+        colorComitTwo = colorPullArray[1][0];
+      }
+
+      // calculating pack values
+      let packCardValues = []
+      for (let m = 0; m < pack.length; m++) {
+        let cardRating = 0
+        let color = this.masterHash["name_to_color"][pack[m]];
+        if (colorcomitted === false) {
+          if (color.length === 0) {
+            cardRating += 1 + colorPullArray[0][1]  //Change once we have rating dict
+          }
+          if (color.length === 1) {
+            cardRating += 1 + colorPull[color[0]]; //Change once we have rating dict
+          }
+          if (color.length === 2) {
+            let colorMatchValue = colorPull[color[0]] + colorPull[color[1]];
+            cardRating += 1 + colorMatchValue; //Change once we have rating dict
+          }
+          if (color.length > 2) {
+            cardRating += 1 - 0.5
+          }
+        } else {
+          if (color.length === 0) {
+            cardRating += 2.5; //Change once we have rating dict
+          }
+          if (color.length === 1) {
+            if (color[0] === colorComitOne || color[0] === colorComitTwo) {
+              cardRating += 2.5; //Change once we have rating dict
+            }
+          }
+          if (color.length === 2) {
+            cardRating = 1; //Change once we have rating dict
+            if (color[0] === colorComitOne || color[0] === colorComitTwo) {
+              cardRating += 1.25; //Change once we have rating dict
+            }
+            if (color[1] === colorComitOne || color[1] === colorComitTwo) {
+              cardRating += 1.25; //Change once we have rating dict
+            }
+          }
+          if (color.length > 2) {
+            cardRating = 1; //Change once we have rating dict
+            if (color[0] === colorComitOne || color[0] === colorComitTwo) {
+              cardRating = 1 + 0.75; //Change once we have rating dict
+            }
+            if (color[1] === colorComitOne || color[1] === colorComitTwo) {
+              cardRating = 1 + 0.75; //Change once we have rating dict
+            }
+            if (color[2] === colorComitOne || color[2] === colorComitTwo) {
+              cardRating = 1 + 0.75; //Change once we have rating dict
+            }
+          }
+        }
+        if (i === 0) {
+          this.activePickSoftmax[this.masterHash["name_to_index"][pack[m]]] = cardRating
+        }
+        let nameAndRating = [pack[m], cardRating];
+        packCardValues.push(nameAndRating);
+      }
+      packCardValues.sort(function(a, b) {return b[1] - a[1]})
+      let pick = packCardValues[0][0]
+      let pickIndex = this.masterHash["name_to_index"][pick];
+      this.activePreds[i] = pickIndex;
+      console.log(pick);
+    }
+  }
 
   ///////////////////////////////// DISPLAY //////////////////////////////////
   // Change the displayed pack SRCs to the image of the current pack
@@ -389,14 +492,7 @@ class DraftSimPackage {
     }
   }
 
-  // Function that displays the images of the cards you have selected in the pool tab
-  displayPoolImages = (picks) => {
-    // Remove css IDs for border styles:
-    // There might be a better function for you to move this to,
-    // like if if you have one doing any cleanup after the pick.
-    // I couldn't find one and it's fine here if not.
-    // removing these IDs so you don't get duplicate borders next pick
-
+  displayRemoveBorders() {
     if (document.getElementById("orangeSelect")) {
       document.getElementById("orangeSelect").removeAttribute("id");
     }
@@ -404,7 +500,9 @@ class DraftSimPackage {
     if (document.getElementById("greenSelect")) {
       document.getElementById("greenSelect").removeAttribute("id");
     }
+  }
 
+  updateActivePools(picks) {
     let humanPick = this.masterHash["index_to_name"][picks[0]];
     let humanPickCMC = this.masterHash["name_to_cmc"][humanPick];
     let humanPickURL = this.masterHash["name_to_url"][humanPick][
@@ -415,6 +513,10 @@ class DraftSimPackage {
     } else {
       this.activePoolUrls[5].push(humanPickURL);
     }
+  }
+
+  // Function that displays the images of the cards you have selected in the pool tab
+  displayPoolImages = () => {
     for (let j = 0; j < 7; j++) {
       this.activePoolUrls[j] = this.displayPoolSortedByColor(
         this.activePoolUrls[j]
@@ -423,7 +525,6 @@ class DraftSimPackage {
         this.elements["PoolArray"][j][i].src = this.activePoolUrls[j][i];
       }
     }
-    return;
   };
   //  Function that resets pool after you remove a card from it and hide it in the sideboard
   displayPoolAfterSideboard = (event) => {
@@ -508,7 +609,9 @@ class DraftSimPackage {
   displayMainDeckCount() {
     this.elements["ScoreHTML"].style.opacity = 0;
     setTimeout(() => {
-      this.elements["ScoreHTML"].innerHTML = `Maindeck: ${this.currentMainDeckCount}`;
+      this.elements[
+        "ScoreHTML"
+      ].innerHTML = `Maindeck: ${this.currentMainDeckCount}`;
       this.elements["ScoreHTML"].style.opacity = 1;
     }, 150);
   }
@@ -610,6 +713,8 @@ class DraftSimPackage {
   // Function that updates what is displayed when the pool window button is toggled
   updatePoolToggled = () => {
     if (this.currentPoolToggled === false) {
+      this.displayPoolImages();
+      this.updatePoolTooltips();
       this.displayMainDeckCount();
       this.currentPoolToggled = true;
       this.elements["PoolToggle"].style.color = "black";
@@ -650,14 +755,6 @@ class DraftSimPackage {
           "title",
           `<img src="${src}" class="tooltip-popup" />`
         );
-        console.log(
-          "added:",
-          this.masterHash["url_to_name"][src],
-          "to element row:",
-          j,
-          "element:",
-          i
-        );
         $('[data-toggle="tooltip"]').tooltip("dispose");
         $(document).ready(function () {
           $("[data-toggle=tooltip]").tooltip({
@@ -675,7 +772,8 @@ class DraftSimPackage {
   resetDraft = () => {
     // resetting all varaiables that store gamestate
     for (let i = 0; i < 15; i++) {
-      this.elements["DisplayedPackDiv"][i].style.animation = "fadeOut ease 0.25s";
+      this.elements["DisplayedPackDiv"][i].style.animation =
+        "fadeOut ease 0.25s";
     }
     this.currentScore = 0;
     this.currentScoreFixed = 0;
@@ -704,14 +802,17 @@ class DraftSimPackage {
       this.activePools,
       this.currentPack
     );
-    [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
+    [this.activePreds, this.activePickSoftmax] = this.makeMLPreds(
       this.activeOnehots
     );
     this.currentPicksActive = true;
 
     // Resetting event listeners
     for (let i = 0; i < 15; i++) {
-      this.elements["DisplayedPack"][i].addEventListener("click", this.humanMakesPick);
+      this.elements["DisplayedPack"][i].addEventListener(
+        "click",
+        this.humanMakesPick
+      );
     }
     for (let i = 0; i < 30; i++) {
       this.elements["SideboardArray"][i].src = "";
@@ -760,7 +861,7 @@ class DraftSimPackage {
 
       this.activePicks = JSON.parse(JSON.stringify(this.activePreds)); //this creates a deepcopy, because JS using shallowcopy for arrays
       this.activePicks[0] = pickIndex;
-
+      this.updateActivePools(this.activePicks);
       this.displayBotPred(this.activePreds[0]);
       this.displayPickAccuracy(
         this.activePickSoftmax,
@@ -786,7 +887,8 @@ class DraftSimPackage {
           "click",
           this.humanSeesResults
         );
-        this.elements["DisplayedPackDiv"][i].style.animation = "fadeOut ease 0.3s";
+        this.elements["DisplayedPackDiv"][i].style.animation =
+          "fadeOut ease 0.3s";
       }
       this.updatePick();
       if (this.currentPick < 45) {
@@ -806,20 +908,20 @@ class DraftSimPackage {
           this.activePools,
           this.currentPack
         );
-        [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
+        [this.activePreds, this.activePickSoftmax] = this.makeMLPreds(
           this.activeOnehots
         );
         this.currentPicksActive = true;
-        this.displayPoolImages(this.activePicks);
+        this.displayRemoveBorders();
         this.currentMainDeckCount++;
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
             this.displayPack(this.activeOnehots[0]);
             this.elements["DisplayedPackDiv"][i].style.animation = "";
-            this.elements["DisplayedPackDiv"][i].style.animation = "fadeIn ease 0.3s";
+            this.elements["DisplayedPackDiv"][i].style.animation =
+              "fadeIn ease 0.3s";
           }
         }, 210);
-        this.updatePoolTooltips();
 
         setTimeout(() => {
           for (let m = 0; m < 15; m++) {
@@ -838,6 +940,9 @@ class DraftSimPackage {
   setupAfterPromise(data) {
     this.masterHash = data[1];
     this.model = data[0];
+    if (data[2]) {
+      this.ratings = data[2];
+    }
     this.activePools = this.generateActivePools();
     this.activeFeatureVectors = this.generateActiveFeatures();
     [
@@ -856,7 +961,7 @@ class DraftSimPackage {
     );
     this.elements["LoadingSpinner"].style.display = "none";
     this.displayPack(this.activeOnehots[0]);
-    [this.activePreds, this.activePickSoftmax] = this.makeBatchPreds(
+    [this.activePreds, this.activePickSoftmax] = this.makeMLPreds(
       this.activeOnehots
     );
     this.currentPicksActive = true;

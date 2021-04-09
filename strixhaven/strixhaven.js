@@ -82,11 +82,12 @@ let StrixhavenDraftPackage = new DraftSimPackage("Strixhaven", setSize, inputSiz
 Promise.all([
   tf.loadLayersModel("./tfjs_model/model.json"),
   fetch("./data/output_master_hash.txt"),
+  fetch("./data/masterRatings.txt"),
 ])
   .then(function (responses) {
     // Get a JSON object from each of the responses
     let model = responses[0];
-    let json_response = responses.slice(1 - 2).map(function (response) {
+    let json_response = responses.slice(1 - 3).map(function (response) {
       return response.json();
     });
     return Promise.all([model, json_response[0], json_response[1]]);
@@ -94,7 +95,6 @@ Promise.all([
   .then(function (data) {
     /////////////////////////////////// SETUP ////////////////////////////////////
     StrixhavenDraftPackage.setupAfterPromise(data);
-    console.log(StrixhavenDraftPackage.masterHash);
   })
   .catch(function (error) {
     // if there's an error, log it
