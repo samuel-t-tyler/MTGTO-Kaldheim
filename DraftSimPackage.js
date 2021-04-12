@@ -882,10 +882,12 @@ class DraftSimPackage {
       }
       this.currentPicksActive = false;
       let pickSRC = event.srcElement.src;
-      for (let i = 0; i < this.elements["DisplayedPack"].length; i++) {
-        if (this.elements["DisplayedPack"][i].src === pickSRC) {
-          //using ID instead of classname here because it's easier + faster to remove between card draws:
-          this.elements["DisplayedPack"][i].id = "orangeSelect";
+      if (this.currentFeedbackActive === true) {
+        for (let i = 0; i < this.elements["DisplayedPack"].length; i++) {
+          if (this.elements["DisplayedPack"][i].src === pickSRC) {
+            //using ID instead of classname here because it's easier + faster to remove between card draws:
+            this.elements["DisplayedPack"][i].id = "orangeSelect";
+          }
         }
       }
       // Highlighting bot pick and calculating accuracy of human pick
@@ -905,10 +907,14 @@ class DraftSimPackage {
       // Updating event listeners
       setTimeout(() => {
         for (let i = 0; i < 15; i++) {
-          this.elements["DisplayedPack"][i].addEventListener(
-            "click",
-            this.humanSeesResults
-          );
+          if (this.currentFeedbackActive === false) {
+            this.humanSeesResults();
+          } else {
+            this.elements["DisplayedPack"][i].addEventListener(
+              "click",
+              this.humanSeesResults
+            );
+          }
         }
       }, 250);
     }
