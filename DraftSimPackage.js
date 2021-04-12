@@ -367,7 +367,7 @@ class DraftSimPackage {
 
   makePred() {
     if (this.MLPreds === true) {
-      this.makeMLPreds();
+      this.makeMLPreds(this.activeOnehots);
     } else {
       this.makeHeuristicPreds();
     }
@@ -426,7 +426,8 @@ class DraftSimPackage {
       let humanPickSoftmax = activePickSoftmax[picks[0]];
       let error = 1 - humanPickSoftmax / botPickSoftmax;
       let pickValue
-      if (this.makeMLPreds === true) {
+      if (this.MLPredst === true) {
+        console.log("using ML method");
         pickValue = -Math.pow(error, 2.8) + 1;
       } else {
         pickValue = -error + 1;
@@ -748,6 +749,7 @@ class DraftSimPackage {
   // Function that updates what is displayed when the pool window button is toggled
   updatePoolToggled = () => {
     if (this.currentPoolToggled === false) {
+      this.elements["FeedbackHTML"].style.display = "none"
       this.displayPoolImages();
       this.updatePoolTooltips();
       this.displayMainDeckCount();
@@ -756,6 +758,7 @@ class DraftSimPackage {
       this.elements["PoolToggle"].style.backgroundColor = "white";
       this.elements["RestartIcon"].style.display = "none";
     } else {
+      this.elements["FeedbackHTML"].style.display = "block";
       this.elements["ScoreHTML"].innerHTML = "";
       this.currentPoolToggled = false;
       this.elements["PoolToggle"].style.color = "white";
@@ -903,20 +906,24 @@ class DraftSimPackage {
         this.activePicks,
         this.activePreds
       );
+      this.currentMainDeckCount++;
 
       // Updating event listeners
-      setTimeout(() => {
-        for (let i = 0; i < 15; i++) {
-          if (this.currentFeedbackActive === false) {
-            this.humanSeesResults();
-          } else {
+      if (this.currentFeedbackActive === false) {
+        setTimeout(() => {
+          this.humanSeesResults();
+        }, 100)
+      } else {
+        setTimeout(() => {
+          for (let i = 0; i < 15; i++) {
             this.elements["DisplayedPack"][i].addEventListener(
               "click",
               this.humanSeesResults
             );
           }
-        }
-      }, 250);
+        
+        }, 150);
+      }
     }
   };
   humanSeesResults = () => {
@@ -948,10 +955,8 @@ class DraftSimPackage {
           this.currentPack
         );
         this.makePred();
-        this.makeHeuristicPreds();
         this.currentPicksActive = true;
         this.displayRemoveBorders();
-        this.currentMainDeckCount++;
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
             this.displayPack(this.activeOnehots[0]);

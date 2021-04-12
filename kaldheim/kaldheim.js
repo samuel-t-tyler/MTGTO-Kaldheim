@@ -75,9 +75,12 @@ let landSlot = [
 const setSize = 280;
 const inputSize = 574;
 const oddsRare = 0.875;
+const MLPreds = true;
+const genericPack = true;
+
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
-let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", setSize, inputSize, oddsRare, landSlot, elements);
+let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", setSize, inputSize, oddsRare, landSlot, elements, MLPreds, genericPack);
 
 Promise.all([
   tf.loadLayersModel("./tfjs_model/model.json"),
