@@ -54,30 +54,16 @@ elements["SideboardArray"] = document.getElementsByClassName("7-cmc-image");
 
 //////////////////////////////// KALDHEIM UNIQUE VARIABLES //////////////////////////////
 
-let landSlot = [
-  "Snow-Covered Mountain",
-  "Snow-Covered Island",
-  "Snow-Covered Swamp",
-  "Snow-Covered Forest",
-  "Snow-Covered Plains",
-  "Alpine Meadow",
-  "Arctic Treeline",
-  "Glacial Floodplain",
-  "Highland Forest",
-  "Ice Tunnel",
-  "Rimewood Falls",
-  "Snowfield Sinkhole",
-  "Sulfurous Mire",
-  "Volatile Fjord",
-  "Woodland Chasm",
-];
+let specialSlot = ["Redefined in special generate pack function, unique pack setup for stx"];
 
-const setSize = 280;
-const inputSize = 574;
+const setSize = 338;
+const inputSize = (setSize * 2) + 14;
 const oddsRare = 0.875;
+const MLpreds = false; // Once we have sufficient data for ML preds, we can set this to default to true
+const genericPack = false
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
-let StrixhavenDraftPackage = new DraftSimPackage("Strixhaven", setSize, inputSize, oddsRare, landSlot, elements);
+let StrixhavenDraftPackage = new DraftSimPackage("Strixhaven", setSize, inputSize, oddsRare, specialSlot, elements, MLpreds, genericPack);
 
 Promise.all([
   tf.loadLayersModel("./tfjs_model/model.json"),
@@ -122,3 +108,51 @@ StrixhavenDraftPackage.elements["ToggleFeedback"].addEventListener("click", Stri
 StrixhavenDraftPackage.elements["Restart"].addEventListener("click", StrixhavenDraftPackage.resetDraft);
 StrixhavenDraftPackage.elements["PoolToggle"].addEventListener("click", StrixhavenDraftPackage.updatePoolToggled);
 StrixhavenDraftPackage.elements["RestartIcon"].addEventListener("click", StrixhavenDraftPackage.resetDraft);
+
+
+/////////////////////////////////////////// SPECIAL STRIXHAVEN FUNCTIONS ///////////////////////////////////////////////
+
+function generatePackSpecial() {
+  let activePackTemp;
+  (activePackTemp = []).length = StrixhavenDraftPackage.setSize;
+  activePackTemp.fill(0);
+  let pack = [];
+  let specialSlot = Object.keys(StrixhavenDraftPackage.masterHash["master_hash_archives"]["name_to_url"])
+  const cards = [
+    StrixhavenDraftPackage.masterHash["nl_commons"],
+    StrixhavenDraftPackage.masterHash["nl_uncommons"],
+    specialSlot,
+    StrixhavenDraftPackage.masterHash["lessons"],
+  ];
+  console.log(StrixhavenDraftPackage.masterHash);
+  console.log(cards);
+  const quantity = [9, 3, 1, 1];
+
+  // add commons, uncommons, mystical archive
+  for (let i = 0; i < quantity.length; i++) {
+    let shuffled = cards[i].sort(() => 0.5 - Math.random());
+    // Get sub-array of first n elements after shuffled
+    let selected = shuffled.slice(0, quantity[i]);
+    for (let j = 0; j < quantity[i]; j++) {
+      pack.push(selected[j]);
+    }
+  }
+  // add rare/mythic
+  let randomNum = Math.random();
+  if (randomNum > StrixhavenDraftPackage.oddsOfRare) {
+    let shuffled = StrixhavenDraftPackage.masterHash["nl_mythics"].sort(
+      () => 0.5 - Math.random()
+    );
+    let selected = shuffled.slice(0, 1);
+    pack.push(selected);
+  } else {
+    let shuffled = StrixhavenDraftPackage.masterHash["nl_rares"].sort(() => 0.5 - Math.random());
+    let selected = shuffled.slice(0, 1);
+    pack.push(selected);
+  }
+
+  for (let card = 0; card < 15; card++) {
+    activePackTemp[StrixhavenDraftPackage.masterHash["name_to_index"][pack[card]]] = 1;
+  }
+  return activePackTemp;
+};

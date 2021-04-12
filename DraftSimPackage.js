@@ -6,15 +6,19 @@ class DraftSimPackage {
     setSize,
     inputSize,
     oddsOfRare,
-    landSlot = ["Mountain", "Swamp", "Forest", "Plains", "Island"],
-    elements
+    specialSlot = ["Mountain", "Swamp", "Forest", "Plains", "Island"],
+    elements,
+    mlPreds,
+    genericPack
   ) {
     this.set = set; //String of the set name
     this.setSize = setSize; //Number of cards in the set
     this.inputSize = inputSize; //Size of the input array into the neural net
     this.oddsOfRare = oddsOfRare; //Odds of opening a rare in any given pack, relateive to a mythic (0-1)
-    this.landSlot = landSlot; //Array of strings that represent the unique set of cards that can be in the land slot for a se
+    this.specialSlot = specialSlot; //Array of strings that represent the unique set of cards that can be in the land slot for a se
     this.elements = elements;
+    this.MLPreds = mlPreds;
+    this.genericPack = genericPack
   }
   // Critical variables
   masterHash; // Layered object that can take any card representation and turn into any other card representation
@@ -35,7 +39,7 @@ class DraftSimPackage {
   // Variables that store gamestate information of players, like decks and onehots.  All start with the word "active"
   activePacks; // Onehot array of shape [8, 3, 280] representing all packs in the draft
   activeOnehots; // Array of shape [8, 574] representing the vector being fed into the prediction matrix
-  activePreds; // Array of length 8 representing the bot pred of each pick being made
+  activePreds = []; // Array of length 8 representing the bot pred of each pick being made
   activePicks; // Array of length 8 representing each being made.  For human, it is their choice
   activeFeatureVectors; // Array of shape [8, 14] representing all players feature vectors
   activePools; //Array of shape [8, 280] representing all pools for all players
@@ -101,7 +105,7 @@ class DraftSimPackage {
     for (let m = 0; m < cardsAvailable.length; m++) {
       if (
         this.masterHash["name_to_rarity"][cardsAvailable[m]] === "common" &&
-        !this.landSlot.includes(cardsAvailable[m])
+        !this.specialSlot.includes(cardsAvailable[m])
       ) {
         this.commons.push(cardsAvailable[m]);
       }
@@ -120,7 +124,7 @@ class DraftSimPackage {
       this.uncommons,
       this.rares,
       this.mythics,
-      this.landSlot,
+      this.specialSlot,
     ];
   };
 
@@ -148,38 +152,43 @@ class DraftSimPackage {
   };
   // Function to generate a random pack of Kaldheim cards
   generatePack = () => {
-    let activePackTemp;
-    (activePackTemp = []).length = 280;
-    activePackTemp.fill(0);
-    let pack = [];
-    const cards = [this.commons, this.uncommons, this.landSlot];
-    const quantity = [10, 3, 1];
+    if (this.genericPack === true) {  //this is used to allow custom pack generation functions defined in mainset.js
+      let activePackTemp;
+      (activePackTemp = []).length = this.setSize;
+      activePackTemp.fill(0);
+      let pack = [];
+      const cards = [this.commons, this.uncommons, this.specialSlot];
+      const quantity = [10, 3, 1];
 
-    // add commons, uncommons, snow lands
-    for (let i = 0; i < 3; i++) {
-      let shuffled = cards[i].sort(() => 0.5 - Math.random());
-      // Get sub-array of first n elements after shuffled
-      let selected = shuffled.slice(0, quantity[i]);
-      for (let j = 0; j < quantity[i]; j++) {
-        pack.push(selected[j]);
+      // add commons, uncommons, snow lands
+      for (let i = 0; i < 3; i++) {
+        let shuffled = cards[i].sort(() => 0.5 - Math.random());
+        // Get sub-array of first n elements after shuffled
+        let selected = shuffled.slice(0, quantity[i]);
+        for (let j = 0; j < quantity[i]; j++) {
+          pack.push(selected[j]);
+        }
       }
-    }
-    // add rare/mythic
-    let randomNum = Math.random();
-    if (randomNum > this.oddsOfRare) {
-      let shuffled = this.mythics.sort(() => 0.5 - Math.random());
-      let selected = shuffled.slice(0, 1);
-      pack.push(selected);
-    } else {
-      let shuffled = this.rares.sort(() => 0.5 - Math.random());
-      let selected = shuffled.slice(0, 1);
-      pack.push(selected);
-    }
+      // add rare/mythic
+      let randomNum = Math.random();
+      if (randomNum > this.oddsOfRare) {
+        let shuffled = this.mythics.sort(() => 0.5 - Math.random());
+        let selected = shuffled.slice(0, 1);
+        pack.push(selected);
+      } else {
+        let shuffled = this.rares.sort(() => 0.5 - Math.random());
+        let selected = shuffled.slice(0, 1);
+        pack.push(selected);
+      }
 
-    for (let card = 0; card < 15; card++) {
-      activePackTemp[this.masterHash["name_to_index"][pack[card]]] = 1;
+      for (let card = 0; card < 15; card++) {
+        activePackTemp[this.masterHash["name_to_index"][pack[card]]] = 1;
+      }
+      return activePackTemp;
+    } else if (this.genericPack === false) {
+      let activePackTemp = generatePackSpecial();  //call the custom pack generation function.  must be names generatePackSpecial()
+      return activePackTemp;
     }
-    return activePackTemp;
   };
 
   // This function is called once at the beginning of each draft, and generates the 24 packs passed between bots
@@ -239,9 +248,8 @@ class DraftSimPackage {
       arrayOfIndexes.push(max_value_index);
     }
     this.activePreds = arrayOfIndexes;
-    return [this.activePreds, this.activePickSoftmax];
   };
-  
+
   // Bot algorithm that uses heuristics to make predictions rather than machine learning.  For when we have insufficient ML data
   makeHeuristicPreds() {
     for (let i = 0; i < 8; i++) {
@@ -253,59 +261,63 @@ class DraftSimPackage {
       let colorComitTwo;
       let colorValueSum;
       let colorPull = {
-        "W": 0,
-        "U": 0,
-        "B": 0,
-        "R": 0,
-        "G": 0,
-      }
+        W: 0,
+        U: 0,
+        B: 0,
+        R: 0,
+        G: 0,
+      };
       let pack = this.findContense(this.activePacks[i][this.currentPack]);
       let pool = this.findContense(this.activePools[i]);
 
       // Calcuating the pull for each players colors to apply bonus to card value
       for (let k = 0; k < pool.length; k++) {
         let color = this.masterHash["name_to_color"][pool[k]];
-        let rating = 1  //Change this using rating hash, take max 2 - rating
+        let rating = parseInt(this.ratings[pool[k]]);
         for (let l = 0; l < color.length; l++) {
-          colorPull[color[l]] += rating * 0.25;
+          let pull = (rating - 2) * 0.25;
+          if (pull < 0) {
+            pull = 0;
+          }
+          colorPull[color[l]] += pull;
         }
       }
 
       // Determining if we are in the "two color locked" threshold
       let colorPullArray = Object.entries(colorPull);
-      colorPullArray.sort(function (a, b) { return b[1] - a[1] })
+      colorPullArray.sort(function (a, b) {
+        return b[1] - a[1];
+      });
       if (colorPullArray[0][1] > 3.3 && colorPullArray[1][1] > 3.3) {
-        colorcomitted = true
+        colorcomitted = true;
         colorComitOne = colorPullArray[0][0];
         colorComitTwo = colorPullArray[1][0];
       }
 
       // calculating pack values
-      let packCardValues = []
+      //////////////////////////////// i need to cap the colorrating bonus /
+      let packCardValues = [];
       for (let m = 0; m < pack.length; m++) {
-        let cardRating = 0
+        let cardRating = parseInt(this.ratings[pack[m]]);
         let color = this.masterHash["name_to_color"][pack[m]];
         if (colorcomitted === false) {
           if (color.length === 0) {
-            cardRating += 1 + colorPullArray[0][1]  //Change once we have rating dict
-          }
-          if (color.length === 1) {
-            cardRating += 1 + colorPull[color[0]]; //Change once we have rating dict
-          }
-          if (color.length === 2) {
+            cardRating += colorPullArray[0][1]; // Colorless pull === top pull
+          } else if (color.length === 1) {
+            cardRating += colorPull[color[0]];
+          } else if (color.length === 2) {
             let colorMatchValue = colorPull[color[0]] + colorPull[color[1]];
-            cardRating += 1 + colorMatchValue; //Change once we have rating dict
-          }
-          if (color.length > 2) {
-            cardRating += 1 - 0.5
+            cardRating += colorMatchValue;
+          } else if (color.length > 2) {
+            cardRating += 0.5;
           }
         } else {
           if (color.length === 0) {
-            cardRating += 2.5; //Change once we have rating dict
+            cardRating += 2.5;
           }
           if (color.length === 1) {
             if (color[0] === colorComitOne || color[0] === colorComitTwo) {
-              cardRating += 2.5; //Change once we have rating dict
+              cardRating += 2.5;
             }
           }
           if (color.length === 2) {
@@ -318,29 +330,40 @@ class DraftSimPackage {
             }
           }
           if (color.length > 2) {
-            cardRating = 1; //Change once we have rating dict
+            cardRating = 1;
             if (color[0] === colorComitOne || color[0] === colorComitTwo) {
-              cardRating = 1 + 0.75; //Change once we have rating dict
+              cardRating += 0.75;
             }
             if (color[1] === colorComitOne || color[1] === colorComitTwo) {
-              cardRating = 1 + 0.75; //Change once we have rating dict
+              cardRating += 0.75;
             }
             if (color[2] === colorComitOne || color[2] === colorComitTwo) {
-              cardRating = 1 + 0.75; //Change once we have rating dict
+              cardRating += 0.75;
             }
           }
         }
         if (i === 0) {
-          this.activePickSoftmax[this.masterHash["name_to_index"][pack[m]]] = cardRating
+          this.activePickSoftmax[
+            this.masterHash["name_to_index"][pack[m]]
+          ] = cardRating;
         }
         let nameAndRating = [pack[m], cardRating];
         packCardValues.push(nameAndRating);
       }
-      packCardValues.sort(function(a, b) {return b[1] - a[1]})
-      let pick = packCardValues[0][0]
+      packCardValues.sort(function (a, b) {
+        return b[1] - a[1];
+      });
+      let pick = packCardValues[0][0];
       let pickIndex = this.masterHash["name_to_index"][pick];
       this.activePreds[i] = pickIndex;
-      console.log(pick);
+    }
+  }
+
+  makePred() {
+    if (this.MLPreds === true) {
+      this.makeMLPreds();
+    } else {
+      this.makeHeuristicPreds();
     }
   }
 
@@ -802,9 +825,7 @@ class DraftSimPackage {
       this.activePools,
       this.currentPack
     );
-    [this.activePreds, this.activePickSoftmax] = this.makeMLPreds(
-      this.activeOnehots
-    );
+    this.makePred();
     this.currentPicksActive = true;
 
     // Resetting event listeners
@@ -908,9 +929,8 @@ class DraftSimPackage {
           this.activePools,
           this.currentPack
         );
-        [this.activePreds, this.activePickSoftmax] = this.makeMLPreds(
-          this.activeOnehots
-        );
+        this.makePred();
+        this.makeHeuristicPreds();
         this.currentPicksActive = true;
         this.displayRemoveBorders();
         this.currentMainDeckCount++;
@@ -950,7 +970,7 @@ class DraftSimPackage {
       this.uncommons,
       this.rares,
       this.mythics,
-      this.landSlot,
+      this.specialSlot,
     ] = this.generateRarityArrays();
     this.activePacks = this.generateActivePacks();
     this.activeOnehots = this.updateOnehots(
@@ -961,9 +981,8 @@ class DraftSimPackage {
     );
     this.elements["LoadingSpinner"].style.display = "none";
     this.displayPack(this.activeOnehots[0]);
-    [this.activePreds, this.activePickSoftmax] = this.makeMLPreds(
-      this.activeOnehots
-    );
+    this.makePred();
     this.currentPicksActive = true;
+    console.log(this.masterHash);
   }
 }
