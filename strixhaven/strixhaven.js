@@ -124,8 +124,6 @@ function generatePackSpecial() {
     specialSlot,
     StrixhavenDraftPackage.masterHash["lessons"],
   ];
-  console.log(StrixhavenDraftPackage.masterHash);
-  console.log(cards);
   const quantity = [9, 3, 1, 1];
 
   // add commons, uncommons, mystical archive

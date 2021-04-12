@@ -274,12 +274,18 @@ class DraftSimPackage {
       for (let k = 0; k < pool.length; k++) {
         let color = this.masterHash["name_to_color"][pool[k]];
         let rating = parseInt(this.ratings[pool[k]]);
+        if (rating === NaN || this.ratings[pool[k]] === "") {
+          console.log(rating, this.ratings[pool[k]]);
+          console.log("card", pool[k])
+        }
         for (let l = 0; l < color.length; l++) {
-          let pull = (rating - 2) * 0.25;
+          let pull = (rating - 2) * 0.266;
           if (pull < 0) {
             pull = 0;
           }
           colorPull[color[l]] += pull;
+          if (rating === NaN) {
+          } 
         }
       }
 
@@ -302,22 +308,22 @@ class DraftSimPackage {
         let color = this.masterHash["name_to_color"][pack[m]];
         if (colorcomitted === false) {
           if (color.length === 0) {
-            cardRating += colorPullArray[0][1]; // Colorless pull === top pull
+            cardRating += colorPullArray[0][1];
           } else if (color.length === 1) {
             cardRating += colorPull[color[0]];
           } else if (color.length === 2) {
             let colorMatchValue = colorPull[color[0]] + colorPull[color[1]];
             cardRating += colorMatchValue;
           } else if (color.length > 2) {
-            cardRating += 0.5;
+            cardRating -= 0.55;
           }
         } else {
           if (color.length === 0) {
-            cardRating += 2.5;
+            cardRating += 2.55;
           }
           if (color.length === 1) {
             if (color[0] === colorComitOne || color[0] === colorComitTwo) {
-              cardRating += 2.5;
+              cardRating += 2.55;
             }
           }
           if (color.length === 2) {
@@ -345,7 +351,7 @@ class DraftSimPackage {
         if (i === 0) {
           this.activePickSoftmax[
             this.masterHash["name_to_index"][pack[m]]
-          ] = cardRating;
+          ] = cardRating + 0.0001
         }
         let nameAndRating = [pack[m], cardRating];
         packCardValues.push(nameAndRating);
@@ -419,8 +425,14 @@ class DraftSimPackage {
       let botPickSoftmax = activePickSoftmax[preds[0]];
       let humanPickSoftmax = activePickSoftmax[picks[0]];
       let error = 1 - humanPickSoftmax / botPickSoftmax;
-      let pickValue = -Math.pow(error, 2.8) + 1;
+      let pickValue
+      if (this.makeMLPreds === true) {
+        pickValue = -Math.pow(error, 2.8) + 1;
+      } else {
+        pickValue = -error + 1;
+      }
       this.currentScore += pickValue;
+      console.log(pickValue, "pickvalue");
       this.currentScoreFixed = this.currentScore.toFixed(1);
       this.elements["FeedbackHTML"].style.color = "white";
       if (this.currentScoreFixed[this.currentScoreFixed.length - 1] === "0") {
@@ -983,6 +995,8 @@ class DraftSimPackage {
     this.displayPack(this.activeOnehots[0]);
     this.makePred();
     this.currentPicksActive = true;
-    console.log(this.masterHash);
+    if (this.MLPreds === false) {
+      this.displayFeedbackToggle();
+    }
   }
 }
