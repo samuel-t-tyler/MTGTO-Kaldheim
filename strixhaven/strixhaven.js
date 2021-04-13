@@ -149,7 +149,6 @@ function generatePackSpecial() {
     StrixhavenDraftPackage.masterHash["mythic_lessons"][lessonMIndex],
   ];
   let lessonRan = Math.random();
-  console.log("lessonRan", lessonRan, "archiveRan", archiveRan);
   if (lessonRan > 0.935) {  //Odds of mythic archive
     lessonChoice = lessonChocies[3];
   } else if (lessonRan < 0.935 && lessonRan > 0.7) { //Odds of rare archive

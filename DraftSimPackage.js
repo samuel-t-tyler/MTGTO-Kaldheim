@@ -259,7 +259,6 @@ class DraftSimPackage {
       let colorcomitted = false;
       let colorComitOne;
       let colorComitTwo;
-      let colorValueSum;
       let colorPull = {
         W: 0,
         U: 0,
@@ -275,8 +274,6 @@ class DraftSimPackage {
         let color = this.masterHash["name_to_color"][pool[k]];
         let rating = parseInt(this.ratings[pool[k]]);
         if (rating === NaN || this.ratings[pool[k]] === "") {
-          console.log(rating, this.ratings[pool[k]]);
-          console.log("card", pool[k])
         }
         for (let l = 0; l < color.length; l++) {
           let pull = (rating - 2) * 0.266;
@@ -284,8 +281,6 @@ class DraftSimPackage {
             pull = 0;
           }
           colorPull[color[l]] += pull;
-          if (rating === NaN) {
-          } 
         }
       }
 
@@ -304,7 +299,7 @@ class DraftSimPackage {
       //////////////////////////////// i need to cap the colorrating bonus /
       let packCardValues = [];
       for (let m = 0; m < pack.length; m++) {
-        let cardRating = parseInt(this.ratings[pack[m]]);
+        let cardRating = parseFloat(this.ratings[pack[m]]);
         let color = this.masterHash["name_to_color"][pack[m]];
         if (colorcomitted === false) {
           if (color.length === 0) {
@@ -349,6 +344,7 @@ class DraftSimPackage {
           }
         }
         if (i === 0) {
+          console.log("adding on index", this.masterHash["name_to_index"][pack[m]], )
           this.activePickSoftmax[
             this.masterHash["name_to_index"][pack[m]]
           ] = cardRating + 0.0001
@@ -425,15 +421,9 @@ class DraftSimPackage {
       let botPickSoftmax = activePickSoftmax[preds[0]];
       let humanPickSoftmax = activePickSoftmax[picks[0]];
       let error = 1 - humanPickSoftmax / botPickSoftmax;
-      let pickValue
-      if (this.MLPredst === true) {
-        console.log("using ML method");
-        pickValue = -Math.pow(error, 2.8) + 1;
-      } else {
-        pickValue = -error + 1;
-      }
+      let pickValue;
+      pickValue = -Math.pow(error, 2.8) + 1;
       this.currentScore += pickValue;
-      console.log(pickValue, "pickvalue");
       this.currentScoreFixed = this.currentScore.toFixed(1);
       this.elements["FeedbackHTML"].style.color = "white";
       if (this.currentScoreFixed[this.currentScoreFixed.length - 1] === "0") {
@@ -458,7 +448,7 @@ class DraftSimPackage {
         this.elements["FeedbackHTML"].innerHTML = "Mistake";
       }
       this.elements["ScoreHTML"].style.opacity = 1;
-    }, 150);
+    }, 75);
     return;
   };
 
@@ -818,7 +808,9 @@ class DraftSimPackage {
     this.currentPick = 0;
     this.currentPack = 0;
     this.currentPicksActive = false;
-    this.currentFeedbackActive = true;
+    if (this.MLPreds === false) {
+      this.currentFeedbackActive = false;
+    }
     this.activePacks = [];
     this.activeOnehots = [];
     this.activePreds = [];
@@ -912,7 +904,7 @@ class DraftSimPackage {
       if (this.currentFeedbackActive === false) {
         setTimeout(() => {
           this.humanSeesResults();
-        }, 100)
+        }, 80)
       } else {
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
