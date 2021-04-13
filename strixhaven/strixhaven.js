@@ -117,14 +117,58 @@ function generatePackSpecial() {
   (activePackTemp = []).length = StrixhavenDraftPackage.setSize;
   activePackTemp.fill(0);
   let pack = [];
+  let archiveChoice;
+  let lessonChoice
+
+  // Picking Random Archive
+  let archiveUIndex = Math.floor(Math.random() * StrixhavenDraftPackage.masterHash["uncommon_archives"].length)
+  let archiveRIndex = Math.floor(Math.random() * StrixhavenDraftPackage.masterHash["rare_archives"].length);
+  let archiveMIndex = Math.floor(Math.random() * StrixhavenDraftPackage.masterHash["mythic_archives"].length);
+  let archiveChocies = [
+    StrixhavenDraftPackage.masterHash["uncommon_archives"][archiveUIndex],
+    StrixhavenDraftPackage.masterHash["rare_archives"][archiveRIndex],
+    StrixhavenDraftPackage.masterHash["mythic_archives"][archiveMIndex],
+  ];
+  let archiveRan = Math.random()
+  if (archiveRan > 0.935) {  //Odds of mythic archive
+    archiveChoice = archiveChocies[2]
+  } else if (archiveRan < 0.935 && archiveRan > 0.66) { //Odds of rare archive
+    archiveChoice = archiveChocies[1];
+  } else { //Odds of uncommon archive
+    archiveChoice = archiveChocies[0];
+  }
+  // Picking random Lesson
+  let lessonCIndex = Math.floor(Math.random() * StrixhavenDraftPackage.masterHash["common_lessons"].length)
+  let lessonUIndex = Math.floor(Math.random() * StrixhavenDraftPackage.masterHash["uncommon_lessons"].length)
+  let lessonRIndex = Math.floor(Math.random() * StrixhavenDraftPackage.masterHash["rare_lessons"].length);
+  let lessonMIndex = Math.floor(Math.random() * StrixhavenDraftPackage.masterHash["mythic_lessons"].length);
+  let lessonChocies = [
+    StrixhavenDraftPackage.masterHash["common_lessons"][lessonCIndex],
+    StrixhavenDraftPackage.masterHash["uncommon_lessons"][lessonUIndex],
+    StrixhavenDraftPackage.masterHash["rare_lessons"][lessonRIndex],
+    StrixhavenDraftPackage.masterHash["mythic_lessons"][lessonMIndex],
+  ];
+  let lessonRan = Math.random();
+  console.log("lessonRan", lessonRan, "archiveRan", archiveRan);
+  if (lessonRan > 0.935) {  //Odds of mythic archive
+    lessonChoice = lessonChocies[3];
+  } else if (lessonRan < 0.935 && lessonRan > 0.7) { //Odds of rare archive
+    lessonChoice = lessonChocies[2];
+  } else if (lessonRan < 0.7 && lessonRan > 0.5) {
+    //Odds of uncommon archive
+    lessonChoice = lessonChocies[1];
+  } else {
+    lessonChoice = lessonChocies[0];
+  }
+
+
   let specialSlot = Object.keys(StrixhavenDraftPackage.masterHash["master_hash_archives"]["name_to_url"])
   const cards = [
     StrixhavenDraftPackage.masterHash["nl_commons"],
     StrixhavenDraftPackage.masterHash["nl_uncommons"],
-    specialSlot,
     StrixhavenDraftPackage.masterHash["lessons"],
   ];
-  const quantity = [9, 3, 1, 1];
+  const quantity = [9, 3, 1];
 
   // add commons, uncommons, mystical archive
   for (let i = 0; i < quantity.length; i++) {
@@ -148,6 +192,7 @@ function generatePackSpecial() {
     let selected = shuffled.slice(0, 1);
     pack.push(selected);
   }
+  pack.push(archiveChoice)
 
   for (let card = 0; card < 15; card++) {
     activePackTemp[StrixhavenDraftPackage.masterHash["name_to_index"][pack[card]]] = 1;
