@@ -8,6 +8,8 @@
 
 Particles.js available here:
 https://github.com/VincentGarreau/particles.js/
+Some open source icons provided by:
+https://icons8.com/
 
 Two functions, "humanMakesPick" and "humanSeesResults" guide the logic of the site.  We start with "humanMakesPick", 
 and alternate back and forth between the two for the remainder of the draft.  Most of the other functions called here 
