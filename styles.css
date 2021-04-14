@@ -3,6 +3,10 @@ body {
     font-family: 'Orbitron', sans-serif;
 }
 
+p {
+  display: inline-block;
+}
+
 .noSelect {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -168,7 +172,7 @@ body {
   background-color: transparent;
 }
 .tooltip img {
-  min-width: 35vh !important;
+  min-width: 32vh !important;
   height: auto;
 }
 
@@ -181,6 +185,7 @@ body {
 .dropdown-item {
   color: white ;
   background-color: black ; 
+  transition: all 0.15s ease;
 }
 
 .dropdown-item:hover {
@@ -255,7 +260,7 @@ img {
 }
 
 .pool-row {
-    max-height: 4.5vh;
+    max-height: 4vh;
     padding: 0;
     background-color: transparent;
 }
@@ -303,7 +308,32 @@ img {
 }
 
 .zoom:hover {
-  transform: scale(1.07); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+  transform: scale(1.08); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+}
+
+/*////////////////////////////////////  Footer  /////////////////////////////// */
+.fixed-bottom {
+  padding: 0.5vh 1vw 0.5vh 1vw;
+  background-color: rgb(230, 230, 230);
+  color: rgb(0, 0, 0);
+  width: 40vw;
+  border-radius: 0 10px 0 0;
+  border-width: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-image{
+  width: 2.7vw;
+  height: 2.7vw;
+  height: auto;
+}
+
+p {
+  font-size: 1.5vw;
+  vertical-align: middle;
+   margin-block-end: 0 !important;
 }
 
 .fade-out {

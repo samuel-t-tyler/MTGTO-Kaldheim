@@ -35,6 +35,9 @@ class DraftSimPackage {
   currentDraftOver = false;
   currentMainDeckCount = 0;
   currentScoreFixed = 0;
+  currentCreatures = 0;
+  currentLands = 0;
+  currentSpells = 0;
 
   // Variables that store gamestate information of players, like decks and onehots.  All start with the word "active"
   activePacks; // Onehot array of shape [8, 3, 280] representing all packs in the draft
@@ -344,7 +347,6 @@ class DraftSimPackage {
           }
         }
         if (i === 0) {
-          console.log("adding on index", this.masterHash["name_to_index"][pack[m]], )
           this.activePickSoftmax[
             this.masterHash["name_to_index"][pack[m]]
           ] = cardRating + 0.0001
@@ -414,43 +416,47 @@ class DraftSimPackage {
   never greater than one since the bot always picks the highest softmax in each pack.  This function makes that calculation and 
   then updates the score.innerHTML to reflect the result
   */
-  displayPickAccuracy = (activePickSoftmax, picks, preds) => {
-    this.elements["ScoreHTML"].style.opacity = 0;
-    setTimeout(() => {
-      this.elements["FeedbackHTML"].style.opacity = 1;
-      let botPickSoftmax = activePickSoftmax[preds[0]];
-      let humanPickSoftmax = activePickSoftmax[picks[0]];
-      let error = 1 - humanPickSoftmax / botPickSoftmax;
-      let pickValue;
-      pickValue = -Math.pow(error, 2.8) + 1;
-      this.currentScore += pickValue;
-      this.currentScoreFixed = this.currentScore.toFixed(1);
-      this.elements["FeedbackHTML"].style.color = "white";
-      if (this.currentScoreFixed[this.currentScoreFixed.length - 1] === "0") {
-        this.currentScoreFixed = this.currentScore.toFixed(0);
-      }
-      this.elements["ScoreHTML"].innerHTML = `${this.currentScoreFixed} / ${
-        this.currentPick + 1
-      }`;
-      if (pickValue >= 0.95) {
-        this.elements["FeedbackHTML"].innerHTML = "Excellent!";
-      }
-      if (pickValue >= 0.7 && pickValue < 0.95) {
-        this.elements["FeedbackHTML"].innerHTML = "Great!";
-      }
-      if (pickValue >= 0.5 && pickValue < 0.7) {
-        this.elements["FeedbackHTML"].innerHTML = "Not bad!";
-      }
-      if (pickValue >= 0.3 && pickValue < 0.5) {
-        this.elements["FeedbackHTML"].innerHTML = "Possible Mistake";
-      }
-      if (pickValue < 0.3) {
-        this.elements["FeedbackHTML"].innerHTML = "Mistake";
-      }
-      this.elements["ScoreHTML"].style.opacity = 1;
-    }, 75);
-    return;
-  };
+  // displayPickAccuracy = (activePickSoftmax, picks, preds) => {
+  //   this.elements["ScoreHTML"].style.opacity = 0;
+  //   setTimeout(() => {
+  //     this.elements["FeedbackHTML"].style.opacity = 1;
+  //     let botPickSoftmax = activePickSoftmax[preds[0]];
+  //     let humanPickSoftmax = activePickSoftmax[picks[0]];
+  //     let error = 1 - humanPickSoftmax / botPickSoftmax;
+  //     let pickValue;
+  //     if (this.MLPreds === true) {
+  //       pickValue = -Math.pow(error, 2.8) + 1;
+  //     } else {
+  //       pickValue = -error + 1;
+  //     }
+  //     this.currentScore += pickValue;
+  //     this.currentScoreFixed = this.currentScore.toFixed(1);
+  //     this.elements["FeedbackHTML"].style.color = "white";
+  //     if (this.currentScoreFixed[this.currentScoreFixed.length - 1] === "0") {
+  //       this.currentScoreFixed = this.currentScore.toFixed(0);
+  //     }
+  //     this.elements["ScoreHTML"].innerHTML = `${this.currentScoreFixed} / ${
+  //       this.currentPick + 1
+  //     }`;
+  //     if (pickValue >= 0.95) {
+  //       this.elements["FeedbackHTML"].innerHTML = "Excellent!";
+  //     }
+  //     if (pickValue >= 0.7 && pickValue < 0.95) {
+  //       this.elements["FeedbackHTML"].innerHTML = "Great!";
+  //     }
+  //     if (pickValue >= 0.5 && pickValue < 0.7) {
+  //       this.elements["FeedbackHTML"].innerHTML = "Not bad!";
+  //     }
+  //     if (pickValue >= 0.3 && pickValue < 0.5) {
+  //       this.elements["FeedbackHTML"].innerHTML = "Possible Mistake";
+  //     }
+  //     if (pickValue < 0.3) {
+  //       this.elements["FeedbackHTML"].innerHTML = "Mistake";
+  //     }
+  //     this.elements["ScoreHTML"].style.opacity = 1;
+  //   }, 75);
+  //   return;
+  // };
 
   // Highlight the pick the bot likes
   displayBotPred = (pred) => {
@@ -593,13 +599,11 @@ class DraftSimPackage {
   displayFeedbackToggle = () => {
     if (this.currentFeedbackActive === true) {
       this.elements["FeedbackHTML"].style.visibility = "hidden";
-      this.elements["ScoreHTML"].style.visibility = "hidden";
       this.currentFeedbackActive = false;
       return;
     }
     if (this.currentFeedbackActive === false) {
       this.elements["FeedbackHTML"].style.visibility = "visible";
-      this.elements["ScoreHTML"].style.visibility = "visible";
       this.currentFeedbackActive = true;
       return;
     }
@@ -632,24 +636,49 @@ class DraftSimPackage {
     this.updatePoolTooltips();
   };
 
-  displayMainDeckCount() {
-    this.elements["ScoreHTML"].style.opacity = 0;
-    setTimeout(() => {
-      this.elements[
-        "ScoreHTML"
-      ].innerHTML = `Maindeck: ${this.currentMainDeckCount}`;
-      this.elements["ScoreHTML"].style.opacity = 1;
-    }, 150);
+  displayPackFlipcardHover = () => {
+    for (let i = 0; i < 15; i++){ 
+      let element = this.elements["DisplayedPack"][i]
+      let hoverURL = element.src;
+      let hoverName = this.masterHash["url_to_name"][hoverURL];
+      let flipURL;
+      if (this.masterHash["name_to_flip_uri"][hoverName]) {
+        flipURL = this.masterHash["name_to_flip_uri"][hoverName];
+      }
+      if (this.checkDFC(hoverURL)) {
+        element.setAttribute("data-toggle", "tooltip");
+        element.setAttribute(
+          "title",
+          `<img src="${flipURL}" class="tooltip-popup" />`
+        );
+        $(document).ready(function () {
+          $("[data-toggle=tooltip]").tooltip({
+            animated: "fade",
+            placement: "right",
+            html: true,
+          });
+        });
+      }
+    }
+  }
+  disableTooltips() {
+    $('[data-toggle="tooltip"]').tooltip("dispose");
+    for (let i = 0; i < 15; i++) {
+      let element = this.elements["DisplayedPack"][i]
+      element.removeAttribute("title");
+      element.removeAttribute("data-toggle");
+    }
   }
 
-  displayScore() {
-    this.elements["ScoreHTML"].style.opacity = 0;
-    setTimeout(() => {
-      this.elements["ScoreHTML"].innerHTML = `${this.currentScoreFixed} / ${
-        this.currentPick + 1
-      }`;
-      this.elements["ScoreHTML"].style.opacity = 1;
-    }, 150);
+
+  ///////////////////////////////// CHECK //////////////////////////////////////////
+
+  checkDFC(cardURL) {
+    if (this.masterHash["name_to_flip"]) {
+      let cardName = this.masterHash["url_to_name"][cardURL]
+      let isDFC = this.masterHash["name_to_flip"][cardName]
+      return isDFC
+    }
   }
 
   ///////////////////////////////// UPDATE LOGIC //////////////////////////////////
@@ -749,7 +778,6 @@ class DraftSimPackage {
       this.elements["RestartIcon"].style.display = "none";
     } else {
       this.elements["FeedbackHTML"].style.display = "block";
-      this.elements["ScoreHTML"].innerHTML = "";
       this.currentPoolToggled = false;
       this.elements["PoolToggle"].style.color = "white";
       this.elements["PoolToggle"].style.backgroundColor = "black";
@@ -794,6 +822,38 @@ class DraftSimPackage {
       }
     }
   }
+  updateFooterStats() {
+    this.elements["packCountHTML"].innerHTML = String(Math.floor((this.currentPick + 1) / 15) + 1)
+    this.elements["deckCountHTML"].innerHTML = String(this.currentMainDeckCount);
+    let botPickSoftmax = this.activePickSoftmax[this.activePreds[0]];
+    let humanPickSoftmax = this.activePickSoftmax[this.activePicks[0]];
+    let error = 1 - humanPickSoftmax / botPickSoftmax;
+    let pickValue;
+    if (this.MLPreds === true) {
+      pickValue = -Math.pow(error, 2.8) + 1;
+    } else {
+      pickValue = -error + 1;
+    }
+    this.currentScore += pickValue;
+    this.currentScoreFixed = (this.currentScore / (this.currentPick + 1)).toFixed(2);
+    this.elements["accuracyCountHTML"].innerHTML = String(
+      this.currentScoreFixed
+    );
+    this.elements["creatureCountHTML"].innerHTML = String(this.currentCreatures)
+    this.elements["landCountHTML"].innerHTML = String(this.currentLands)
+    this.elements["spellCountHTML"].innerHTML = String(this.currentSpells)
+  }
+  updateCurrentTypeCount() {
+    let humanPick = this.activePicks[0]
+    let humanPickType = this.masterHash["name_to_supertype"][this.masterHash["index_to_name"][humanPick]];
+    if (humanPickType === "Land") {
+      this.currentLands += 1
+    } else if (humanPickType === "Creature") {
+      this.currentCreatures += 1;
+    } else {
+      this.currentSpells += 1;
+    }
+  }
   ////////////////////////////////// END DRAFT ////////////////////////////////////
 
   // Function that resets the gamestate from the beginning
@@ -817,6 +877,7 @@ class DraftSimPackage {
     this.activePicks = [];
     this.activeFeatureVectors = this.generateActiveFeatures();
     this.activePools = this.generateActivePools();
+    this.displayRemoveBorders(); 
     this.activePickSoftmax = [];
     this.activePoolUrls = [[], [], [], [], [], [], []];
     this.activePoolSideboard = [[], [], [], [], [], [], []];
@@ -854,7 +915,6 @@ class DraftSimPackage {
     }
 
     // Resetting inner HTML
-    this.elements["ScoreHTML"].innerHTML = "Score";
     this.elements["FeedbackHTML"].innerHTML = "";
     setTimeout(() => {
       for (let i = 0; i < 15; i++) {
@@ -867,6 +927,7 @@ class DraftSimPackage {
 
   ///////////////////////////////// MAIN LOGIC //////////////////////////////////
   humanMakesPick = (event) => {
+    this.disableTooltips();
     // Changing border color of the card the player picked
     if (this.currentPicksActive === true) {
       for (let i = 0; i < 15; i++) {
@@ -893,13 +954,9 @@ class DraftSimPackage {
       this.activePicks[0] = pickIndex;
       this.updateActivePools(this.activePicks);
       this.displayBotPred(this.activePreds[0]);
-      this.displayPickAccuracy(
-        this.activePickSoftmax,
-        this.activePicks,
-        this.activePreds
-      );
       this.currentMainDeckCount++;
-
+      this.updateCurrentTypeCount();  
+      this.updateFooterStats();
       // Updating event listeners
       if (this.currentFeedbackActive === false) {
         setTimeout(() => {
@@ -1001,5 +1058,6 @@ class DraftSimPackage {
     if (this.MLPreds === false) {
       this.displayFeedbackToggle();
     }
+    this.displayPackFlipcardHover()
   }
 }

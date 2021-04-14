@@ -4,10 +4,10 @@
 // http://localhost:8000/path
 
 ///////////////////////////////// CREATE HTML WITH LOOP //////////////////////////////////
-let KaldheimHTMLGeneration = new HTMLGeneration();
+let StrixhavenHTMLGeneration = new HTMLGeneration();
 
 let mainWindow = document.getElementById("main_window");
-KaldheimHTMLGeneration.createPackHTML(mainWindow);
+StrixhavenHTMLGeneration.createPackHTML(mainWindow);
 
 //Element naming convention not used because these variables are not directly reference anywhere, accessed though elemenetPoolColArray
 let poolZeroCmcCol = document.getElementById("zero_cmc");
@@ -21,7 +21,7 @@ let poolSideboardCol = document.getElementById("sideboard");
 
 let elementPoolColArray = [poolZeroCmcCol, poolOneCmcCol, poolTwoCmcCol, poolThreeCmcCol, poolFourCmcCol, poolFiveCmcCol, poolSixCmcCol, poolSideboardCol];
 
-KaldheimHTMLGeneration.createPoolHTML(elementPoolColArray);
+StrixhavenHTMLGeneration.createPoolHTML(elementPoolColArray);
 
 ///////////////////////////////// DEFINING GLOBAL VARIABLES //////////////////////////////////
 // Fetching relevant cards by class, defining global variables
@@ -30,7 +30,6 @@ let elements = {};
 elements["DisplayedPack"] = document.getElementsByClassName("pack-card-image");
 elements["DisplayedPackDiv"] = document.getElementsByClassName("pack-card-image-div");
 
-elements["ScoreHTML"] = document.getElementById("score");
 elements["FeedbackHTML"] = document.getElementById("feedback");
 elements["LoadingSpinner"] = document.getElementById("loadingSpinner");
 elements["RestartIcon"] = document.getElementById("restartIcon")
@@ -39,6 +38,13 @@ elements["PoolToggle"] = document.getElementById("pool-toggler");
 elements["ResetPool"] = document.getElementById("resetSideboard");
 elements["ToggleFeedback"] = document.getElementById("toggleFeedback");
 elements["Restart"] = document.getElementById("resetDraft")
+
+elements["packCountHTML"] = document.getElementById("packCountHTML");
+elements["deckCountHTML"] = document.getElementById("deckCountHTML");
+elements["creatureCountHTML"] = document.getElementById("creatureCountHTML");
+elements["spellCountHTML"] = document.getElementById("spellCountHTML");
+elements["landCountHTML"] = document.getElementById("landCountHTML");
+elements["accuracyCountHTML"] = document.getElementById("accuracyCountHTML");
 
 //Element naming convention not used because these variables are not directly reference anywhere, accessed though elemenetPoolArray
 let poolZeroCmc = document.getElementsByClassName("0-cmc-image");
@@ -52,7 +58,7 @@ let poolSixCmc = document.getElementsByClassName("6-cmc-image");
 elements["PoolArray"] = [poolZeroCmc, poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
 elements["SideboardArray"] = document.getElementsByClassName("7-cmc-image");
 
-//////////////////////////////// KALDHEIM UNIQUE VARIABLES //////////////////////////////
+//////////////////////////////// SET UNIQUE VARIABLES //////////////////////////////
 
 let specialSlot = ["Redefined in special generate pack function, unique pack setup for stx"];
 

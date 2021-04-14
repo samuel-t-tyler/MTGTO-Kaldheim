@@ -9,6 +9,7 @@ class HTMLGeneration {
       let imageElement = document.createElement("img");
       imageDiv.className = "pack-card-image-div";
       imageElement.className = "pack-card-image rounded noSelect zoom";
+      imageElement.id = `pack-image-${i}`;
       imageDiv.appendChild(imageElement);
       main.appendChild(imageDiv);
     }
