@@ -413,7 +413,6 @@ class DraftSimPackage {
 
   displayFeedback = () => {
     if (this.currentFeedbackActive === true) {
-      this.elements["FeedbackHTML"].style.display = "block";
       this.elements["FeedbackHTML"].style.opacity = 1
       this.elements["FeedbackHTML"].innerHTML = this.currentPickAccuracy
     }
@@ -558,12 +557,12 @@ class DraftSimPackage {
   // Function that hides or displays player feedback based on user input in the menu
   displayFeedbackToggle = () => {
     if (this.currentFeedbackActive === true) {
-      this.elements["FeedbackHTML"].style.visibility = "hidden";
+      this.elements["FeedbackHTML"].style.opacity = 0;
       this.currentFeedbackActive = false;
       return;
     }
     if (this.currentFeedbackActive === false) {
-      this.elements["FeedbackHTML"].style.visibility = "visible";
+      this.elements["FeedbackHTML"].style.opacity = 1;
       this.currentFeedbackActive = true;
       return;
     }
@@ -742,7 +741,7 @@ class DraftSimPackage {
   // Function that updates what is displayed when the pool window button is toggled
   updatePoolToggled = () => {
     if (this.currentPoolToggled === false) {
-      this.elements["FeedbackHTML"].style.display = "none";
+      this.elements["FeedbackHTML"].style.opacity = 0;
       this.displayPoolImages();
       this.updatePoolTooltips();
       this.currentPoolToggled = true;
@@ -750,7 +749,7 @@ class DraftSimPackage {
       this.elements["PoolToggle"].style.backgroundColor = "white";
       this.elements["RestartIcon"].style.display = "none";
     } else {
-      this.elements["FeedbackHTML"].style.display = "block";
+      this.elements["FeedbackHTML"].style.opacity = 1;
       this.currentPoolToggled = false;
       this.elements["PoolToggle"].style.color = "white";
       this.elements["PoolToggle"].style.backgroundColor = "black";

@@ -241,7 +241,6 @@ img {
     height: auto;
     max-width: 100%;
     max-height: 95%;
-    
 }
 
 .pool-card-image {
@@ -255,8 +254,14 @@ img {
     justify-content: center;
     max-height: 35vh ;
     max-width: 25vh ;
-    margin: 0.2vh;
     cursor: pointer;
+}
+
+.pack-card-image-div img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 95%;
 }
 
 .pool-row {
@@ -445,5 +450,30 @@ animation: fadeIn ease 0.5s;
   }
   #loadingText {
     display: none;
+  }
+  .fixed-bottom {
+    width: 100vw;
+    border-radius: 0;
+    padding: 2% 8% 2% 8%
+  }
+  .footer-item {
+    min-width: 6vw;
+    max-width: 6vw;
+  }
+
+  .footer-image{
+    width: 8vw;
+    height: 8vw;
+    height: auto;
+  }
+
+  #feedback {
+    display: none ;
+  }
+
+  p {
+    font-size: 3vw;
+    vertical-align: middle;
+    margin-block-end: 0 !important;
   }
 }
