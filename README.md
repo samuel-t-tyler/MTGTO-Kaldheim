@@ -39,5 +39,5 @@ I also created a few naming conventions:
 
 Particles.js available here:
 https://github.com/VincentGarreau/particles.js/
-Some open source icons provided by:
+Open source icons provided by:
 https://icons8.com/
