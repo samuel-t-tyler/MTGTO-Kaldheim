@@ -18,7 +18,7 @@ class DraftSimPackage {
     this.specialSlot = specialSlot; //Array of strings that represent the unique set of cards that can be in the land slot for a se
     this.elements = elements;
     this.MLPreds = mlPreds;
-    this.genericPack = genericPack
+    this.genericPack = genericPack;
   }
   // Critical variables
   masterHash; // Layered object that can take any card representation and turn into any other card representation
@@ -34,10 +34,11 @@ class DraftSimPackage {
   currentPoolToggled = false;
   currentDraftOver = false;
   currentMainDeckCount = 0;
-  currentScoreFixed = 0;
   currentCreatures = 0;
   currentLands = 0;
   currentSpells = 0;
+  currentPickAccuracy = 0;
+  currentDraftAccuracy = 0;
 
   // Variables that store gamestate information of players, like decks and onehots.  All start with the word "active"
   activePacks; // Onehot array of shape [8, 3, 280] representing all packs in the draft
@@ -155,7 +156,8 @@ class DraftSimPackage {
   };
   // Function to generate a random pack of Kaldheim cards
   generatePack = () => {
-    if (this.genericPack === true) {  //this is used to allow custom pack generation functions defined in mainset.js
+    if (this.genericPack === true) {
+      //this is used to allow custom pack generation functions defined in mainset.js
       let activePackTemp;
       (activePackTemp = []).length = this.setSize;
       activePackTemp.fill(0);
@@ -189,7 +191,7 @@ class DraftSimPackage {
       }
       return activePackTemp;
     } else if (this.genericPack === false) {
-      let activePackTemp = generatePackSpecial();  //call the custom pack generation function.  must be names generatePackSpecial()
+      let activePackTemp = generatePackSpecial(); //call the custom pack generation function.  must be names generatePackSpecial()
       return activePackTemp;
     }
   };
@@ -347,9 +349,8 @@ class DraftSimPackage {
           }
         }
         if (i === 0) {
-          this.activePickSoftmax[
-            this.masterHash["name_to_index"][pack[m]]
-          ] = cardRating + 0.0001
+          this.activePickSoftmax[this.masterHash["name_to_index"][pack[m]]] =
+            cardRating + 0.0001;
         }
         let nameAndRating = [pack[m], cardRating];
         packCardValues.push(nameAndRating);
@@ -409,54 +410,14 @@ class DraftSimPackage {
       this.elements["DisplayedPack"][k].src = arrayOfSortedURLS[k];
     }
   };
-  /*
-  We use the formula (y = -(error*error)^e + 1), where e is the natural log 2.8, and error is (humansoftmax / botsoftmax)  
-  to generate a number between zero and one that represents the "correctness" of the human pick.  If the human and bot pick 
-  the same card, the error is 0, and y=1.  If the bot hates the human pick, error is close to 1, so y is close to zero.  The error is 
-  never greater than one since the bot always picks the highest softmax in each pack.  This function makes that calculation and 
-  then updates the score.innerHTML to reflect the result
-  */
-  // displayPickAccuracy = (activePickSoftmax, picks, preds) => {
-  //   this.elements["ScoreHTML"].style.opacity = 0;
-  //   setTimeout(() => {
-  //     this.elements["FeedbackHTML"].style.opacity = 1;
-  //     let botPickSoftmax = activePickSoftmax[preds[0]];
-  //     let humanPickSoftmax = activePickSoftmax[picks[0]];
-  //     let error = 1 - humanPickSoftmax / botPickSoftmax;
-  //     let pickValue;
-  //     if (this.MLPreds === true) {
-  //       pickValue = -Math.pow(error, 2.8) + 1;
-  //     } else {
-  //       pickValue = -error + 1;
-  //     }
-  //     this.currentScore += pickValue;
-  //     this.currentScoreFixed = this.currentScore.toFixed(1);
-  //     this.elements["FeedbackHTML"].style.color = "white";
-  //     if (this.currentScoreFixed[this.currentScoreFixed.length - 1] === "0") {
-  //       this.currentScoreFixed = this.currentScore.toFixed(0);
-  //     }
-  //     this.elements["ScoreHTML"].innerHTML = `${this.currentScoreFixed} / ${
-  //       this.currentPick + 1
-  //     }`;
-  //     if (pickValue >= 0.95) {
-  //       this.elements["FeedbackHTML"].innerHTML = "Excellent!";
-  //     }
-  //     if (pickValue >= 0.7 && pickValue < 0.95) {
-  //       this.elements["FeedbackHTML"].innerHTML = "Great!";
-  //     }
-  //     if (pickValue >= 0.5 && pickValue < 0.7) {
-  //       this.elements["FeedbackHTML"].innerHTML = "Not bad!";
-  //     }
-  //     if (pickValue >= 0.3 && pickValue < 0.5) {
-  //       this.elements["FeedbackHTML"].innerHTML = "Possible Mistake";
-  //     }
-  //     if (pickValue < 0.3) {
-  //       this.elements["FeedbackHTML"].innerHTML = "Mistake";
-  //     }
-  //     this.elements["ScoreHTML"].style.opacity = 1;
-  //   }, 75);
-  //   return;
-  // };
+
+  displayFeedback = () => {
+    if (this.currentFeedbackActive === true) {
+      this.elements["FeedbackHTML"].style.display = "block";
+      this.elements["FeedbackHTML"].style.opacity = 1
+      this.elements["FeedbackHTML"].innerHTML = this.currentPickAccuracy
+    }
+  };
 
   // Highlight the pick the bot likes
   displayBotPred = (pred) => {
@@ -573,7 +534,6 @@ class DraftSimPackage {
     }
     this.displaySideboard();
     this.currentMainDeckCount -= 1;
-    this.displayMainDeckCount();
     this.updatePoolTooltips();
     return;
   };
@@ -632,13 +592,12 @@ class DraftSimPackage {
       }
     }
     this.currentMainDeckCount++;
-    this.displayMainDeckCount();
     this.updatePoolTooltips();
   };
 
   displayPackFlipcardHover = () => {
-    for (let i = 0; i < 15; i++){ 
-      let element = this.elements["DisplayedPack"][i]
+    for (let i = 0; i < 15; i++) {
+      let element = this.elements["DisplayedPack"][i];
       let hoverURL = element.src;
       let hoverName = this.masterHash["url_to_name"][hoverURL];
       let flipURL;
@@ -660,24 +619,39 @@ class DraftSimPackage {
         });
       }
     }
-  }
+  };
   disableTooltips() {
     $('[data-toggle="tooltip"]').tooltip("dispose");
     for (let i = 0; i < 15; i++) {
-      let element = this.elements["DisplayedPack"][i]
+      let element = this.elements["DisplayedPack"][i];
       element.removeAttribute("title");
       element.removeAttribute("data-toggle");
     }
   }
-
+  displayFooterStats() {
+    this.elements["packCountHTML"].innerHTML = String(
+      Math.floor((this.currentPick + 1) / 15) + 1
+    );
+    this.elements["deckCountHTML"].innerHTML = String(
+      this.currentMainDeckCount
+    );
+    this.elements["accuracyCountHTML"].innerHTML = String(
+      this.currentDraftAccuracy
+    );
+    this.elements["creatureCountHTML"].innerHTML = String(
+      this.currentCreatures
+    );
+    this.elements["landCountHTML"].innerHTML = String(this.currentLands);
+    this.elements["spellCountHTML"].innerHTML = String(this.currentSpells);
+  }
 
   ///////////////////////////////// CHECK //////////////////////////////////////////
 
   checkDFC(cardURL) {
     if (this.masterHash["name_to_flip"]) {
-      let cardName = this.masterHash["url_to_name"][cardURL]
-      let isDFC = this.masterHash["name_to_flip"][cardName]
-      return isDFC
+      let cardName = this.masterHash["url_to_name"][cardURL];
+      let isDFC = this.masterHash["name_to_flip"][cardName];
+      return isDFC;
     }
   }
 
@@ -768,10 +742,9 @@ class DraftSimPackage {
   // Function that updates what is displayed when the pool window button is toggled
   updatePoolToggled = () => {
     if (this.currentPoolToggled === false) {
-      this.elements["FeedbackHTML"].style.display = "none"
+      this.elements["FeedbackHTML"].style.display = "none";
       this.displayPoolImages();
       this.updatePoolTooltips();
-      this.displayMainDeckCount();
       this.currentPoolToggled = true;
       this.elements["PoolToggle"].style.color = "black";
       this.elements["PoolToggle"].style.backgroundColor = "white";
@@ -822,9 +795,15 @@ class DraftSimPackage {
       }
     }
   }
-  updateFooterStats() {
-    this.elements["packCountHTML"].innerHTML = String(Math.floor((this.currentPick + 1) / 15) + 1)
-    this.elements["deckCountHTML"].innerHTML = String(this.currentMainDeckCount);
+
+  /*
+  We use the formula (y = -(error*error)^e + 1), where e is the natural log 2.8, and error is (humansoftmax / botsoftmax)  
+  to generate a number between zero and one that represents the "correctness" of the human pick.  If the human and bot pick 
+  the same card, the error is 0, and y=1.  If the bot hates the human pick, error is close to 1, so y is close to zero.  The error is 
+  never greater than one since the bot always picks the highest softmax in each pack.  This function makes that calculation and 
+  then updates the score.innerHTML to reflect the result
+  */
+  updatePickAccuracy() {
     let botPickSoftmax = this.activePickSoftmax[this.activePreds[0]];
     let humanPickSoftmax = this.activePickSoftmax[this.activePicks[0]];
     let error = 1 - humanPickSoftmax / botPickSoftmax;
@@ -834,20 +813,21 @@ class DraftSimPackage {
     } else {
       pickValue = -error + 1;
     }
+    this.currentPickAccuracy = pickValue.toFixed(1)
     this.currentScore += pickValue;
-    this.currentScoreFixed = (this.currentScore / (this.currentPick + 1)).toFixed(2);
-    this.elements["accuracyCountHTML"].innerHTML = String(
-      this.currentScoreFixed
-    );
-    this.elements["creatureCountHTML"].innerHTML = String(this.currentCreatures)
-    this.elements["landCountHTML"].innerHTML = String(this.currentLands)
-    this.elements["spellCountHTML"].innerHTML = String(this.currentSpells)
+    this.currentDraftAccuracy = (
+      this.currentScore /
+      (this.currentPick + 1)
+    ).toFixed(2);
   }
+
   updateCurrentTypeCount() {
-    let humanPick = this.activePicks[0]
-    let humanPickType = this.masterHash["name_to_supertype"][this.masterHash["index_to_name"][humanPick]];
+    let humanPick = this.activePicks[0];
+    let humanPickType = this.masterHash["name_to_supertype"][
+      this.masterHash["index_to_name"][humanPick]
+    ];
     if (humanPickType === "Land") {
-      this.currentLands += 1
+      this.currentLands += 1;
     } else if (humanPickType === "Creature") {
       this.currentCreatures += 1;
     } else {
@@ -864,7 +844,6 @@ class DraftSimPackage {
         "fadeOut ease 0.25s";
     }
     this.currentScore = 0;
-    this.currentScoreFixed = 0;
     this.currentPick = 0;
     this.currentPack = 0;
     this.currentPicksActive = false;
@@ -877,7 +856,7 @@ class DraftSimPackage {
     this.activePicks = [];
     this.activeFeatureVectors = this.generateActiveFeatures();
     this.activePools = this.generateActivePools();
-    this.displayRemoveBorders(); 
+    this.displayRemoveBorders();
     this.activePickSoftmax = [];
     this.activePoolUrls = [[], [], [], [], [], [], []];
     this.activePoolSideboard = [[], [], [], [], [], [], []];
@@ -893,6 +872,13 @@ class DraftSimPackage {
       this.activePools,
       this.currentPack
     );
+    this.currentMainDeckCount = 0;
+    this.currentCreatures = 0;
+    this.currentLands = 0;
+    this.currentSpells = 0;
+    this.currentPickAccuracy = 0;
+    this.currentDraftAccuracy = 0;
+    this.displayFooterStats();
     this.makePred();
     this.currentPicksActive = true;
 
@@ -955,13 +941,15 @@ class DraftSimPackage {
       this.updateActivePools(this.activePicks);
       this.displayBotPred(this.activePreds[0]);
       this.currentMainDeckCount++;
-      this.updateCurrentTypeCount();  
-      this.updateFooterStats();
+      this.updateCurrentTypeCount();
+      this.updatePickAccuracy();
+      this.displayFooterStats();
+      this.displayFeedback();
       // Updating event listeners
       if (this.currentFeedbackActive === false) {
         setTimeout(() => {
           this.humanSeesResults();
-        }, 80)
+        }, 80);
       } else {
         setTimeout(() => {
           for (let i = 0; i < 15; i++) {
@@ -970,7 +958,6 @@ class DraftSimPackage {
               this.humanSeesResults
             );
           }
-        
         }, 150);
       }
     }
@@ -1058,6 +1045,6 @@ class DraftSimPackage {
     if (this.MLPreds === false) {
       this.displayFeedbackToggle();
     }
-    this.displayPackFlipcardHover()
+    this.displayPackFlipcardHover();
   }
 }
