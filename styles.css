@@ -252,8 +252,8 @@ img {
 
 .pack-card-image-div {
     justify-content: center;
-    max-height: 35vh ;
-    max-width: 25vh ;
+    max-height: 40vh ;
+    max-width: 29vh ;
     cursor: pointer;
 }
 
