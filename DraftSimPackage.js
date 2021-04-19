@@ -264,7 +264,7 @@ class DraftSimPackage {
       let colorcomitted = false;
       let colorComitOne;
       let colorComitTwo;
-      let colorPull = {
+      let colorLean = {
         W: 0,
         U: 0,
         B: 0,
@@ -281,23 +281,23 @@ class DraftSimPackage {
         if (rating === NaN || this.ratings[pool[k]] === "") {
         }
         for (let l = 0; l < color.length; l++) {
-          let pull = (rating - 2) * 0.266;
-          if (pull < 0) {
-            pull = 0;
+          let lean = (rating - 2) * 0.266;
+          if (lean < 0) {
+            lean = 0;
           }
-          colorPull[color[l]] += pull;
+          colorLean[color[l]] += lean;
         }
       }
 
       // Determining if we are in the "two color locked" threshold
-      let colorPullArray = Object.entries(colorPull);
-      colorPullArray.sort(function (a, b) {
+      let colorLeanArray = Object.entries(colorLean);
+      colorLeanArray.sort(function (a, b) {
         return b[1] - a[1];
       });
-      if (colorPullArray[0][1] > 3.3 && colorPullArray[1][1] > 3.3) {
+      if (colorLeanArray[0][1] > 3.3 && colorLeanArray[1][1] > 3.3) {
         colorcomitted = true;
-        colorComitOne = colorPullArray[0][0];
-        colorComitTwo = colorPullArray[1][0];
+        colorComitOne = colorLeanArray[0][0];
+        colorComitTwo = colorLeanArray[1][0];
       }
 
       // calculating pack values
@@ -308,11 +308,11 @@ class DraftSimPackage {
         let color = this.masterHash["name_to_color"][pack[m]];
         if (colorcomitted === false) {
           if (color.length === 0) {
-            cardRating += colorPullArray[0][1];
+            cardRating += colorLeanArray[0][1];
           } else if (color.length === 1) {
-            cardRating += colorPull[color[0]];
+            cardRating += colorLean[color[0]];
           } else if (color.length === 2) {
-            let colorMatchValue = colorPull[color[0]] + colorPull[color[1]];
+            let colorMatchValue = colorLean[color[0]] + colorLean[color[1]];
             cardRating += colorMatchValue;
           } else if (color.length > 2) {
             cardRating -= 0.55;

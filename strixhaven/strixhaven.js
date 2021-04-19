@@ -45,6 +45,7 @@ elements["creatureCountHTML"] = document.getElementById("creatureCountHTML");
 elements["spellCountHTML"] = document.getElementById("spellCountHTML");
 elements["landCountHTML"] = document.getElementById("landCountHTML");
 elements["accuracyCountHTML"] = document.getElementById("accuracyCountHTML");
+elements["imageSizeSlider"] = document.getElementById("myRange");
 
 //Element naming convention not used because these variables are not directly reference anywhere, accessed though elemenetPoolArray
 let poolZeroCmc = document.getElementsByClassName("0-cmc-image");
@@ -94,6 +95,12 @@ Promise.all([
   });
 
 ////////////////////////////////// EVENT LISTENERS //////////////////////////////////// 
+
+elements["imageSizeSlider"].oninput = function () {
+  for (let i = 0; i < StrixhavenDraftPackage.elements["DisplayedPackDiv"].length; i++) {
+    StrixhavenDraftPackage.elements["DisplayedPackDiv"][i].style.maxWidth = `${this.value}vh`;
+  }
+};
 
 for (let i = 0; i < 15; i++) {
   StrixhavenDraftPackage.elements["DisplayedPack"][i].addEventListener("click", StrixhavenDraftPackage.humanMakesPick);
