@@ -9,7 +9,8 @@ class DraftSimPackage {
     specialSlot = ["Mountain", "Swamp", "Forest", "Plains", "Island"],
     elements,
     mlPreds,
-    genericPack
+    genericPack,
+    flipCards
   ) {
     this.set = set; //String of the set name
     this.setSize = setSize; //Number of cards in the set
@@ -19,6 +20,7 @@ class DraftSimPackage {
     this.elements = elements;
     this.MLPreds = mlPreds;
     this.genericPack = genericPack;
+    this.flipCards = flipCards
   }
   // Critical variables
   masterHash; // Layered object that can take any card representation and turn into any other card representation
@@ -312,7 +314,7 @@ class DraftSimPackage {
           } else if (color.length === 1) {
             cardRating += colorLean[color[0]];
           } else if (color.length === 2) {
-            let colorMatchValue = colorLean[color[0]] + colorLean[color[1]];
+            let colorMatchValue = colorLean[color[0]] + colorLean [color[1]];
             cardRating += colorMatchValue;
           } else if (color.length > 2) {
             cardRating -= 0.55;
@@ -383,6 +385,8 @@ class DraftSimPackage {
     for (let z = 0; z < 15; z++) {
       this.elements["DisplayedPack"][z].classList.add("fullPack");
       this.elements["DisplayedPack"][z].src = "";
+      this.elements["DisplayedPackDiv"][z].style.display = "none"
+      
     }
     for (let i = 0; i < humanPlayerActivePack.length; i++) {
       if (humanPlayerActivePack[i] > 0) {
@@ -408,6 +412,7 @@ class DraftSimPackage {
     arrayOfSortedURLS = arrayOfSortedURLS.concat(rares, uncommons, commons);
     for (let k = 0; k < arrayOfSortedURLS.length; k++) {
       this.elements["DisplayedPack"][k].src = arrayOfSortedURLS[k];
+      this.elements["DisplayedPackDiv"][k].style.display = "block";
     }
   };
 
@@ -595,30 +600,33 @@ class DraftSimPackage {
   };
 
   displayPackFlipcardHover = () => {
-    for (let i = 0; i < 15; i++) {
-      let element = this.elements["DisplayedPack"][i];
-      let hoverURL = element.src;
-      let hoverName = this.masterHash["url_to_name"][hoverURL];
-      let flipURL;
-      if (this.masterHash["name_to_flip_uri"][hoverName]) {
-        flipURL = this.masterHash["name_to_flip_uri"][hoverName];
-      }
-      if (this.checkDFC(hoverURL)) {
-        element.setAttribute("data-toggle", "tooltip");
-        element.setAttribute(
-          "title",
-          `<img src="${flipURL}" class="tooltip-popup" />`
-        );
-        $(document).ready(function () {
-          $("[data-toggle=tooltip]").tooltip({
-            animated: "fade",
-            placement: "right",
-            html: true,
+    if (this.flipCards === true) {
+      for (let i = 0; i < 15; i++) {
+        let element = this.elements["DisplayedPack"][i];
+        let hoverURL = element.src;
+        let hoverName = this.masterHash["url_to_name"][hoverURL];
+        let flipURL;
+        if (this.masterHash["name_to_flip_uri"][hoverName]) {
+          flipURL = this.masterHash["name_to_flip_uri"][hoverName];
+        }
+        if (this.checkDFC(hoverURL)) {
+          element.setAttribute("data-toggle", "tooltip");
+          element.setAttribute(
+            "title",
+            `<img src="${flipURL}" class="tooltip-popup" />`
+          );
+          $(document).ready(function () {
+            $("[data-toggle=tooltip]").tooltip({
+              animated: "fade",
+              placement: "right",
+              html: true,
+            });
           });
-        });
+        }
       }
-    }
-  };
+    };
+  }
+
   disableTooltips() {
     $('[data-toggle="tooltip"]').tooltip("dispose");
     for (let i = 0; i < 15; i++) {
@@ -642,6 +650,18 @@ class DraftSimPackage {
     );
     this.elements["landCountHTML"].innerHTML = String(this.currentLands);
     this.elements["spellCountHTML"].innerHTML = String(this.currentSpells);
+  }
+
+  displayPickSuggestion = () => {
+    console.log("clicked")
+    if (this.currentPicksActive === true) {
+      let humanPred = this.masterHash["index_to_url"][this.activePreds[0]]
+      for (let i = 0; i < this.elements["DisplayedPack"].length; i++) {
+        if (this.elements["DisplayedPack"][i].src === humanPred) {
+          this.elements["DisplayedPack"][i].id = "greenSelect";
+        }
+      }
+    }
   }
 
   ///////////////////////////////// CHECK //////////////////////////////////////////
@@ -1015,6 +1035,33 @@ class DraftSimPackage {
       this.elements["FeedbackHTML"].style.opacity = 0;
     }
   };
+
+  ///////////////////////////////// SETUP LOGIC //////////////////////////////////
+  addEventListeners = () => {
+
+  for (let i = 0; i < 15; i++) {
+    this.elements["DisplayedPack"][i].addEventListener("click", this.humanMakesPick);
+    console.log(this.elements)
+  }
+
+  for (let j = 0; j < this.elements["PoolArray"].length; j++){
+    for (let i = 0; i < this.elements["PoolArray"][j].length; i++) {
+      this.elements["PoolArray"][j][i].addEventListener("click", this.displayPoolAfterSideboard)
+    }
+  }
+
+  for (let i = 0; i < 30; i++) {
+    this.elements["SideboardArray"][i].addEventListener("click", this.moveSideboardToPool);
+  }
+
+  this.elements["ResetPool"].addEventListener("click", this.displayPoolAfterReset);
+  this.elements["ToggleFeedback"].addEventListener("click", this.displayFeedbackToggle);
+  this.elements["Restart"].addEventListener("click", this.resetDraft);
+  this.elements["PoolToggle"].addEventListener("click", this.updatePoolToggled);
+  this.elements["RestartIcon"].addEventListener("click", this.resetDraft);
+  this.elements["questionMark"].addEventListener("click", this.displayPickSuggestion)
+  }
+
   setupAfterPromise(data) {
     this.masterHash = data[1];
     this.model = data[0];
@@ -1045,5 +1092,6 @@ class DraftSimPackage {
       this.displayFeedbackToggle();
     }
     this.displayPackFlipcardHover();
+    this.addEventListeners();
   }
 }

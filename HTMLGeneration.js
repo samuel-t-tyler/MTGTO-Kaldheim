@@ -37,4 +37,54 @@ class HTMLGeneration {
       }
     }
   }
+  fetchElements() {
+    let elements = {};
+
+    elements["DisplayedPack"] = document.getElementsByClassName(
+      "pack-card-image"
+    );
+    elements["DisplayedPackDiv"] = document.getElementsByClassName("pack-card-image-div");
+
+    elements["FeedbackHTML"] = document.getElementById("feedback");
+    elements["LoadingSpinner"] = document.getElementById("loadingSpinner");
+    elements["RestartIcon"] = document.getElementById("restartIcon");
+    elements["PoolToggle"] = document.getElementById("pool-toggler");
+
+    elements["ResetPool"] = document.getElementById("resetSideboard");
+    elements["ToggleFeedback"] = document.getElementById("toggleFeedback");
+    elements["Restart"] = document.getElementById("resetDraft");
+
+    elements["packCountHTML"] = document.getElementById("packCountHTML");
+    elements["deckCountHTML"] = document.getElementById("deckCountHTML");
+    elements["creatureCountHTML"] = document.getElementById(
+      "creatureCountHTML"
+    );
+    elements["spellCountHTML"] = document.getElementById("spellCountHTML");
+    elements["landCountHTML"] = document.getElementById("landCountHTML");
+    elements["accuracyCountHTML"] = document.getElementById("accuracyCountHTML");
+    elements["imageSizeSlider"] = document.getElementById("myRange");
+    elements["questionMark"] = document.getElementById("question-mark")
+
+    //Element naming convention not used because these variables are not directly reference anywhere, accessed though elemenetPoolArray
+    let poolZeroCmc = document.getElementsByClassName("0-cmc-image");
+    let poolOneCmc = document.getElementsByClassName("1-cmc-image");
+    let poolTwoCmc = document.getElementsByClassName("2-cmc-image");
+    let poolThreeCmc = document.getElementsByClassName("3-cmc-image");
+    let poolFourCmc = document.getElementsByClassName("4-cmc-image");
+    let poolFiveCmc = document.getElementsByClassName("5-cmc-image");
+    let poolSixCmc = document.getElementsByClassName("6-cmc-image");
+
+    elements["PoolArray"] = [
+      poolZeroCmc,
+      poolOneCmc,
+      poolTwoCmc,
+      poolThreeCmc,
+      poolFourCmc,
+      poolFiveCmc,
+      poolSixCmc,
+    ];
+    elements["SideboardArray"] = document.getElementsByClassName("7-cmc-image");
+
+    return elements
+  }
 }

@@ -23,41 +23,8 @@ let elementPoolColArray = [poolZeroCmcCol, poolOneCmcCol, poolTwoCmcCol, poolThr
 
 StrixhavenHTMLGeneration.createPoolHTML(elementPoolColArray);
 
-///////////////////////////////// DEFINING GLOBAL VARIABLES //////////////////////////////////
-// Fetching relevant cards by class, defining global variables
-let elements = {};
-
-elements["DisplayedPack"] = document.getElementsByClassName("pack-card-image");
-elements["DisplayedPackDiv"] = document.getElementsByClassName("pack-card-image-div");
-
-elements["FeedbackHTML"] = document.getElementById("feedback");
-elements["LoadingSpinner"] = document.getElementById("loadingSpinner");
-elements["RestartIcon"] = document.getElementById("restartIcon")
-elements["PoolToggle"] = document.getElementById("pool-toggler");
-
-elements["ResetPool"] = document.getElementById("resetSideboard");
-elements["ToggleFeedback"] = document.getElementById("toggleFeedback");
-elements["Restart"] = document.getElementById("resetDraft")
-
-elements["packCountHTML"] = document.getElementById("packCountHTML");
-elements["deckCountHTML"] = document.getElementById("deckCountHTML");
-elements["creatureCountHTML"] = document.getElementById("creatureCountHTML");
-elements["spellCountHTML"] = document.getElementById("spellCountHTML");
-elements["landCountHTML"] = document.getElementById("landCountHTML");
-elements["accuracyCountHTML"] = document.getElementById("accuracyCountHTML");
-elements["imageSizeSlider"] = document.getElementById("myRange");
-
-//Element naming convention not used because these variables are not directly reference anywhere, accessed though elemenetPoolArray
-let poolZeroCmc = document.getElementsByClassName("0-cmc-image");
-let poolOneCmc = document.getElementsByClassName("1-cmc-image");
-let poolTwoCmc = document.getElementsByClassName("2-cmc-image");
-let poolThreeCmc = document.getElementsByClassName("3-cmc-image");
-let poolFourCmc = document.getElementsByClassName("4-cmc-image");
-let poolFiveCmc = document.getElementsByClassName("5-cmc-image");
-let poolSixCmc = document.getElementsByClassName("6-cmc-image");
-
-elements["PoolArray"] = [poolZeroCmc, poolOneCmc, poolTwoCmc, poolThreeCmc, poolFourCmc, poolFiveCmc, poolSixCmc];
-elements["SideboardArray"] = document.getElementsByClassName("7-cmc-image");
+///////////////////////////////// FETCHING PAGE ELEMENTS //////////////////////////////////
+let elements = StrixhavenHTMLGeneration.fetchElements()
 
 //////////////////////////////// SET UNIQUE VARIABLES //////////////////////////////
 
@@ -68,9 +35,10 @@ const inputSize = (setSize * 2) + 14;
 const oddsRare = 0.875;
 const MLpreds = false; // Once we have sufficient data for ML preds, we can set this to default to true
 const genericPack = false
+const flipCards = true
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
-let StrixhavenDraftPackage = new DraftSimPackage("Strixhaven", setSize, inputSize, oddsRare, specialSlot, elements, MLpreds, genericPack);
+let StrixhavenDraftPackage = new DraftSimPackage("Strixhaven", setSize, inputSize, oddsRare, specialSlot, elements, MLpreds, genericPack, flipCards);
 
 Promise.all([
   tf.loadLayersModel("./tfjs_model/model.json"),
@@ -94,36 +62,16 @@ Promise.all([
     console.log(error);
   });
 
-////////////////////////////////// EVENT LISTENERS //////////////////////////////////// 
-
-elements["imageSizeSlider"].oninput = function () {
-  for (let i = 0; i < StrixhavenDraftPackage.elements["DisplayedPackDiv"].length; i++) {
-    StrixhavenDraftPackage.elements["DisplayedPackDiv"][i].style.maxWidth = `${this.value}vh`;
-  }
-};
-
-for (let i = 0; i < 15; i++) {
-  StrixhavenDraftPackage.elements["DisplayedPack"][i].addEventListener("click", StrixhavenDraftPackage.humanMakesPick);
-}
-
-for (let j = 0; j < StrixhavenDraftPackage.elements["PoolArray"].length; j++){
-  for (let i = 0; i < StrixhavenDraftPackage.elements["PoolArray"][j].length; i++) {
-    StrixhavenDraftPackage.elements["PoolArray"][j][i].addEventListener("click", StrixhavenDraftPackage.displayPoolAfterSideboard)
-  }
-}
-
-for (let i = 0; i < 30; i++) {
-  StrixhavenDraftPackage.elements["SideboardArray"][i].addEventListener("click", StrixhavenDraftPackage.moveSideboardToPool);
-}
-
-StrixhavenDraftPackage.elements["ResetPool"].addEventListener("click", StrixhavenDraftPackage.displayPoolAfterReset);
-StrixhavenDraftPackage.elements["ToggleFeedback"].addEventListener("click", StrixhavenDraftPackage.displayFeedbackToggle);
-StrixhavenDraftPackage.elements["Restart"].addEventListener("click", StrixhavenDraftPackage.resetDraft);
-StrixhavenDraftPackage.elements["PoolToggle"].addEventListener("click", StrixhavenDraftPackage.updatePoolToggled);
-StrixhavenDraftPackage.elements["RestartIcon"].addEventListener("click", StrixhavenDraftPackage.resetDraft);
-
 
 /////////////////////////////////////////// SPECIAL STRIXHAVEN FUNCTIONS ///////////////////////////////////////////////
+
+StrixhavenDraftPackage.elements["imageSizeSlider"].oninput = function () {
+  for (let i = 0; i < StrixhavenDraftPackage.elements["DisplayedPackDiv"].length; i++) {
+    StrixhavenDraftPackage.elements["DisplayedPackDiv"][
+      i
+    ].style.maxWidth = `${this.value}vh`;
+  }
+};
 
 function generatePackSpecial() {
   let activePackTemp;
