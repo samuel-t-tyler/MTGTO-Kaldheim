@@ -61,11 +61,10 @@ h1 {
     left: 50%;
     font-size: 5vh;
     filter: brightness(50%);
-    margin-top: -8vh; /* Negative half of height. */
+    margin-top: -2vh; /* Negative half of height. */
     margin-left: -14.4vh; /* Negative half of width. */
     font-family: 'Orbitron', sans-serif;
 }
-
 #strixhaven {
     background-color: transparent;
     color: white;
@@ -74,10 +73,24 @@ h1 {
     left: 50%;
     font-size: 5vh;
     filter: brightness(50%);
-    margin-top: -2vh; /* Negative half of height. */
+    margin-top: -8vh; /* Negative half of height. */
     margin-left: -19.4vh; /* Negative half of width. */
     font-family: 'Orbitron', sans-serif;
 }
+
+#teirlists {
+    background-color: transparent;
+    color: white;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    font-size: 5vh;
+    filter: brightness(50%);
+    margin-top: 4vh; /* Negative half of height. */
+    margin-left: -19.5vh; /* Negative half of width. */
+    font-family: 'Orbitron', sans-serif;
+}
+
 
 #about {
     background-color: transparent;
@@ -87,33 +100,17 @@ h1 {
     left: 50%;
     font-size: 5vh;
     filter: brightness(50%);
-    margin-top: 4vh; /* Negative half of height. */
-    margin-left: -10.3vh; /* Negative half of width. */
+    margin-top: 10vh; /* Negative half of height. */
+    margin-left: -9.8vh; /* Negative half of width. */
     font-family: 'Orbitron', sans-serif;
 }
 
-#about:hover {
+.menu:hover {
     filter: brightness(200%);
     animation-name: brighten;
     animation-duration: 1s;
     animation-fill-mode: forwards; 
     cursor: pointer;  
-}
-
-#kaldheim:hover {
-    filter: brightness(200%);
-    animation-name: brighten;
-    animation-duration: 1s;
-    animation-fill-mode: forwards; 
-    cursor: pointer;
-}
-
-#strixhaven:hover {
-    filter: brightness(200%);
-    animation-name: brighten;
-    animation-duration: 1s;
-    animation-fill-mode: forwards; 
-    cursor: pointer;
 }
 
 a {

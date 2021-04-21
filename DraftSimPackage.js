@@ -20,7 +20,7 @@ class DraftSimPackage {
     this.elements = elements;
     this.MLPreds = mlPreds;
     this.genericPack = genericPack;
-    this.flipCards = flipCards
+    this.flipCards = flipCards;
   }
   // Critical variables
   masterHash; // Layered object that can take any card representation and turn into any other card representation
@@ -212,6 +212,29 @@ class DraftSimPackage {
     return activePacksTemp;
   };
 
+  generateUpdatedFooterStats(cardName, opperation) {
+    if (opperation === "remove") {
+      let cutType = this.masterHash["name_to_supertype"][cardName];
+      if (cutType === "Creature") {
+        this.currentCreatures -= 1;
+      } else if (cutType === "Land") {
+        this.currentLands -= 1;
+      } else {
+        this.currentSpells -= 1;
+      }
+      this.currentMainDeckCount -= 1;
+    } else if (opperation === "add") {
+        let cutType = this.masterHash["name_to_supertype"][cardName];
+        if (cutType === "Creature") {
+          this.currentCreatures += 1;
+        } else if (cutType === "Land") {
+          this.currentLands += 1;
+        } else {
+          this.currentSpells += 1;
+        }
+    }
+  }
+
   ///////////////////////////////// MAKING PREDICTIONS //////////////////////////////////
 
   //This is the ML model hosted by TFJS.  This function takes a onehot of shape this.inputShape and spits out a onehot vector
@@ -314,7 +337,7 @@ class DraftSimPackage {
           } else if (color.length === 1) {
             cardRating += colorLean[color[0]];
           } else if (color.length === 2) {
-            let colorMatchValue = colorLean[color[0]] + colorLean [color[1]];
+            let colorMatchValue = colorLean[color[0]] + colorLean[color[1]];
             cardRating += colorMatchValue;
           } else if (color.length > 2) {
             cardRating -= 0.55;
@@ -385,8 +408,7 @@ class DraftSimPackage {
     for (let z = 0; z < 15; z++) {
       this.elements["DisplayedPack"][z].classList.add("fullPack");
       this.elements["DisplayedPack"][z].src = "";
-      this.elements["DisplayedPackDiv"][z].style.display = "none"
-      
+      this.elements["DisplayedPackDiv"][z].style.display = "none";
     }
     for (let i = 0; i < humanPlayerActivePack.length; i++) {
       if (humanPlayerActivePack[i] > 0) {
@@ -418,8 +440,8 @@ class DraftSimPackage {
 
   displayFeedback = () => {
     if (this.currentFeedbackActive === true) {
-      this.elements["FeedbackHTML"].style.opacity = 1
-      this.elements["FeedbackHTML"].innerHTML = this.currentPickAccuracy
+      this.elements["FeedbackHTML"].style.opacity = 1;
+      this.elements["FeedbackHTML"].innerHTML = this.currentPickAccuracy;
     }
   };
 
@@ -529,6 +551,9 @@ class DraftSimPackage {
     const pile = clicked[0];
     const index = parseInt(clicked.slice(2, 4)); //note that index is one above the index used in array
     const cutURL = this.activePoolUrls[pile].splice(index - 1, 1);
+    let cutName = this.masterHash["url_to_name"][cutURL];
+    this.generateUpdatedFooterStats(cutName, "remove");
+    this.displayFooterStats();
     this.activePoolSideboard[pile].push(cutURL[0]);
     for (let k = 0; k < 30; k++) {
       this.elements["PoolArray"][pile][k].src = "";
@@ -537,7 +562,6 @@ class DraftSimPackage {
       this.elements["PoolArray"][pile][z].src = this.activePoolUrls[pile][z];
     }
     this.displaySideboard();
-    this.currentMainDeckCount -= 1;
     this.updatePoolTooltips();
     return;
   };
@@ -546,9 +570,15 @@ class DraftSimPackage {
   displayPoolAfterReset = () => {
     for (let i = 0; i < 7; i++) {
       for (let j = 0; j < this.activePoolSideboard[i].length; j++) {
+        this.currentMainDeckCount++;
+        console.log()
+        let cardName = this.masterHash["url_to_name"][this.activePoolSideboard[i][j]  ];
+        console.log(cardName);
+        this.generateUpdatedFooterStats(cardName, "add");
         this.activePoolUrls[i].push(this.activePoolSideboard[i][j]);
       }
     }
+    this.displayFooterStats();
     for (let k = 0; k < 7; k++) {
       for (let l = 0; l < this.activePoolUrls[k].length; l++) {
         this.elements["PoolArray"][k][l].src = this.activePoolUrls[k][l];
@@ -575,6 +605,10 @@ class DraftSimPackage {
   // Function that is called when a player clicks on a sideboard card to move it back into the pool
   moveSideboardToPool = (event) => {
     let sideboardSrc = event.srcElement.src;
+    let cardName = this.masterHash["url_to_name"][sideboardSrc];
+    this.currentMainDeckCount++;
+    this.generateUpdatedFooterStats(cardName, "add");
+    this.displayFooterStats();
     let cmc = this.masterHash["name_to_cmc"][
       this.masterHash["url_to_name"][sideboardSrc]
     ];
@@ -595,7 +629,6 @@ class DraftSimPackage {
         this.elements["PoolArray"][j][i].src = this.activePoolUrls[j][i];
       }
     }
-    this.currentMainDeckCount++;
     this.updatePoolTooltips();
   };
 
@@ -624,8 +657,8 @@ class DraftSimPackage {
           });
         }
       }
-    };
-  }
+    }
+  };
 
   disableTooltips() {
     $('[data-toggle="tooltip"]').tooltip("dispose");
@@ -653,16 +686,16 @@ class DraftSimPackage {
   }
 
   displayPickSuggestion = () => {
-    console.log("clicked")
+    console.log("clicked");
     if (this.currentPicksActive === true) {
-      let humanPred = this.masterHash["index_to_url"][this.activePreds[0]]
+      let humanPred = this.masterHash["index_to_url"][this.activePreds[0]];
       for (let i = 0; i < this.elements["DisplayedPack"].length; i++) {
         if (this.elements["DisplayedPack"][i].src === humanPred) {
           this.elements["DisplayedPack"][i].id = "greenSelect";
         }
       }
     }
-  }
+  };
 
   ///////////////////////////////// CHECK //////////////////////////////////////////
 
@@ -832,7 +865,7 @@ class DraftSimPackage {
     } else {
       pickValue = -error + 1;
     }
-    this.currentPickAccuracy = pickValue.toFixed(1)
+    this.currentPickAccuracy = pickValue.toFixed(1);
     this.currentScore += pickValue;
     this.currentDraftAccuracy = (
       this.currentScore /
@@ -1038,29 +1071,48 @@ class DraftSimPackage {
 
   ///////////////////////////////// SETUP LOGIC //////////////////////////////////
   addEventListeners = () => {
-
-  for (let i = 0; i < 15; i++) {
-    this.elements["DisplayedPack"][i].addEventListener("click", this.humanMakesPick);
-    console.log(this.elements)
-  }
-
-  for (let j = 0; j < this.elements["PoolArray"].length; j++){
-    for (let i = 0; i < this.elements["PoolArray"][j].length; i++) {
-      this.elements["PoolArray"][j][i].addEventListener("click", this.displayPoolAfterSideboard)
+    for (let i = 0; i < 15; i++) {
+      this.elements["DisplayedPack"][i].addEventListener(
+        "click",
+        this.humanMakesPick
+      );
     }
-  }
 
-  for (let i = 0; i < 30; i++) {
-    this.elements["SideboardArray"][i].addEventListener("click", this.moveSideboardToPool);
-  }
+    for (let j = 0; j < this.elements["PoolArray"].length; j++) {
+      for (let i = 0; i < this.elements["PoolArray"][j].length; i++) {
+        this.elements["PoolArray"][j][i].addEventListener(
+          "click",
+          this.displayPoolAfterSideboard
+        );
+      }
+    }
 
-  this.elements["ResetPool"].addEventListener("click", this.displayPoolAfterReset);
-  this.elements["ToggleFeedback"].addEventListener("click", this.displayFeedbackToggle);
-  this.elements["Restart"].addEventListener("click", this.resetDraft);
-  this.elements["PoolToggle"].addEventListener("click", this.updatePoolToggled);
-  this.elements["RestartIcon"].addEventListener("click", this.resetDraft);
-  this.elements["questionMark"].addEventListener("click", this.displayPickSuggestion)
-  }
+    for (let i = 0; i < 30; i++) {
+      this.elements["SideboardArray"][i].addEventListener(
+        "click",
+        this.moveSideboardToPool
+      );
+    }
+
+    this.elements["ResetPool"].addEventListener(
+      "click",
+      this.displayPoolAfterReset
+    );
+    this.elements["ToggleFeedback"].addEventListener(
+      "click",
+      this.displayFeedbackToggle
+    );
+    this.elements["Restart"].addEventListener("click", this.resetDraft);
+    this.elements["PoolToggle"].addEventListener(
+      "click",
+      this.updatePoolToggled
+    );
+    this.elements["RestartIcon"].addEventListener("click", this.resetDraft);
+    this.elements["questionMark"].addEventListener(
+      "click",
+      this.displayPickSuggestion
+    );
+  };
 
   setupAfterPromise(data) {
     this.masterHash = data[1];
