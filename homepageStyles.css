@@ -1,14 +1,14 @@
 html {
-    background-color: black;
+    background-color: rgb(0, 0, 0);
 }
 body {
     padding: 0;
     margin: 0;
-    background-color: black;
+    z-index: 1000000;
 }
 
 .background-image {
-    z-index: -1;
+    z-index: -5;
     position: fixed;
     width: 110% ;
     height: 110%;
@@ -22,6 +22,22 @@ body {
 h1 {
     z-index: 1;
 }
+
+#vignette {
+    z-index: 2;
+    position: fixed;
+    width: 110% ;
+    height: 110%;
+    object-fit: cover;
+    opacity: 90%;
+    overflow: hidden;
+    transition: 500ms linear;
+}
+
+.menu {
+    z-index: 3;
+}
+
 
 #test {
     display: none;
@@ -108,7 +124,7 @@ h1 {
 .menu:hover {
     filter: brightness(200%);
     animation-name: brighten;
-    animation-duration: 1s;
+    animation-duration: 0.5s;
     animation-fill-mode: forwards; 
     cursor: pointer;  
 }
