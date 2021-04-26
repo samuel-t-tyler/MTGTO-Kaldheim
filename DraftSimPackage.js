@@ -234,6 +234,12 @@ class DraftSimPackage {
         }
     }
   }
+  generatePreloadImages() {
+    for (let url of Object.values(this.masterHash["name_to_url"])) {
+      var img = new Image();
+      img.src = url[0];
+    }
+  }
 
   ///////////////////////////////// MAKING PREDICTIONS //////////////////////////////////
 
@@ -441,7 +447,7 @@ class DraftSimPackage {
   displayFeedback = () => {
     if (this.currentFeedbackActive === true) {
       this.elements["FeedbackHTML"].style.opacity = 1;
-      this.elements["FeedbackHTML"].innerHTML = this.currentPickAccuracy;
+      this.elements["FeedbackHTML"].innerHTML = `Accuracy: ${this.currentPickAccuracy}`;
     }
   };
 
@@ -1120,6 +1126,7 @@ class DraftSimPackage {
     if (data[2]) {
       this.ratings = data[2];
     }
+    this.generatePreloadImages();
     this.activePools = this.generateActivePools();
     this.activeFeatureVectors = this.generateActiveFeatures();
     [

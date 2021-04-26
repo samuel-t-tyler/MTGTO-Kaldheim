@@ -4,7 +4,6 @@ html {
 body {
     padding: 0;
     margin: 0;
-    z-index: 1000000;
 }
 
 .background-image {
@@ -24,7 +23,7 @@ h1 {
 }
 
 #vignette {
-    z-index: 2;
+    z-index: 0;
     position: fixed;
     width: 110% ;
     height: 110%;
@@ -35,7 +34,8 @@ h1 {
 }
 
 .menu {
-    z-index: 3;
+    z-index: 10;
+    font-weight: 500;
 }
 
 
@@ -64,6 +64,7 @@ h1 {
     top: 50%;
     left: 50%;
     font-size: 10vh;
+    font-weight: 700;
     margin-top: -20vh; /* Negative half of height. */
     margin-left: -20.1vh; /* Negative half of width. */
     font-family: 'Orbitron', sans-serif;
