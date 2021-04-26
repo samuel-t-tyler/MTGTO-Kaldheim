@@ -439,8 +439,8 @@ class DraftSimPackage {
     }
     arrayOfSortedURLS = arrayOfSortedURLS.concat(rares, uncommons, commons);
     for (let k = 0; k < arrayOfSortedURLS.length; k++) {
-      this.elements["DisplayedPack"][k].src = arrayOfSortedURLS[k];
       this.elements["DisplayedPackDiv"][k].style.display = "block";
+      this.elements["DisplayedPack"][k].src = arrayOfSortedURLS[k];
     }
   };
 
@@ -555,7 +555,6 @@ class DraftSimPackage {
   displayPoolAfterSideboard = (event) => {
     const clicked = event.srcElement.id;
     const pile = clicked[0];
-    console.log(pile);
     const index = parseInt(clicked.slice(2, 4)); //note that index is one above the index used in array
     const cutURL = this.activePoolUrls[pile].splice(index - 1, 1);
     let cutName = this.masterHash["url_to_name"][cutURL];
@@ -630,14 +629,12 @@ class DraftSimPackage {
     this.activePoolSideboard[cmc].splice(PSindex, 1);
     this.displaySideboard();
     this.activePoolUrls[cmc].push(sideboardSrc);
-    for (let j = 0; j < 7; j++) {
-      this.activePoolUrls[j] = this.displayPoolSortedByColor(
-        this.activePoolUrls[j]
-      );
-      for (let i = 0; i < this.activePoolUrls[j].length; i++) {
-        this.elements["PoolArray"][j][i].src = this.activePoolUrls[j][i];
-      }
+    //
+    this.activePoolUrls[cmc] = this.displayPoolSortedByColor(this.activePoolUrls[cmc]);
+    for (let i = 0; i < this.activePoolUrls[cmc].length; i++) {
+      this.elements["PoolArray"][cmc][i].src = this.activePoolUrls[cmc][i];
     }
+    //
     this.updatePoolTooltips();
   };
 
@@ -825,7 +822,7 @@ class DraftSimPackage {
   updateDraftIfOver = () => {
     if (this.currentPick === 45) {
       for (let i = 0; i < this.displayPack.length; i++) {
-        this.elements["DisplayedPack"][i].style.display = "none";
+        this.elements["DisplayedPackDiv"][i].style.display = "none";
         this.elements["DisplayedPack"][i].style.border = "transparent";
       }
       this.elements["RestartIcon"].style.display = "block";
@@ -904,6 +901,10 @@ class DraftSimPackage {
       this.elements["DisplayedPackDiv"][i].style.animation =
         "fadeOut ease 0.25s";
     }
+    for (let k = 0; k < 15; k++) {
+      this.elements["DisplayedPackDiv"][k].style.display = "block";
+      this.elements["DisplayedPack"][k].src = "";
+    }
     this.currentScore = 0;
     this.currentPick = 0;
     this.currentPack = 0;
@@ -970,6 +971,7 @@ class DraftSimPackage {
         this.elements["DisplayedPack"][i].style.animation = "fadeIn ease 0.25s";
       }
     }, 250);
+    console.log(this.findContense(this.activePacks[0][0]), "activePacks");
   };
 
   ///////////////////////////////// MAIN LOGIC //////////////////////////////////
