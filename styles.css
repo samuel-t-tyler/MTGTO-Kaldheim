@@ -102,7 +102,7 @@ p {
 #navbar {
     position: sticky;
     z-index: 6;
-    min-height: 8vh;
+    min-height: 10vh;
     width: 100%;
     background-color: rgba(22,22,22, 0) !important;
 }
@@ -113,7 +113,7 @@ p {
 }
 
 #GTO-bot {
-    font-size: 3vh;
+    font-size: 1.6vw;
     font-family: 'Orbitron', sans-serif;
     color: rgb(245, 245, 245);
 }
@@ -147,8 +147,8 @@ p {
 }
 
 #pool-toggler {
-  position: sticky;
-  left: 50vh;
+  position: absolute !important;
+  left: 30vw;
   background-color: black;
   color: white;
   border-color: rgba(219, 219, 219, 0.89) ;
@@ -177,7 +177,7 @@ p {
 }
 
 #main_window {
-    height: 92vh;
+    height: 90vh;
     padding-top: 4.3vh;
     background-color: transparent;
 }
@@ -195,8 +195,8 @@ p {
 }
 
 #pool_window {
-    margin-top: 8vh;
-    min-height: 92vh;
+    margin-top: 10vh;
+    min-height: 90vh;
     z-index: 5;
     justify-content: center;
     background-color: rgba(22,22,22, 100) !important;
