@@ -1158,6 +1158,6 @@ class DraftSimPackage {
       }
       this.displayPackFlipcardHover();
       this.addEventListeners();
-    }, 500)
+    }, 1000)
   }
 }

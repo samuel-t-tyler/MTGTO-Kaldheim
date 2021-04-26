@@ -495,8 +495,10 @@ animation: fadeIn ease 0.5s;
   }
 
   #GTO-bot {
-    font-size: 2vh !important;
+    font-size: 3vh !important;
     font-family: 'Orbitron', sans-serif;
+    display: inline-block;
+    position:relative;
 }
   .zoom:hover {
   transform: scale(1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
@@ -515,12 +517,6 @@ animation: fadeIn ease 0.5s;
     color: white !important;
     background-color: white;
   }
-  #GTO-bot {
-    font-size: 3vh;
-    font-family: 'Orbitron', sans-serif;
-    display: inline-block;
-    position:relative;
-  }
   #navbar {
     justify-content: right;
   }
@@ -529,6 +525,7 @@ animation: fadeIn ease 0.5s;
   }
   .fixed-bottom {
     width: 100vw;
+    left: 0 !important;
     border-radius: 0;
     padding: 2% 8% 2% 8%
   }
@@ -551,5 +548,15 @@ animation: fadeIn ease 0.5s;
     font-size: 3vw;
     vertical-align: middle;
     margin-block-end: 0 !important;
+  }
+
+  #question-mark {
+    width: 7vw;
+    height: 7vw;
+    margin-right: 10vw;
+  }
+
+  .slider {
+    width: 10vw;
   }
 }
