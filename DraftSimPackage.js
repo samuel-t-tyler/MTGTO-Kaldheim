@@ -536,7 +536,7 @@ class DraftSimPackage {
     if (humanPickCMC < 7) {
       this.activePoolUrls[humanPickCMC].push(humanPickURL);
     } else {
-      this.activePoolUrls[5].push(humanPickURL);
+      this.activePoolUrls[6].push(humanPickURL);
     }
   }
 
@@ -555,6 +555,7 @@ class DraftSimPackage {
   displayPoolAfterSideboard = (event) => {
     const clicked = event.srcElement.id;
     const pile = clicked[0];
+    console.log(pile);
     const index = parseInt(clicked.slice(2, 4)); //note that index is one above the index used in array
     const cutURL = this.activePoolUrls[pile].splice(index - 1, 1);
     let cutName = this.masterHash["url_to_name"][cutURL];
@@ -577,7 +578,6 @@ class DraftSimPackage {
     for (let i = 0; i < 7; i++) {
       for (let j = 0; j < this.activePoolSideboard[i].length; j++) {
         this.currentMainDeckCount++;
-        console.log()
         let cardName = this.masterHash["url_to_name"][this.activePoolSideboard[i][j]  ];
         console.log(cardName);
         this.generateUpdatedFooterStats(cardName, "add");
@@ -610,6 +610,7 @@ class DraftSimPackage {
   };
   // Function that is called when a player clicks on a sideboard card to move it back into the pool
   moveSideboardToPool = (event) => {
+    console.log(this.activePoolSideboard);
     let sideboardSrc = event.srcElement.src;
     let cardName = this.masterHash["url_to_name"][sideboardSrc];
     this.currentMainDeckCount++;
@@ -618,9 +619,11 @@ class DraftSimPackage {
     let cmc = this.masterHash["name_to_cmc"][
       this.masterHash["url_to_name"][sideboardSrc]
     ];
-    if (cmc > 6) {
+    if (cmc >= 6) {
+      console.log("greater than 6 cmc")
       cmc = 6;
     }
+    console.log(cmc);
     let PSindex = this.activePoolSideboard[cmc].findIndex(
       (e) => e === sideboardSrc
     );
@@ -1127,30 +1130,32 @@ class DraftSimPackage {
       this.ratings = data[2];
     }
     this.generatePreloadImages();
-    this.activePools = this.generateActivePools();
-    this.activeFeatureVectors = this.generateActiveFeatures();
-    [
-      this.commons,
-      this.uncommons,
-      this.rares,
-      this.mythics,
-      this.specialSlot,
-    ] = this.generateRarityArrays();
-    this.activePacks = this.generateActivePacks();
-    this.activeOnehots = this.updateOnehots(
-      this.activePacks,
-      this.activeFeatureVectors,
-      this.activePools,
-      this.currentPack
-    );
-    this.elements["LoadingSpinner"].style.display = "none";
-    this.displayPack(this.activeOnehots[0]);
-    this.makePred();
-    this.currentPicksActive = true;
-    if (this.MLPreds === false) {
-      this.displayFeedbackToggle();
-    }
-    this.displayPackFlipcardHover();
-    this.addEventListeners();
+    setTimeout(() => {
+      this.activePools = this.generateActivePools();
+      this.activeFeatureVectors = this.generateActiveFeatures();
+      [
+        this.commons,
+        this.uncommons,
+        this.rares,
+        this.mythics,
+        this.specialSlot,
+      ] = this.generateRarityArrays();
+      this.activePacks = this.generateActivePacks();
+      this.activeOnehots = this.updateOnehots(
+        this.activePacks,
+        this.activeFeatureVectors,
+        this.activePools,
+        this.currentPack
+      );
+      this.elements["LoadingSpinner"].style.display = "none";
+      this.displayPack(this.activeOnehots[0]);
+      this.makePred();
+      this.currentPicksActive = true;
+      if (this.MLPreds === false) {
+        this.displayFeedbackToggle();
+      }
+      this.displayPackFlipcardHover();
+      this.addEventListeners();
+    }, 500)
   }
 }
