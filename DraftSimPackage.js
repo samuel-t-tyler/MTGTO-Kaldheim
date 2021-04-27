@@ -239,6 +239,7 @@ class DraftSimPackage {
       var img = new Image();
       img.src = url[0];
     }
+    console.log("images-loaded")
   }
 
   ///////////////////////////////// MAKING PREDICTIONS //////////////////////////////////
@@ -413,8 +414,8 @@ class DraftSimPackage {
     let arrayOfURLs = [];
     for (let z = 0; z < 15; z++) {
       this.elements["DisplayedPack"][z].classList.add("fullPack");
-      this.elements["DisplayedPack"][z].src = "";
       this.elements["DisplayedPackDiv"][z].style.display = "none";
+      this.elements["DisplayedPack"][z].src = "";
     }
     for (let i = 0; i < humanPlayerActivePack.length; i++) {
       if (humanPlayerActivePack[i] > 0) {
@@ -439,8 +440,10 @@ class DraftSimPackage {
     }
     arrayOfSortedURLS = arrayOfSortedURLS.concat(rares, uncommons, commons);
     for (let k = 0; k < arrayOfSortedURLS.length; k++) {
-      this.elements["DisplayedPackDiv"][k].style.display = "block";
       this.elements["DisplayedPack"][k].src = arrayOfSortedURLS[k];
+    }
+    for (let k = 0; k < arrayOfSortedURLS.length; k++) {
+      this.elements["DisplayedPackDiv"][k].style.display = "block";
     }
   };
 
@@ -968,9 +971,9 @@ class DraftSimPackage {
       for (let i = 0; i < 15; i++) {
         this.displayPack(this.activeOnehots[0]);
         this.elements["DisplayedPack"][i].style.animation = "";
-        this.elements["DisplayedPack"][i].style.animation = "fadeIn ease 0.25s";
+        this.elements["DisplayedPack"][i].style.animation = "fadeIn ease 0.15s";
       }
-    }, 250);
+    }, 150);
     console.log(this.findContense(this.activePacks[0][0]), "activePacks");
   };
 
@@ -1021,7 +1024,7 @@ class DraftSimPackage {
               this.humanSeesResults
             );
           }
-        }, 150);
+        }, 100);
       }
     }
   };
@@ -1061,9 +1064,9 @@ class DraftSimPackage {
             this.displayPack(this.activeOnehots[0]);
             this.elements["DisplayedPackDiv"][i].style.animation = "";
             this.elements["DisplayedPackDiv"][i].style.animation =
-              "fadeIn ease 0.3s";
+              "fadeIn ease 0.15s";
           }
-        }, 210);
+        }, 150);
 
         setTimeout(() => {
           for (let m = 0; m < 15; m++) {
@@ -1072,7 +1075,7 @@ class DraftSimPackage {
               this.humanMakesPick
             );
           }
-        }, 500);
+        }, 200);
       } else {
         this.updateDraftIfOver();
       }
@@ -1125,39 +1128,32 @@ class DraftSimPackage {
     );
   };
 
-  setupAfterPromise(data) {
-    this.masterHash = data[1];
-    this.model = data[0];
-    if (data[2]) {
-      this.ratings = data[2];
+  setupAfterPromise() {
+    this.activePools = this.generateActivePools();
+    this.activeFeatureVectors = this.generateActiveFeatures();
+    [
+      this.commons,
+      this.uncommons,
+      this.rares,
+      this.mythics,
+      this.specialSlot,
+    ] = this.generateRarityArrays();
+    this.activePacks = this.generateActivePacks();
+    this.activeOnehots = this.updateOnehots(
+      this.activePacks,
+      this.activeFeatureVectors,
+      this.activePools,
+      this.currentPack
+    );
+    this.elements["LoadingSpinner"].style.display = "none";
+    this.displayPack(this.activeOnehots[0]);
+    this.makePred();
+    this.currentPicksActive = true;
+    if (this.MLPreds === false) {
+      this.displayFeedbackToggle();
     }
+    this.displayPackFlipcardHover();
+    this.addEventListeners();
     this.generatePreloadImages();
-    setTimeout(() => {
-      this.activePools = this.generateActivePools();
-      this.activeFeatureVectors = this.generateActiveFeatures();
-      [
-        this.commons,
-        this.uncommons,
-        this.rares,
-        this.mythics,
-        this.specialSlot,
-      ] = this.generateRarityArrays();
-      this.activePacks = this.generateActivePacks();
-      this.activeOnehots = this.updateOnehots(
-        this.activePacks,
-        this.activeFeatureVectors,
-        this.activePools,
-        this.currentPack
-      );
-      this.elements["LoadingSpinner"].style.display = "none";
-      this.displayPack(this.activeOnehots[0]);
-      this.makePred();
-      this.currentPicksActive = true;
-      if (this.MLPreds === false) {
-        this.displayFeedbackToggle();
-      }
-      this.displayPackFlipcardHover();
-      this.addEventListeners();
-    }, 1000)
   }
 }

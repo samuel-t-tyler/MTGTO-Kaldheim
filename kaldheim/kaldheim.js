@@ -71,9 +71,15 @@ Promise.all([
     return Promise.all([model, json_response[0], json_response[1]]);
   })
   .then(function (data) {
+    KaldheimDraftPackage.masterHash = data[1];
+    KaldheimDraftPackage.model = data[0];
+    if (data[2]) {
+      KaldheimDraftPackage.ratings = data[2];
+    }
     /////////////////////////////////// SETUP ////////////////////////////////////
+  })
+  .then(function (data) {
     KaldheimDraftPackage.setupAfterPromise(data);
-    console.log(KaldheimDraftPackage.masterHash);
   })
   .catch(function (error) {
     // if there's an error, log it

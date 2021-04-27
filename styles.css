@@ -178,7 +178,6 @@ p {
 
 #main_window {
     height: 90vh;
-    padding-top: 4.3vh;
     background-color: transparent;
 }
 
@@ -293,9 +292,8 @@ img {
 
 #sideboard {
   display: block;
-  margin-top: -13vh ;
+  margin-top: -15vh ;
   padding-top: 13vh;
-  min-height: 92vh;
   background-color: rgb(36, 36, 36);
 }
 

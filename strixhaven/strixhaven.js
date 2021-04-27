@@ -54,7 +54,14 @@ Promise.all([
     return Promise.all([model, json_response[0], json_response[1]]);
   })
   .then(function (data) {
+    StrixhavenDraftPackage.masterHash = data[1];
+    StrixhavenDraftPackage.model = data[0];
+    if (data[2]) {
+      StrixhavenDraftPackage.ratings = data[2];
+    }
     /////////////////////////////////// SETUP ////////////////////////////////////
+  })
+  .then(function (data) {
     StrixhavenDraftPackage.setupAfterPromise(data);
   })
   .catch(function (error) {
