@@ -44,16 +44,16 @@ h1 {
 
 #main-div {
     position: absolute;
-    z-index: 6;
+    z-index: 0;
     margin: 0 25vw 0 25vw;
     width: 50vw;
     height: 100vh;
 }
 
 #menu-div {
-    position: relative;
+    position: absolute;
     z-index: 5;
-    margin: 25vh 0 25vh 0;
+    margin: 25vh 25vw 25vh 25vw;
     width: 50vw;
     height: 50vh;
 }
