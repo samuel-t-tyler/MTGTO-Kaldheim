@@ -872,7 +872,7 @@ class DraftSimPackage {
     let error = 1 - humanPickSoftmax / botPickSoftmax;
     let pickValue;
     if (this.MLPreds === true) {
-      pickValue = -Math.pow(error, 2.8) + 1;
+      pickValue = -Math.pow(error, 4) + 1;
     } else {
       pickValue = -error + 1;
     }
