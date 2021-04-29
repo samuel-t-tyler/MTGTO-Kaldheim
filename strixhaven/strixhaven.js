@@ -33,9 +33,9 @@ let specialSlot = ["Redefined in special generate pack function, unique pack set
 const setSize = 338;
 const inputSize = (setSize * 2) + 14;
 const oddsRare = 0.875;
-const MLpreds = false; // Once we have sufficient data for ML preds, we can set this to default to true
+const MLpreds = true; // Once we have sufficient data for ML preds, we can set this to default to true
 const genericPack = false
-const flipCards = true
+const flipCards = false
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
 let StrixhavenDraftPackage = new DraftSimPackage("Strixhaven", setSize, inputSize, oddsRare, specialSlot, elements, MLpreds, genericPack, flipCards);

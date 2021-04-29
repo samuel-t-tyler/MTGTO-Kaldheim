@@ -23,13 +23,13 @@ p {
 
 /* add these when you click on card */
 #greenSelect {
-  box-shadow: 0 0 4pt 3pt #46e646 !important;
-  transition: all 0.2s !important;
+  box-shadow: 0 0 4pt 3pt #77dd77 !important;
+  transition: all 0.1s !important;
 }
 
 #orangeSelect {
   box-shadow: 0 0 4pt 3pt #ffa77b !important;
-  transition: all 0.2s !important;
+  transition: all 0.1s !important;
 }
 
 .loadingSpinner {
@@ -250,10 +250,10 @@ img {
 }
 
 .pack-card-image-div {
-    margin: 0.4vw;
+    margin: 0.5vw;
     justify-content: center;
     max-height: 60vh ;
-    max-width: 24vh ;
+    max-width: 23vh ;
     cursor: pointer;
 }
 

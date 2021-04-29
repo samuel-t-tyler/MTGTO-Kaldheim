@@ -670,11 +670,13 @@ class DraftSimPackage {
   };
 
   disableTooltips() {
-    $('[data-toggle="tooltip"]').tooltip("dispose");
-    for (let i = 0; i < 15; i++) {
-      let element = this.elements["DisplayedPack"][i];
-      element.removeAttribute("title");
-      element.removeAttribute("data-toggle");
+    if (this.flipCards === true) {
+      $('[data-toggle="tooltip"]').tooltip("dispose");
+      for (let i = 0; i < 15; i++) {
+        let element = this.elements["DisplayedPack"][i];
+        element.removeAttribute("title");
+        element.removeAttribute("data-toggle");
+      }
     }
   }
   displayFooterStats() {
@@ -971,9 +973,9 @@ class DraftSimPackage {
       for (let i = 0; i < 15; i++) {
         this.displayPack(this.activeOnehots[0]);
         this.elements["DisplayedPack"][i].style.animation = "";
-        this.elements["DisplayedPack"][i].style.animation = "fadeIn ease 0.15s";
+        this.elements["DisplayedPack"][i].style.animation = "fadeIn ease 0.200s";
       }
-    }, 150);
+    }, 200);
     console.log(this.findContense(this.activePacks[0][0]), "activePacks");
   };
 
@@ -1024,7 +1026,7 @@ class DraftSimPackage {
               this.humanSeesResults
             );
           }
-        }, 100);
+        }, 200);
       }
     }
   };
@@ -1064,9 +1066,9 @@ class DraftSimPackage {
             this.displayPack(this.activeOnehots[0]);
             this.elements["DisplayedPackDiv"][i].style.animation = "";
             this.elements["DisplayedPackDiv"][i].style.animation =
-              "fadeIn ease 0.15s";
+              "fadeIn ease 0.2s";
           }
-        }, 150);
+        }, 200);
 
         setTimeout(() => {
           for (let m = 0; m < 15; m++) {
