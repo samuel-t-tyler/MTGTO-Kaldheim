@@ -160,10 +160,10 @@ a {
 
 @media only screen and (max-device-width: 800px) {
     #title {
-        font-size: 7vw;
+        font-size: 9vw;
     }
     .menu {
-        font-size: 5vw;
+        font-size: 7vw;
     }
     #menu-div {
         margin: 30vh 0 20vh 0;
@@ -178,5 +178,9 @@ a {
 
     #about-heading {
         font-size: 8vw;
+    }
+
+    #about-body {
+        font-size: 4vw;
     }
 }
