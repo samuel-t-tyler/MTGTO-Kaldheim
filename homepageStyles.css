@@ -17,8 +17,8 @@ h1 {
 .background-image {
     z-index: -5;
     position: fixed;
-    width: 110% ;
-    height: 110%;
+    width: 100% ;
+    height: 100%;
     background-repeat: no-repeat;
     object-fit: cover;
     opacity: 0%;
@@ -29,8 +29,8 @@ h1 {
 #vignette {
     z-index: 0;
     position: fixed;
-    width: 110% ;
-    height: 110%;
+    width: 100vw ;
+    height: 100vh;
     object-fit: cover;
     opacity: 90%;
     overflow: hidden;
@@ -156,4 +156,27 @@ a {
 
 #close-button:hover {
     opacity: 1;
+}
+
+@media only screen and (max-device-width: 800px) {
+    #title {
+        font-size: 7vw;
+    }
+    .menu {
+        font-size: 5vw;
+    }
+    #menu-div {
+        margin: 30vh 0 20vh 0;
+        width: 100vw;
+        height: 50vh;
+    }
+    #main-div {
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    #about-heading {
+        font-size: 8vw;
+    }
 }

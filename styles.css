@@ -113,7 +113,7 @@ p {
 }
 
 #GTO-bot {
-    font-size: 1.6vw;
+    font-size: 1.6vw !important;
     font-family: 'Orbitron', sans-serif;
     color: rgb(245, 245, 245);
 }
@@ -493,7 +493,7 @@ animation: fadeIn ease 0.5s;
   }
 
   #GTO-bot {
-    font-size: 3vh !important;
+    font-size: 3.5vw !important;
     font-family: 'Orbitron', sans-serif;
     display: inline-block;
     position:relative;
