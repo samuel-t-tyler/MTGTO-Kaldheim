@@ -6,7 +6,7 @@
 ///////////////////////////////// CREATE HTML WITH LOOP //////////////////////////////////
 let StrixhavenHTMLGeneration = new HTMLGeneration();
 
-let mainWindow = document.getElementById("main_window");
+let mainWindow = document.getElementById("main-window");
 StrixhavenHTMLGeneration.createPackHTML(mainWindow);
 
 //Element naming convention not used because these variables are not directly reference anywhere, accessed though elemenetPoolColArray

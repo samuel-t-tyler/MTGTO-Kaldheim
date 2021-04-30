@@ -17,8 +17,8 @@ h1 {
 .background-image {
     z-index: -5;
     position: fixed;
-    width: 110% ;
-    height: 110%;
+    width: 107% ;
+    height: 107%;
     background-repeat: no-repeat;
     object-fit: cover;
     opacity: 0%;
@@ -29,8 +29,8 @@ h1 {
 #vignette {
     z-index: 0;
     position: fixed;
-    width: 110%;
-    height: 110%;
+    width: 107%;
+    height: 107%;
     object-fit: cover;
     opacity: 90%;
     overflow: hidden;
