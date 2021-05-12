@@ -52,10 +52,11 @@ const oddsRare = 0.875;
 const MLPreds = true;
 const genericPack = true;
 const flipCards = false;
+const localImagesAvailable = true;
 
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
-let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", setSize, inputSize, oddsRare, landSlot, elements, MLPreds, genericPack, flipCards);
+let KaldheimDraftPackage = new DraftSimPackage("Kaldheim", setSize, inputSize, oddsRare, landSlot, elements, MLPreds, genericPack, flipCards, localImagesAvailable);
 
 
 Promise.all([

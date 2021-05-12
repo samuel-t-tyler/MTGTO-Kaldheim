@@ -36,9 +36,10 @@ const oddsRare = 0.875;
 const MLpreds = true; // Once we have sufficient data for ML preds, we can set this to default to true
 const genericPack = false
 const flipCards = false
+const localImagesAvailable = true
 
 ////////////////////////////////// IMPORT ////////////////////////////////////
-let StrixhavenDraftPackage = new DraftSimPackage("Strixhaven", setSize, inputSize, oddsRare, specialSlot, elements, MLpreds, genericPack, flipCards);
+let StrixhavenDraftPackage = new DraftSimPackage("Strixhaven", setSize, inputSize, oddsRare, specialSlot, elements, MLpreds, genericPack, flipCards, localImagesAvailable);
 
 Promise.all([
   tf.loadLayersModel("./tfjs_model/model.json"),

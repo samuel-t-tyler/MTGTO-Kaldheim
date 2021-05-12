@@ -9,7 +9,7 @@ class HTMLGeneration {
       let imageElement = document.createElement("img");
       imageDiv.className = "pack-card-image-div";
       imageElement.className = "pack-card-image rounded noSelect zoom";
-      imageElement.id = `pack-image-${i}`;
+      imageElement.id = `${i}`;
       imageDiv.appendChild(imageElement);
       main.appendChild(imageDiv);
     }
@@ -25,12 +25,14 @@ class HTMLGeneration {
         breakDiv.className = "w-100";
         imageDiv.className = "col pool-row";
         imageElement.className = `pool-card-image noSelect ${j}-cmc-image lift`;
-
+        imageElement.dataset.column = `${j}`
+        imageElement.dataset.row = `${i}`
         if (i < 9) {
           imageElement.id = `${j}-0${i + 1}`;
         } else {
           imageElement.id = `${j}-${i + 1}`;
         }
+
         imageDiv.appendChild(imageElement);
         colsArray[j].appendChild(imageDiv);
         colsArray[j].appendChild(breakDiv);

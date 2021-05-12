@@ -10,7 +10,8 @@ class DraftSimPackage {
     elements,
     mlPreds,
     genericPack,
-    flipCards
+    flipCards,
+    localImagesAvailable
   ) {
     this.set = set; //String of the set name
     this.setSize = setSize; //Number of cards in the set
@@ -21,6 +22,7 @@ class DraftSimPackage {
     this.MLPreds = mlPreds;
     this.genericPack = genericPack;
     this.flipCards = flipCards;
+    this.localImagesAvailable = localImagesAvailable;
   }
   // Critical variables
   masterHash; // Layered object that can take any card representation and turn into any other card representation
@@ -101,6 +103,16 @@ class DraftSimPackage {
 
   ////////////////////////////// GENERATING ACTIVE VARIABLES ///////////////////////////////
   // To generate packs, we need to first sort the cards by rarity.  This function does this, using data provided by masterHash
+
+  // If we don't have local card images, we will use the provided http card images instead.  This is deterimed during setup
+  generateCorrectedLocalImageUrls() {
+    if (this.localImagesAvailable === false) {
+      this.masterHash["name_to_url_local"] = this.masterHash["name_to_url"]
+      this.masterHash["index_to_url_local"] = this.masterHash["index_to_url"]
+      this.masterHash["local_url_to_name"] = this.masterHash["url_to_name"]
+    }
+  }
+
   generateRarityArrays = () => {
     let cardsAvailable = [];
     for (let key in this.masterHash["name_to_collector"]) {
@@ -235,9 +247,9 @@ class DraftSimPackage {
     }
   }
   generatePreloadImages() {
-    for (let url of Object.values(this.masterHash["name_to_url"])) {
+    for (let url of Object.values(this.masterHash["name_to_url_local"])) {
       var img = new Image();
-      img.src = url[0];
+      img.src = url;
     }
     console.log("images-loaded")
   }
@@ -419,7 +431,7 @@ class DraftSimPackage {
     }
     for (let i = 0; i < humanPlayerActivePack.length; i++) {
       if (humanPlayerActivePack[i] > 0) {
-        arrayOfURLs.push(this.masterHash["index_to_url"][i]);
+        arrayOfURLs.push(this.masterHash["index_to_url_local"][i]);
       }
     }
     //Sort URLS by rarity
@@ -428,7 +440,7 @@ class DraftSimPackage {
     let uncommons = [];
     let commons = [];
     for (let m = 0; m < arrayOfURLs.length; m++) {
-      let cardName = this.masterHash["url_to_name"][arrayOfURLs[m]];
+      let cardName = this.masterHash["local_url_to_name"][arrayOfURLs[m]];
       let rarity = this.masterHash["name_to_rarity"][cardName];
       if (rarity === "common") {
         commons.push(arrayOfURLs[m]);
@@ -457,9 +469,9 @@ class DraftSimPackage {
   // Highlight the pick the bot likes
   displayBotPred = (pred) => {
     if (this.currentFeedbackActive === true) {
-      let predURL = this.masterHash["index_to_url"][pred];
+      let predURL = this.masterHash["index_to_url_local"][pred];
       for (let i = 0; i < this.elements["DisplayedPack"].length; i++) {
-        if (this.elements["DisplayedPack"][i].src === predURL) {
+        if (this.elements["DisplayedPack"][i].getAttribute("src") === predURL) {
           //using ID instead of classname here because it's easier + faster to remove between card draws:
           this.elements["DisplayedPack"][i].id = "greenSelect";
         }
@@ -473,11 +485,11 @@ class DraftSimPackage {
     let sortedSRCS = [];
     let tuples = [];
     for (let i = 0; i < elementPoolArray.length; i++) {
-      if (elementPoolArray[i].length > 100) {
+      if (elementPoolArray[i].length > 1) {
         //75 represents a length between an empty SRC (basic path) and 117, scryfall path length
         // let temp = [poolArrayCol[i], this.masterHash["name_to_color"][this.masterHash["src_to_name"][poolArrayCol[i]]]];
         let cardURL = elementPoolArray[i];
-        let cardName = this.masterHash["url_to_name"][cardURL];
+        let cardName = this.masterHash["local_url_to_name"][cardURL];
         let cardColor = this.masterHash["name_to_color"][cardName];
         if (cardColor.length === 0) {
           cardColor = "AColorless";
@@ -533,9 +545,7 @@ class DraftSimPackage {
   updateActivePools(picks) {
     let humanPick = this.masterHash["index_to_name"][picks[0]];
     let humanPickCMC = this.masterHash["name_to_cmc"][humanPick];
-    let humanPickURL = this.masterHash["name_to_url"][humanPick][
-      this.masterHash["name_to_url"][humanPick].length - 1
-    ];
+    let humanPickURL = this.masterHash["name_to_url_local"][humanPick];
     if (humanPickCMC < 7) {
       this.activePoolUrls[humanPickCMC].push(humanPickURL);
     } else {
@@ -560,7 +570,7 @@ class DraftSimPackage {
     const pile = clicked[0];
     const index = parseInt(clicked.slice(2, 4)); //note that index is one above the index used in array
     const cutURL = this.activePoolUrls[pile].splice(index - 1, 1);
-    let cutName = this.masterHash["url_to_name"][cutURL];
+    let cutName = this.masterHash["local_url_to_name"][cutURL];
     this.generateUpdatedFooterStats(cutName, "remove");
     this.displayFooterStats();
     this.activePoolSideboard[pile].push(cutURL[0]);
@@ -580,7 +590,7 @@ class DraftSimPackage {
     for (let i = 0; i < 7; i++) {
       for (let j = 0; j < this.activePoolSideboard[i].length; j++) {
         this.currentMainDeckCount++;
-        let cardName = this.masterHash["url_to_name"][this.activePoolSideboard[i][j]  ];
+        let cardName = this.masterHash["local_url_to_name"][this.activePoolSideboard[i][j]  ];
         console.log(cardName);
         this.generateUpdatedFooterStats(cardName, "add");
         this.activePoolUrls[i].push(this.activePoolSideboard[i][j]);
@@ -613,13 +623,13 @@ class DraftSimPackage {
   // Function that is called when a player clicks on a sideboard card to move it back into the pool
   moveSideboardToPool = (event) => {
     console.log(this.activePoolSideboard);
-    let sideboardSrc = event.srcElement.src;
-    let cardName = this.masterHash["url_to_name"][sideboardSrc];
+    let sideboardSrc = event.srcElement.getAttribute("src");
+    let cardName = this.masterHash["local_url_to_name"][sideboardSrc];
     this.currentMainDeckCount++;
     this.generateUpdatedFooterStats(cardName, "add");
     this.displayFooterStats();
     let cmc = this.masterHash["name_to_cmc"][
-      this.masterHash["url_to_name"][sideboardSrc]
+      this.masterHash["local_url_to_name"][sideboardSrc]
     ];
     if (cmc >= 6) {
       console.log("greater than 6 cmc")
@@ -646,7 +656,7 @@ class DraftSimPackage {
       for (let i = 0; i < 15; i++) {
         let element = this.elements["DisplayedPack"][i];
         let hoverURL = element.src;
-        let hoverName = this.masterHash["url_to_name"][hoverURL];
+        let hoverName = this.masterHash["local_url_to_name"][hoverURL];
         let flipURL;
         if (this.masterHash["name_to_flip_uri"][hoverName]) {
           flipURL = this.masterHash["name_to_flip_uri"][hoverName];
@@ -699,7 +709,7 @@ class DraftSimPackage {
   displayPickSuggestion = () => {
     console.log("clicked");
     if (this.currentPicksActive === true) {
-      let humanPred = this.masterHash["index_to_url"][this.activePreds[0]];
+      let humanPred = this.masterHash["index_to_url_local"][this.activePreds[0]];
       for (let i = 0; i < this.elements["DisplayedPack"].length; i++) {
         if (this.elements["DisplayedPack"][i].src === humanPred) {
           this.elements["DisplayedPack"][i].id = "greenSelect";
@@ -712,7 +722,7 @@ class DraftSimPackage {
 
   checkDFC(cardURL) {
     if (this.masterHash["name_to_flip"]) {
-      let cardName = this.masterHash["url_to_name"][cardURL];
+      let cardName = this.masterHash["local_url_to_name"][cardURL];
       let isDFC = this.masterHash["name_to_flip"][cardName];
       return isDFC;
     }
@@ -991,18 +1001,21 @@ class DraftSimPackage {
         );
       }
       this.currentPicksActive = false;
-      let pickSRC = event.srcElement.src;
+      let pickSRC = event.srcElement.getAttribute("src")
       if (this.currentFeedbackActive === true) {
         for (let i = 0; i < this.elements["DisplayedPack"].length; i++) {
-          if (this.elements["DisplayedPack"][i].src === pickSRC) {
+          if (this.elements["DisplayedPack"][i].getAttribute("src") === pickSRC) {
             //using ID instead of classname here because it's easier + faster to remove between card draws:
             this.elements["DisplayedPack"][i].id = "orangeSelect";
           }
         }
       }
       // Highlighting bot pick and calculating accuracy of human pick
-      let pickName = this.masterHash["url_to_name"][pickSRC];
+      let pickName = this.masterHash["local_url_to_name"][pickSRC];
+      console.log("pickSRC", pickName)
+      console.log("pickName", pickName)
       let pickIndex = this.masterHash["name_to_index"][pickName];
+      console.log(pickSRC, "pick src")
 
       this.activePicks = JSON.parse(JSON.stringify(this.activePreds)); //this creates a deepcopy, because JS using shallowcopy for arrays
       this.activePicks[0] = pickIndex;
@@ -1029,6 +1042,8 @@ class DraftSimPackage {
         }, 200);
       }
     }
+    console.log(this.activePreds)
+    console.log(this.activePicks)
   };
   humanSeesResults = () => {
     if (this.currentPicksActive === false) {
@@ -1131,6 +1146,7 @@ class DraftSimPackage {
   };
 
   setupAfterPromise() {
+    this.generateCorrectedLocalImageUrls()
     this.activePools = this.generateActivePools();
     this.activeFeatureVectors = this.generateActiveFeatures();
     [
@@ -1157,5 +1173,8 @@ class DraftSimPackage {
     this.displayPackFlipcardHover();
     this.addEventListeners();
     this.generatePreloadImages();
+    console.log(this.masterHash["name_to_url_local"])
+    console.log(this.masterHash["index_to_url_local"])
+    console.log(this.masterHash["local_url_to_name"])
   }
 }
